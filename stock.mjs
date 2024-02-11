@@ -44,10 +44,10 @@ const stock = () => {
     out.price = async (date) => { 
    
         const afterTrading_data = await stock().afterTrading(date)
-        console.log(afterTrading_data)
+        // console.log(afterTrading_data)
        
         
-        console.log(afterTrading_data.tables[8].data)
+        // console.log(afterTrading_data.tables[8].data)
         console.log("證券代號 證券名稱 收盤價")
         for (const v of afterTrading_data.tables[8].data){
            
@@ -57,6 +57,28 @@ const stock = () => {
         
     }
  
+    out.order = async (date) => { 
+   
+        const afterTrading_data = await stock().afterTrading(date)
+        console.log(afterTrading_data)
+
+        //連結上述資料做排序
+        const numbers = afterTrading_data.tables[8].data
+        numbers.sort(function (a, b) {
+            return b[2] - a[2];
+        });
+        console.log(numbers);
+          
+        //連結上述資料取前10筆資料
+        const ten = numbers.slice(0,10)
+        console.log(ten);
+        
+        console.log("證券代號 證券名稱 成交股數 收盤價")
+        for (const v of ten){
+            console.log(`${v[0]} ${v[1]} ${v[2]} ${v[8]}`)
+        }
+
+    }
     return out
 }
 (async ()=>{
