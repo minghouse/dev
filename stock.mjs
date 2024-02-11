@@ -36,7 +36,6 @@ const stock = () => {
         return data
     }
 
-    //
     /**
      * 收盤價  
      * @param {date} 日期 
