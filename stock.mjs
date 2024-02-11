@@ -56,7 +56,7 @@ const stock = () => {
         
         
     }
-
+ 
     return out
 }
 (async ()=>{
