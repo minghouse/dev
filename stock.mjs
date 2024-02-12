@@ -57,27 +57,33 @@ const stock = () => {
         
     }
  
-    out.order = async (date) => { 
+    out.order = async (date,count) => { 
    
         const afterTrading_data = await stock().afterTrading(date)
-        console.log(afterTrading_data)
+        // console.log(afterTrading_data)
 
+        // const c=a.replace(/-/g, "")
+        // console.log(c)
+        // const d=a.replace(/[-:]/g, "")
+        // console.log(d)
+        
         //連結上述資料做排序
         const numbers = afterTrading_data.tables[8].data
         numbers.sort(function (a, b) {
-            return b[2] - a[2];
+            return b[2].replace(/,/g,"") - a[2].replace(/,/g,"");
         });
-        console.log(numbers);
+        // console.log(numbers);
           
         //連結上述資料取前10筆資料
-        const ten = numbers.slice(0,10)
-        console.log(ten);
+        const ten = numbers.slice(0,count)
+        // console.log(ten);
         
         console.log("證券代號 證券名稱 成交股數 收盤價")
         for (const v of ten){
             console.log(`${v[0]} ${v[1]} ${v[2]} ${v[8]}`)
         }
 
+       
     }
     return out
 }
@@ -87,10 +93,11 @@ const stock = () => {
         // console.log(afterTrading_data)
 
         //收盤價
-        console.log(await stock().price('20240205'))
+        // console.log(await stock().price('20240205'))
         //目前這樣會印出1，所以回到46行先來做資料整理
 
-        
+        const order = await stock().order('20240205',20)
+        // console.log(order)
         
         //測試計算EPS
         const eps = stock().EPS(1,2)
