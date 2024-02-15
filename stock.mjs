@@ -105,7 +105,32 @@ const stock = () => {
         }
     
     }
-    
+    /**
+     * 是不是有開盤
+     */
+    out.is_work = async (date) => {
+        const open = await fetch(` https://www.twse.com.tw/rwd/zh/holidaySchedule/holidaySchedule?response=json`)
+        const data = await open.json();
+
+        //取出有日期的資料 
+        //EX: [
+        //       [ '2024-01-01', '中華民國開國紀念日', '依規定放假1日。' ],
+        //       [ '2024-01-02', '國曆新年開始交易日', '國曆新年開始交易。' ],
+        //    ]
+        const something = data.data
+
+        //將上面有日期的資料轉換為只有日期的陣列 EX: [ '20240101', '20240102', ... ]
+        const trueorfalse = data.data.push(date);
+        const indexOfdate = trueorfalse.indexOf(date);
+        console.log("Fruits array:", fruits);
+        console.log("Index of 'orange':", indexOfOrange)
+
+        //如果indexOfOrange <0 return true, >0 return false
+
+        return data
+        
+    }  
+
     return out
 }
 (async ()=>{
@@ -116,9 +141,18 @@ const stock = () => {
         //收盤價
         // console.log(await stock().price('20240205'))
         //目前這樣會印出1，所以回到46行先來做資料整理
+        // const ml_red = await stock().ml_red("20240205")
 
-        const order = await stock().order('20240205',20)
+        // const order = await stock().order('20240205',20)
         // console.log(order)
+
+        //20240215是否有開盤
+        const is_work = await stock().is_work('20240215')
+        console.log(is_work)
+
+        //20240213是否有開盤
+        const is_work_2 = await stock().is_work('20240213')
+        console.log(is_work_2)
         
         //測試計算EPS
         const eps = stock().EPS(1,2)
