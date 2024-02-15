@@ -85,6 +85,27 @@ const stock = () => {
 
        
     }
+
+    //這裡開始 董
+    //註解記得哦~
+    //
+    /**
+     * 收盤價>開盤價、收盤價=最高價
+     */
+    out.ml_red = async (date) => {
+        const afterTrading_data = await stock().afterTrading(date)
+        const compare = afterTrading_data.tables[8].data
+        console.log("證券代號 證券名稱 成交股數 收盤價 開盤價 最高價 最低價")
+        for(const v of compare ){
+            //判斷符合條件即是我們想要的資料
+            if (v[8]>v[5]&&v[8]==v[6]){   
+                //會跑到這裡表示v是我們需要的資料，所以在這裡使用console.log，把需要的欄位的值印出來
+                console.log(`${v[0]} ${v[1]} ${v[2]} ${v[8]} ${v[5]} ${v[6]} ${v[7]}`)
+            }
+        }
+    
+    }
+    
     return out
 }
 (async ()=>{
