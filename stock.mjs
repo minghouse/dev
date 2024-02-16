@@ -123,9 +123,18 @@ const stock = () => {
         //將上面有日期的資料轉換為只有日期的陣列 EX: [ '20240101', '20240102', ... ]
         const trueorfalse = [];
         for (const v of something){
-            trueorfalse.push(v[0])
-           
+            // if (!/交易日/.test(v[1])){
+            //     trueorfalse.push(v[0].replace(/-/g,""))   
+            // }
+
+            if (/交易日/.test(v[1])){
+                continue
+            }
+            trueorfalse.push(v[0].replace(/-/g,""))   
+            
+            
         }
+        //從trueorfalse裡面找date在第幾個位置
         const indexOfdate = trueorfalse.indexOf(date)
         if (indexOfdate<=0){
             return true
