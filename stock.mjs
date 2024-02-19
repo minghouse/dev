@@ -148,10 +148,46 @@ const stock = () => {
         
     }  
 
+    //看看out.is_work怎麼弄得~
+    out.weekFriday = ()=>{
+    
+        const out = {}
+        // 獲取當前日期
+        var today = new Date();
+        today.setHours(today.getHours() + 8)
+        // 計算到上週五的天數（星期天為0，星期一為1，以此類推）
+        var daysUntilLastFriday = (today.getDay() + 2) % 7;
+    
+        // 計算上週五的日期
+        var lastFriday = new Date(today);
+        lastFriday.setDate(today.getDate() - daysUntilLastFriday);
+    
+        // 將日期格式化為 "年-月-日"
+        var formattedDate = lastFriday.toISOString().split('T')[0];
+        out.formattedDate_1 = formattedDate
+    
+        const secondfriday = new Date(formattedDate) //這個原本formattedDate是找的到的，如果要formattedDate_1，這個釋放在out裡面了
+        secondfriday.setDate(secondfriday.getDate() - 7) //滑鼠放getDate上面，目前找不到這個方法
+        out.formattedDate_2 = secondfriday.toISOString().split('T')[0];
+        
+        return out
+
+    }
+    out.thisvslast = (){
+       
+    }
+    
+
     return out
 }
+
+   
+
 (async ()=>{
     try {
+        const weekFriday_data = stock().weekFriday()
+    console.log(weekFriday_data.formattedDate_1)
+    console.log(weekFriday_data.formattedDate_2)
         // const afterTrading_data = await stock().afterTrading('20240205')
         // console.log(afterTrading_data)
 
