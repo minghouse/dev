@@ -177,18 +177,26 @@ const stock = () => {
     /**
      * 每週五的收盤要比上週五的高的股票
      */
-    out.thisvslast = async()=>{ //這邊看起來怪怪的I think so too. 箭頭飛走了OH. 回來了XD It flies back.
+    out.thisvslast = async()=>{ 
        //取得兩個周五的日期 使用out.weekFriday
         const twoFD = out.weekFriday() //滑鼠放weekFriday上面，如果是promise輸出的 不是，才需要await
        //取得第一個周五的收盤價 使用 out.afterTrading
+        const firstFD = await out.afterTrading(twoFD.formattedDate_1) //滑鼠放afterTrading上面，input需要什麼?date，對，那date在哪? 輸入個twoFD.看看?
+        const firstFD_1 = firstFD.tables[8].data
+       //取得第二個周五的收盤價 使用 out.afterTrading。
+       const secondFD = await out.afterTrading(twoFD.formattedDate_2) //恭喜創造連結了wow
+       const secondFD_1 = secondFD.tables[8].data
+
+       //方案1：取得符合第一個周五比第二個周五收盤價高的股票 將結果放到xxx1
+
+       //方案1：返回xxx1
+
+
+       //方案2：將兩個周5的收盤價按照股票代號合併為新的Array 並且將Array放到變數xxx1
         
-       //取得第二個周五的收盤價 使用 out.afterTrading
+       //方案2：取得符合第一個周五比第二個周五收盤價高的股票 將結果放到xxx2
 
-       //兩個收盤價做計算 將結果放到變數xxx1
-
-       //取得符合第一個周五比第二個周五收盤價高的股票 將結果放到xxx2
-
-       //返回結果 xxx2
+       //方案2：返回xxx2
        
     }
     
