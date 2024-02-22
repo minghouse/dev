@@ -181,14 +181,23 @@ const stock = () => {
        //取得兩個周五的日期 使用out.weekFriday
         const twoFD = out.weekFriday() //滑鼠放weekFriday上面，如果是promise輸出的 不是，才需要await
        //取得第一個周五的收盤價 使用 out.afterTrading
+      
         const firstFD = await out.afterTrading(twoFD.formattedDate_1) //滑鼠放afterTrading上面，input需要什麼?date，對，那date在哪? 輸入個twoFD.看看?
         const firstFD_1 = firstFD.tables[8].data
+        console.log(twoFD.formattedDate_1)
        //取得第二個周五的收盤價 使用 out.afterTrading。
        const secondFD = await out.afterTrading(twoFD.formattedDate_2) //恭喜創造連結了wow
        const secondFD_1 = secondFD.tables[8].data
-
+        //console.log(firstFD_1,secondFD_1)
        //方案1：取得符合第一個周五比第二個周五收盤價高的股票 將結果放到xxx1
-
+       const higherFD = [firstFD_1,secondFD_1]
+       for(const v of higherFD){
+          if(v[0]>v[1]){
+            console.log (`${v[0]} ${v[1]}`)
+          }
+       }
+           
+        return higherFD
        //方案1：返回xxx1
 
 
@@ -208,9 +217,14 @@ const stock = () => {
 
 (async ()=>{
     try {
+        
+        // const thisvslast_data = stock().thisvslast()
+        // console.log((`${v[0]} ${v[1]}`))
+        stock().thisvslast()
+    
         const weekFriday_data = stock().weekFriday()
-    console.log(weekFriday_data.formattedDate_1)
-    console.log(weekFriday_data.formattedDate_2)
+        console.log(weekFriday_data.formattedDate_1)
+        console.log(weekFriday_data.formattedDate_2)
         // const afterTrading_data = await stock().afterTrading('20240205')
         // console.log(afterTrading_data)
 
