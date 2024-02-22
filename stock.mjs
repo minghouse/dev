@@ -164,11 +164,11 @@ const stock = () => {
     
         // 將日期格式化為 "年-月-日"
         var formattedDate = lastFriday.toISOString().split('T')[0];
-        out.formattedDate_1 = formattedDate
+        out.formattedDate_1 = formattedDate.replace(/-/g,"")
     
         const secondfriday = new Date(formattedDate) //這個原本formattedDate是找的到的，如果要formattedDate_1，這個釋放在out裡面了
         secondfriday.setDate(secondfriday.getDate() - 7) //滑鼠放getDate上面，目前找不到這個方法
-        out.formattedDate_2 = secondfriday.toISOString().split('T')[0];
+        out.formattedDate_2 = secondfriday.toISOString().split('T')[0].replace(/-/g,"");
         
         return out
 
@@ -190,14 +190,27 @@ const stock = () => {
        const secondFD_1 = secondFD.tables[8].data
         //console.log(firstFD_1,secondFD_1)
        //方案1：取得符合第一個周五比第二個周五收盤價高的股票 將結果放到xxx1
-       const higherFD = [firstFD_1,secondFD_1]
-       for(const v of higherFD){
-          if(v[0]>v[1]){
-            console.log (`${v[0]} ${v[1]}`)
-          }
-       }
+       //const higherFD = [firstFD_1,secondFD_1]
+       //for(const v of higherFD){
+       //   if(v[0]>v[1]){
+        //    console.log (`${v[0]} ${v[1]}`)
+       //   }
+     //  }
+        console.log(`證券代號    證券名稱    上週收盤價   本週收盤價`)
+        // 取得第一個周五的資料 設為v
+        for (const v of firstFD_1) {
+            //v[8] 取得第二個周五的資料 設為v2
+            for (const v2 of secondFD_1) {
+                // 第一個周五相同於第二個周五的證券代號 而且第一個周五收盤價大於第二個周五收盤價
+                if (v[0] == v2[0] && v[8] > v2[8]) {
+                    //印出我們要的數值
+                    console.log(`${v[0]}   ${v[1]}  ${v2[8]}  ${v[8]}`)
+                }
+
+            }
+        }
            
-        return higherFD
+        
        //方案1：返回xxx1
 
 
