@@ -176,26 +176,39 @@ const stock = () => {
 
     /**
      * 每週五的收盤要比上週五的高的股票
-     */
-    out.thisvslast = async()=>{ 
+     * @param {string} firstFD_set 本周五
+     * @param {string} secondFD_set 上週五
+     */使用者可自行填入日期在 firstFD_set 和 secondFD_set 
+    out.thisvslast = async(firstFD_set, secondFD_set)=>{ 
        //取得兩個周五的日期 使用out.weekFriday
         const twoFD = out.weekFriday() //滑鼠放weekFriday上面，如果是promise輸出的 不是，才需要await
-       //取得第一個周五的收盤價 使用 out.afterTrading
-      
+        //取得第一個周五的收盤價 使用 out.afterTrading
+        
+        // 有符合的資料才會出現firstFD_set
+        if (firstFD_set) {
+            // 本周五的收盤價等於firstFD_set
+            twoFD.formattedDate_1 = firstFD_set
+        }
+        //
+        if (secondFD_set) {
+            //上周五的收盤價等於secondFD_set
+            twoFD.formattedDate_2 = secondFD_set
+        }
+        
         const firstFD = await out.afterTrading(twoFD.formattedDate_1) //滑鼠放afterTrading上面，input需要什麼?date，對，那date在哪? 輸入個twoFD.看看?
         const firstFD_1 = firstFD.tables[8].data
-        console.log(twoFD.formattedDate_1)
-       //取得第二個周五的收盤價 使用 out.afterTrading。
-       const secondFD = await out.afterTrading(twoFD.formattedDate_2) //恭喜創造連結了wow
-       const secondFD_1 = secondFD.tables[8].data
-        //console.log(firstFD_1,secondFD_1)
-       //方案1：取得符合第一個周五比第二個周五收盤價高的股票 將結果放到xxx1
-       //const higherFD = [firstFD_1,secondFD_1]
-       //for(const v of higherFD){
-       //   if(v[0]>v[1]){
+
+        //取得第二個周五的收盤價 使用 out.afterTrading。
+        const secondFD = await out.afterTrading(twoFD.formattedDate_2) //恭喜創造連結了wow
+        const secondFD_1 = secondFD.tables[8].data
+        
+        //方案1：取得符合第一個周五比第二個周五收盤價高的股票 將結果放到xxx1
+        //const higherFD = [firstFD_1,secondFD_1]
+        //for(const v of higherFD){
+        //   if(v[0]>v[1]){
         //    console.log (`${v[0]} ${v[1]}`)
-       //   }
-     //  }
+        //   }
+        //  }
         console.log(`證券代號    證券名稱    上週收盤價   本週收盤價`)
         // 取得第一個周五的資料 設為v
         for (const v of firstFD_1) {
@@ -206,13 +219,10 @@ const stock = () => {
                     //印出我們要的數值
                     console.log(`${v[0]}   ${v[1]}  ${v2[8]}  ${v[8]}`)
                 }
-
             }
         }
            
         
-       //方案1：返回xxx1
-
 
        //方案2：將兩個周5的收盤價按照股票代號合併為新的Array 並且將Array放到變數xxx1
         
@@ -233,7 +243,9 @@ const stock = () => {
         
         // const thisvslast_data = stock().thisvslast()
         // console.log((`${v[0]} ${v[1]}`))
-        stock().thisvslast()
+
+        // 顯示 指定日的資料
+        await stock().thisvslast('20240216', '20240205')
     
         const weekFriday_data = stock().weekFriday()
         console.log(weekFriday_data.formattedDate_1)
