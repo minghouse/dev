@@ -178,22 +178,14 @@ const stock = () => {
      * 每週五的收盤要比上週五的高的股票
      * @param {string} firstFD_set 本周五
      * @param {string} secondFD_set 上週五
-     */使用者可自行填入日期在 firstFD_set 和 secondFD_set 
+     */
+    //使用者可自行填入日期在 firstFD_set 和 secondFD_set 
     out.thisvslast = async(firstFD_set, secondFD_set)=>{ 
        //取得兩個周五的日期 使用out.weekFriday
         const twoFD = out.weekFriday() //滑鼠放weekFriday上面，如果是promise輸出的 不是，才需要await
         //取得第一個周五的收盤價 使用 out.afterTrading
         
-        // 有符合的資料才會出現firstFD_set
-        if (firstFD_set) {
-            // 本周五的收盤價等於firstFD_set
-            twoFD.formattedDate_1 = firstFD_set
-        }
-        //
-        if (secondFD_set) {
-            //上周五的收盤價等於secondFD_set
-            twoFD.formattedDate_2 = secondFD_set
-        }
+        //>>>>>>>
         
         const firstFD = await out.afterTrading(twoFD.formattedDate_1) //滑鼠放afterTrading上面，input需要什麼?date，對，那date在哪? 輸入個twoFD.看看?
         const firstFD_1 = firstFD.tables[8].data
@@ -209,18 +201,21 @@ const stock = () => {
         //    console.log (`${v[0]} ${v[1]}`)
         //   }
         //  }
-        console.log(`證券代號    證券名稱    上週收盤價   本週收盤價`)
+        console.log("證券代號 證券名稱 本週收盤價 上週收盤價")
+       
         // 取得第一個周五的資料 設為v
-        for (const v of firstFD_1) {
+        for(const v of firstFD_1){    
             //v[8] 取得第二個周五的資料 設為v2
-            for (const v2 of secondFD_1) {
+            for(const v2 of secondFD_1){   
                 // 第一個周五相同於第二個周五的證券代號 而且第一個周五收盤價大於第二個周五收盤價
-                if (v[0] == v2[0] && v[8] > v2[8]) {
+                if(v[0] == v2[0] && v[8]>v2[8]){
                     //印出我們要的數值
-                    console.log(`${v[0]}   ${v[1]}  ${v2[8]}  ${v[8]}`)
-                }
-            }
-        }
+                    console.log(`${v[0]} ${v[1]} ${v[8]} ${v2[8]}`)  
+                }     
+            }   
+                
+        }  
+        
            
         
 
@@ -245,7 +240,7 @@ const stock = () => {
         // console.log((`${v[0]} ${v[1]}`))
 
         // 顯示 指定日的資料
-        await stock().thisvslast('20240216', '20240205')
+        await stock().thisvslast()
     
         const weekFriday_data = stock().weekFriday()
         console.log(weekFriday_data.formattedDate_1)
