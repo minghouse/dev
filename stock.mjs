@@ -183,10 +183,30 @@ const stock = () => {
     out.thisvslast = async(firstFD_set, secondFD_set)=>{ 
        //取得兩個周五的日期 使用out.weekFriday
         const twoFD = out.weekFriday() //滑鼠放weekFriday上面，如果是promise輸出的 不是，才需要await
-        //取得第一個周五的收盤價 使用 out.afterTrading
-        
-        //>>>>>>>
-        
+               
+        //>>>>>>>取得第一個周五的收盤價
+        const firstFDself = await out.afterTrading(firstFD_set)
+        const firstFDself_1 = firstFDself.tables[8].data
+
+        //>>>>>>>取得第二個周五的收盤價
+        const secondFDself = await out.afterTrading(secondFD_set)
+        const secondFDself_1 = secondFDself.tables[8].data
+        // 取得第一個周五的資料 設為v
+        for(const v of firstFDself_1){    
+            //v[8] 取得第二個周五的資料 設為v2
+            for(const v2 of secondFDself_1){   
+                // 第一個周五相同於第二個周五的證券代號 而且第一個周五收盤價大於第二個周五收盤價
+                if(v[0] == v2[0] && v[8]>v2[8]){
+                    //印出我們要的數值
+                    console.log(`${v[0]} ${v[1]} ${v[8]} ${v2[8]}`)  
+                }     
+            }   
+                
+        }  
+
+
+
+         //取得第一個周五的收盤價 使用 out.afterTrading
         const firstFD = await out.afterTrading(twoFD.formattedDate_1) //滑鼠放afterTrading上面，input需要什麼?date，對，那date在哪? 輸入個twoFD.看看?
         const firstFD_1 = firstFD.tables[8].data
 
