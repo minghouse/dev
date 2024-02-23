@@ -261,7 +261,7 @@ const stock = () => {
 
         // 顯示 指定日的資料
         await stock().thisvslast()
-    
+        await stock().thisvslast("20240222","20240215")
         const weekFriday_data = stock().weekFriday()
         console.log(weekFriday_data.formattedDate_1)
         console.log(weekFriday_data.formattedDate_2)
