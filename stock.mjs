@@ -112,7 +112,6 @@ const stock = () => {
     out.is_work = async (date) => {
         const open = await fetch(` https://www.twse.com.tw/rwd/zh/holidaySchedule/holidaySchedule?response=json`)
         const data = await open.json();
-
         //取出有日期的資料 
         //EX: [
         //       [ '2024-01-01', '中華民國開國紀念日', '依規定放假1日。' ],
@@ -131,12 +130,11 @@ const stock = () => {
                 continue
             }
             trueorfalse.push(v[0].replace(/-/g,""))   
-            
-            
+                       
         }
         //從trueorfalse裡面找date在第幾個位置
         const indexOfdate = trueorfalse.indexOf(date)
-        if (indexOfdate<=0){
+        if (indexOfdate<0){
             return true
         }
         
@@ -183,58 +181,34 @@ const stock = () => {
     out.thisvslast = async(firstFD_set, secondFD_set)=>{ 
        //取得兩個周五的日期 使用out.weekFriday
         const twoFD = out.weekFriday() //滑鼠放weekFriday上面，如果是promise輸出的 不是，才需要await
-               
-        //>>>>>>>取得第一個周五的收盤價
-        const firstFDself = await out.afterTrading(firstFD_set)
-        const firstFDself_1 = firstFDself.tables[8].data
-
-        //>>>>>>>取得第二個周五的收盤價
-        const secondFDself = await out.afterTrading(secondFD_set)
-        const secondFDself_1 = secondFDself.tables[8].data
-        // 取得第一個周五的資料 設為v
-        for(const v of firstFDself_1){    
-            //v[8] 取得第二個周五的資料 設為v2
-            for(const v2 of secondFDself_1){   
-                // 第一個周五相同於第二個周五的證券代號 而且第一個周五收盤價大於第二個周五收盤價
-                if(v[0] == v2[0] && v[8]>v2[8]){
-                    //印出我們要的數值
-                    console.log(`${v[0]} ${v[1]} ${v[8]} ${v2[8]}`)  
-                }     
-            }   
-                
-        }  
-
-
+        if(firstFD_set && secondFD_set){
+            twoFD.formattedDate_1 = firstFD_set
+            twoFD.formattedDate_2 = secondFD_set
+        }
 
          //取得第一個周五的收盤價 使用 out.afterTrading
-        const firstFD = await out.afterTrading(twoFD.formattedDate_1) //滑鼠放afterTrading上面，input需要什麼?date，對，那date在哪? 輸入個twoFD.看看?
-        const firstFD_1 = firstFD.tables[8].data
+            const firstFD = await out.afterTrading(twoFD.formattedDate_1) //滑鼠放afterTrading上面，input需要什麼?date，對，那date在哪? 輸入個twoFD.看看?
+            const firstFD_1 = firstFD.tables[8].data
 
         //取得第二個周五的收盤價 使用 out.afterTrading。
-        const secondFD = await out.afterTrading(twoFD.formattedDate_2) //恭喜創造連結了wow
-        const secondFD_1 = secondFD.tables[8].data
-        
-        //方案1：取得符合第一個周五比第二個周五收盤價高的股票 將結果放到xxx1
-        //const higherFD = [firstFD_1,secondFD_1]
-        //for(const v of higherFD){
-        //   if(v[0]>v[1]){
-        //    console.log (`${v[0]} ${v[1]}`)
-        //   }
-        //  }
-        console.log("證券代號 證券名稱 本週收盤價 上週收盤價")
+            const secondFD = await out.afterTrading(twoFD.formattedDate_2) //恭喜創造連結了wow
+            const secondFD_1 = secondFD.tables[8].data
+              
+            console.log("證券代號 證券名稱 本週收盤價 上週收盤價")
        
         // 取得第一個周五的資料 設為v
-        for(const v of firstFD_1){    
+             for(const v of firstFD_1){    
             //v[8] 取得第二個周五的資料 設為v2
-            for(const v2 of secondFD_1){   
+                 for(const v2 of secondFD_1){   
                 // 第一個周五相同於第二個周五的證券代號 而且第一個周五收盤價大於第二個周五收盤價
-                if(v[0] == v2[0] && v[8]>v2[8]){
+                    if(v[0] == v2[0] && v[8]>v2[8]){
                     //印出我們要的數值
                     console.log(`${v[0]} ${v[1]} ${v[8]} ${v2[8]}`)  
-                }     
-            }   
+                    }     
+                }   
                 
-        }  
+             } 
+              
         
            
         
