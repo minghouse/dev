@@ -71,3 +71,9 @@ const people = [
 });
 console.log(people2)
 
+//使用array.filter()找到 >2的數字
+const array = [1, 2, 3, 4, 5];
+const array2 = array.filter((number) => {
+    return number > 2;
+});
+console.log(array2)
