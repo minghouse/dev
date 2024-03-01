@@ -103,7 +103,10 @@ const stock = () => {
                 console.log(`${v[0]} ${v[1]} ${v[2]} ${v[8]} ${v[5]} ${v[6]} ${v[7]}`)
             }
         }
-    
+        const v2 = compare.find((v)=>{
+            return v[8]>v[5]&&v[8]==v[6] 
+        })
+        console.log(`${v[0]} ${v[1]} ${v[2]} ${v2[8]} ${v2[5]} ${v2[6]} ${v[7]}`)
     }
     
     /**
@@ -206,7 +209,11 @@ const stock = () => {
                     console.log(`${v[0]} ${v[1]} ${v[8]} ${v2[8]}`)  
                     }     
                 }   
-                
+                const SFD = secondFD_1.find((v2)=>{
+                    return v[0] == v2[0] && v[8]>v2[8] 
+                    
+                })
+                console.log(`${v[0]} ${v[1]} ${v[8]} ${SFD[8]}`)
              } 
               
         
