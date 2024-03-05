@@ -42,7 +42,7 @@ const stock = () => {
      * @returns 
      */
     out.price = async (date) => { 
-   
+    
         const afterTrading_data = await stock().afterTrading(date)
         // console.log(afterTrading_data)
        
@@ -52,9 +52,7 @@ const stock = () => {
         for (const v of afterTrading_data.tables[8].data){
            
             console.log(`${v[0]} ${v[1]} ${v[8]}`)
-        }
-        
-        
+        }       
     }
  
     out.order = async (date,count) => { 
@@ -93,20 +91,26 @@ const stock = () => {
      * 收盤價>開盤價、收盤價=最高價
      */
     out.ml_red = async (date) => {
+    
         const afterTrading_data = await stock().afterTrading(date)
         const compare = afterTrading_data.tables[8].data
         console.log("證券代號 證券名稱 成交股數 收盤價 開盤價 最高價 最低價")
-        for(const v of compare ){
+        //for(const v of compare ){
             //判斷符合條件即是我們想要的資料
-            if (v[8]>v[5]&&v[8]==v[6]){   
+           // if (v[8]>v[5]&&v[8]==v[6]){   
                 //會跑到這裡表示v是我們需要的資料，所以在這裡使用console.log，把需要的欄位的值印出來
-                console.log(`${v[0]} ${v[1]} ${v[2]} ${v[8]} ${v[5]} ${v[6]} ${v[7]}`)
-            }
-        }
-        const v2 = compare.find((v)=>{
+           //     console.log(`${v[0]} ${v[1]} ${v[2]} ${v[8]} ${v[5]} ${v[6]} ${v[7]}`)
+           // }
+           
+        const v2 = compare.filter((v)=>{
             return v[8]>v[5]&&v[8]==v[6] 
         })
-        console.log(`${v[0]} ${v[1]} ${v[2]} ${v2[8]} ${v2[5]} ${v2[6]} ${v[7]}`)
+           for(const v3 of v2){
+            console.log(`${v3[0]} ${v3[1]} ${v3[2]} ${v3[8]} ${v3[5]} ${v3[6]} ${v3[7]}`)
+           }
+        //console.log(v2)
+        
+        
     }
     
     /**
@@ -145,7 +149,7 @@ const stock = () => {
 
         //如果indexOfOrange <0 return true, >0 return false
 
-        return data
+        // return data
         
     }  
 
@@ -190,50 +194,51 @@ const stock = () => {
         }
 
          //取得第一個周五的收盤價 使用 out.afterTrading
-            const firstFD = await out.afterTrading(twoFD.formattedDate_1) //滑鼠放afterTrading上面，input需要什麼?date，對，那date在哪? 輸入個twoFD.看看?
-            const firstFD_1 = firstFD.tables[8].data
+        const firstFD = await out.afterTrading(twoFD.formattedDate_1) //滑鼠放afterTrading上面，input需要什麼?date，對，那date在哪? 輸入個twoFD.看看?
+        const firstFD_1 = firstFD.tables[8].data
 
         //取得第二個周五的收盤價 使用 out.afterTrading。
-            const secondFD = await out.afterTrading(twoFD.formattedDate_2) //恭喜創造連結了wow
-            const secondFD_1 = secondFD.tables[8].data
+        const secondFD = await out.afterTrading(twoFD.formattedDate_2) //恭喜創造連結了wow
+        const secondFD_1 = secondFD.tables[8].data
               
-            console.log("證券代號 證券名稱 本週收盤價 上週收盤價")
+        console.log("證券代號 證券名稱 本週收盤價 上週收盤價")
        
-        // 取得第一個周五的資料 設為v
-             for(const v of firstFD_1){    
+        // 取得第一個周五的資料 設為v ↓沒對齊XD
+        console.log('firstFD_1的數量:')
+        console.log(firstFD_1.length)
+        let ii = 0
+        for(const v of firstFD_1){    
             //v[8] 取得第二個周五的資料 設為v2
-                 for(const v2 of secondFD_1){   
+            for(const v2 of secondFD_1){   
                 // 第一個周五相同於第二個周五的證券代號 而且第一個周五收盤價大於第二個周五收盤價
-                    if(v[0] == v2[0] && v[8]>v2[8]){
+                if(v[0] == v2[0] && v[8]>v2[8]){
+                    ii++
                     //印出我們要的數值
                     console.log(`${v[0]} ${v[1]} ${v[8]} ${v2[8]}`)  
-                    }     
-                }   
-                const SFD = secondFD_1.find((v2)=>{
-                    return v[0] == v2[0] && v[8]>v2[8] 
-                    
-                })
-                console.log(`${v[0]} ${v[1]} ${v[8]} ${SFD[8]}`)
-             } 
-              
-        
-           
-        
+                }
+            }     
+            
+            // const SFD = secondFD_1.find((v2)=>{
+            //     return v[0] == v2[0] && v[8]>v2[8] 
+            // })
+            // console.log('AAA')
+            // console.log(SFD) //現在我在這裡印出SFD，它必須是array才能使用SFD[8]，所以我們印出來看看他會長怎樣
+            // console.log('AAA')
+            // // if(SFD) {
+            //     console.log(`${v[0]} ${v[1]} ${v[8]} ${SFD[8]}`)
+            // // }
+        }
+        console.log('符合v[0] == v2[0] && v[8]>v2[8]的數量:')
+        console.log(ii)
 
-       //方案2：將兩個周5的收盤價按照股票代號合併為新的Array 並且將Array放到變數xxx1
+    } //<<這跑禎遠
         
-       //方案2：取得符合第一個周五比第二個周五收盤價高的股票 將結果放到xxx2
-
-       //方案2：返回xxx2
-       
-    }
-    
-
     return out
-}
+}   
+   
+        
 
    
-
 (async ()=>{
     try {
         
@@ -241,36 +246,36 @@ const stock = () => {
         // console.log((`${v[0]} ${v[1]}`))
 
         // 顯示 指定日的資料
-        await stock().thisvslast()
-        await stock().thisvslast("20240222","20240215")
-        const weekFriday_data = stock().weekFriday()
-        console.log(weekFriday_data.formattedDate_1)
-        console.log(weekFriday_data.formattedDate_2)
+        //await stock().thisvslast()
+        //await stock().thisvslast("20240222","20240215")
+        //const weekFriday_data = stock().weekFriday()
+        //console.log(weekFriday_data.formattedDate_1)
+        //console.log(weekFriday_data.formattedDate_2)
         // const afterTrading_data = await stock().afterTrading('20240205')
         // console.log(afterTrading_data)
 
         //收盤價
         // console.log(await stock().price('20240205'))
         //目前這樣會印出1，所以回到46行先來做資料整理
-        // const ml_red = await stock().ml_red("20240205")
+        const ml_red = await stock().ml_red("20240205")
 
         // const order = await stock().order('20240205',20)
         // console.log(order)
 
         //20240215是否有開盤
-        const is_work = await stock().is_work('20240215')
-        console.log(is_work)
+       // const is_work = await stock().is_work('20240215')
+       // console.log(is_work)
 
         //20240213是否有開盤
-        const is_work_2 = await stock().is_work('20240213')
-        console.log(is_work_2)
+       // const is_work_2 = await stock().is_work('20240213')
+       // console.log(is_work_2)
         
         //測試計算EPS
-        const eps = stock().EPS(1,2)
-        console.log(eps)
+       // const eps = stock().EPS(1,2)
+       // console.log(eps)
 
         //測試計算殖利率
-        console.log(stock().Yield(1,2))
+        //console.log(stock().Yield(1,2))
     } catch (error) {
        console.log(error)
     }
