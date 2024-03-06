@@ -257,7 +257,7 @@ const stock = () => {
         //收盤價
         // console.log(await stock().price('20240205'))
         //目前這樣會印出1，所以回到46行先來做資料整理
-        const ml_red = await stock().ml_red("20240205")
+       // const ml_red = await stock().ml_red("20240205")
 
         // const order = await stock().order('20240205',20)
         // console.log(order)
