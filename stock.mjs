@@ -44,17 +44,20 @@ const stock = () => {
     out.price = async (date) => { 
     
         const afterTrading_data = await stock().afterTrading(date)
-        // console.log(afterTrading_data)
-       
-        
-        // console.log(afterTrading_data.tables[8].data)
-        console.log("證券代號 證券名稱 收盤價")
-        for (const v of afterTrading_data.tables[8].data){
-           
-            console.log(`${v[0]} ${v[1]} ${v[8]}`)
-        }       
+        const final_price = afterTrading_data.tables[8].data 
+        //console.log("證券代號 證券名稱 收盤價")
+        for (const v of final_price){
+             
+            //console.log(`${v[0]} ${v[1]} ${v[8]}`)
+        }
+        return final_price       
     }
- 
+    /**
+     * 成交股數由大到小排序
+     * @param {date}  日期
+     * @param {count} 成交股筆數 
+     */
+
     out.order = async (date,count) => { 
    
         const afterTrading_data = await stock().afterTrading(date)
@@ -70,18 +73,16 @@ const stock = () => {
         numbers.sort(function (a, b) {
             return b[2].replace(/,/g,"") - a[2].replace(/,/g,"");
         });
-        // console.log(numbers);
           
         //連結上述資料取前10筆資料
         const ten = numbers.slice(0,count)
-        // console.log(ten);
         
-        console.log("證券代號 證券名稱 成交股數 收盤價")
+        //console.log("證券代號 證券名稱 成交股數 收盤價")
         for (const v of ten){
-            console.log(`${v[0]} ${v[1]} ${v[2]} ${v[8]}`)
+            //console.log(`${v[0]} ${v[1]} ${v[2]} ${v[8]}`)
         }
 
-       
+        return ten
     }
 
     //這裡開始 董
@@ -259,11 +260,12 @@ const stock = () => {
    
 (async ()=>{
     try {
-         const deal_prece_data = await stock().deal_price(20240307,10)
-         console.log("證券代號 證券名稱 成交金額 收盤價")
-         for(const v of deal_prece_data){
-            console.log(`${v[0]} ${v[1]} ${v[4]} ${v[8]}`)  
-         }
+        // 成交金額由大到小排序
+         //const deal_prece_data = await stock().deal_price(20240307,10)
+         //console.log("證券代號 證券名稱 成交金額 收盤價")
+         //for(const v of deal_prece_data){
+           // console.log(`${v[0]} ${v[1]} ${v[4]} ${v[8]}`)  
+         //}
          
         // const thisvslast_data = stock().thisvslast()
         // console.log((`${v[0]} ${v[1]}`))
@@ -278,12 +280,22 @@ const stock = () => {
         // console.log(afterTrading_data)
 
         //收盤價
-        // console.log(await stock().price('20240205'))
-        //目前這樣會印出1，所以回到46行先來做資料整理
+       // const price_data = await stock().price('20240205')
+       // console.log("證券代號 證券名稱 收盤價")
+       // for (const v of price_data){
+       //     console.log(`${v[0]} ${v[1]} ${v[8]}`)
+       // }
+        
+
        // const ml_red = await stock().ml_red("20240205")
 
-        // const order = await stock().order('20240205',20)
-        // console.log(order)
+        //成交股數由大到小排序
+        const order = await stock().order('20240205',20)
+        console.log("證券代號 證券名稱 成交股數 收盤價")
+        for (const v of order){
+            console.log(`${v[0]} ${v[1]} ${v[2]} ${v[8]}`) 
+        }
+        
 
         //20240215是否有開盤
        // const is_work = await stock().is_work('20240215')
