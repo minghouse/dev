@@ -232,7 +232,25 @@ const stock = () => {
         console.log(ii)
 
     } //<<這跑禎遠
-        
+    
+    /**
+     * 成交金額排行
+     * @param {date} 日期
+     * @param {count} 筆數 
+     */
+    out.deal_price = async (date, count) => {
+        const afterTrading_data = await stock().afterTrading(date)
+        const numbers = afterTrading_data.tables[8].data
+        numbers.sort(function (a, b) {
+            return b[4].replace(/,/g,"") - a[4].replace(/,/g,"");
+        });
+        const count_number = numbers.slice(0,count)
+        //console.log("證券代號 證券名稱 成交金額 收盤價")
+        for (const v of count_number){
+            //console.log(`${v[0]} ${v[1]} ${v[4]} ${v[8]}`)
+        }
+        return count_number
+    }
     return out
 }   
    
@@ -241,7 +259,12 @@ const stock = () => {
    
 (async ()=>{
     try {
-        
+         const deal_prece_data = await stock().deal_price(20240307,10)
+         console.log("證券代號 證券名稱 成交金額 收盤價")
+         for(const v of deal_prece_data){
+            console.log(`${v[0]} ${v[1]} ${v[4]} ${v[8]}`)  
+         }
+         
         // const thisvslast_data = stock().thisvslast()
         // console.log((`${v[0]} ${v[1]}`))
 
