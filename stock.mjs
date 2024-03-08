@@ -203,21 +203,33 @@ const stock = () => {
         const secondFD_1 = secondFD.tables[8].data
               
         console.log("證券代號 證券名稱 本週收盤價 上週收盤價")
-       
-        // 取得第一個周五的資料 設為v ↓沒對齊XD
-        console.log('firstFD_1的數量:')
-        console.log(firstFD_1.length)
-        let ii = 0
-        for(const v of firstFD_1){    
-            //v[8] 取得第二個周五的資料 設為v2
-            for(const v2 of secondFD_1){   
-                // 第一個周五相同於第二個周五的證券代號 而且第一個周五收盤價大於第二個周五收盤價
-                if(v[0] == v2[0] && v[8]>v2[8]){
-                    ii++
-                    //印出我們要的數值
-                    console.log(`${v[0]} ${v[1]} ${v[8]} ${v2[8]}`)  
+        for (const v of firstFD_1){
+            for (const v2 of secondFD_1){
+                if (v[0]==v2[0]){
+                    v[16]=v2[8]
                 }
-            }     
+            }
+        }
+        const thirdFD_1 = firstFD_1
+        for(const v of thirdFD_1){
+            if(v[8]>v[16]){
+              console.log(`${v[0]} ${v[1]} ${v[8]} ${v[16]}`)   
+            }
+        }
+        // 取得第一個周五的資料 設為v ↓沒對齊XD
+        //console.log('firstFD_1的數量:')
+        //console.log(firstFD_1.length)
+        //let ii = 0
+       // for(const v of firstFD_1){    
+            //v[8] 取得第二個周五的資料 設為v2
+            //for(const v2 of secondFD_1){   
+                // 第一個周五相同於第二個周五的證券代號 而且第一個周五收盤價大於第二個周五收盤價
+               // if(v[0] == v2[0] && v[8]>v2[8]){
+                    //ii++
+                    //印出我們要的數值
+                    //console.log(`${v[0]} ${v[1]} ${v[8]} ${v2[8]}`)  
+                //}
+           // }     
             
             // const SFD = secondFD_1.find((v2)=>{
             //     return v[0] == v2[0] && v[8]>v2[8] 
@@ -229,10 +241,10 @@ const stock = () => {
             //     console.log(`${v[0]} ${v[1]} ${v[8]} ${SFD[8]}`)
             // // }
         }
-        console.log('符合v[0] == v2[0] && v[8]>v2[8]的數量:')
-        console.log(ii)
+        //console.log('符合v[0] == v2[0] && v[8]>v2[8]的數量:')
+        //console.log(ii)
 
-    } //<<這跑禎遠
+    
     
     /**
      * 成交金額排行
@@ -267,8 +279,8 @@ const stock = () => {
            // console.log(`${v[0]} ${v[1]} ${v[4]} ${v[8]}`)  
          //}
          
-        // const thisvslast_data = stock().thisvslast()
-        // console.log((`${v[0]} ${v[1]}`))
+        const thisvslast_data = await stock().thisvslast()
+        console.log((`${v[0]} ${v[1]}`))
 
         // 顯示 指定日的資料
         //await stock().thisvslast()
