@@ -1,14 +1,22 @@
 const yahoo_turnover = async() => {
     const response = await fetch(`https://tw.stock.yahoo.com/rank/turnover`);
-    const result = (await response.text() || '').match(/"list":(.+),"listMeta":{"rankTime":"(.+)","rankTimeRange/)
-    const data = JSON.parse(result[1] || '[]')
-    const time = (result[2]||'').split('T')[0]
+    const result = await response.text()
+    const result1 = result|| ''
+    const result2 = result1.match(/"list":(.+),"listMeta":{"rankTime":"(.+)","rankTimeRange/)
+    const data = JSON.parse(result2[1] || '[]')
+    const time = (result2[2]||'').split('T')[0] 
     return {
       data: data,
       time: time
     }
+    
   }
-  await yahoo_turnover()
-
+  const r = await yahoo_turnover()
+  console.log("股票代號  名稱  股價   漲跌   成交金額")
+  for(const v of r.data){
+     console.log(`${v.volk} ${v.symbolName} ${v.price} ${v.change} ${v.turnoverK}`)
+  }
+  // console.log(r) 
+  
 
   
