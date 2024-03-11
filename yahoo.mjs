@@ -15,9 +15,10 @@ const yahoo_turnover = async() => {
    
   console.log("股票代號  名稱  股價   漲跌   成交金額")
   for(const v of r.data){
-     const million = v.turnoverK/100000
-     const symbol = v.symbol.replace('.TW', '')
-     console.log(`${symbol} ${v.symbolName} ${v.price} ${v.change} ${million}`)
+    const million = v.turnoverK/100000
+    const symbol = v.symbol.replace('.TW', '').replace(/O/g, '');
+    
+    console.log(`${symbol} ${v.symbolName} ${v.price} ${v.change} ${million}`)
   }
   // console.log(r) 
   
