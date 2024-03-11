@@ -12,9 +12,11 @@ const yahoo_turnover = async() => {
     
   }
   const r = await yahoo_turnover()
+   
   console.log("股票代號  名稱  股價   漲跌   成交金額")
   for(const v of r.data){
-     console.log(`${v.volk} ${v.symbolName} ${v.price} ${v.change} ${v.turnoverK}`)
+     const million = v.turnoverK/100000
+     console.log(`${v.symbol} ${v.symbolName} ${v.price} ${v.change} ${million}`)
   }
   // console.log(r) 
   
