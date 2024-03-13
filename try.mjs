@@ -4,11 +4,12 @@ const tpex_stock = async(date) =>{
     const data = await response.json();
     return data
 }
- const tpex = await tpex_stock("20240311")
- 
+ const date = "103/03/12"
+ const tpex = await tpex_stock(date)
+
  console.log("股票代號  名稱  股價   漲跌   成交金額")
  
  for (const v of tpex.aaData){
-
+ 
  console.log(`${v[0]} ${v[1]} ${v[2]} ${v[3]} ${v[8]}`)
  }

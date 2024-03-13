@@ -292,7 +292,7 @@ const stock = () => {
         // console.log(afterTrading_data)
 
         //收盤價
-       // const price_data = await stock().price('20240205')
+       //const price_data = await stock().price('20240205')
        // console.log("證券代號 證券名稱 收盤價")
        // for (const v of price_data){
        //     console.log(`${v[0]} ${v[1]} ${v[8]}`)
