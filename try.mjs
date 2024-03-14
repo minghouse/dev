@@ -17,13 +17,35 @@ const formatDate = (date) => {
 
     return `${shortYear}/${month}/${day}`;
 }
+
+
  const date = '20240313'
  
  const tpex = await tpex_stock(date)
 
- console.log("股票代號  名稱  股價   漲跌   成交金額")
+ console.log("股票代號  名稱  股價   漲跌   成交金額  漲跌型態  漲跌停 ")
  
  for (const v of tpex.aaData){
+    
  
-//  console.log(`${v[0]} ${v[1]} ${v[2]} ${v[3]} ${v[8]}`)
+  const symbol = ()=>{
+      if(v[3]>0){
+     return "+"
+     } else if (v[3] < 0) {
+     return '-';
+     } else {
+     return '';
+     }
+   }
+   const symbol2 = ()=>{
+    if(v[3]>=1){
+   return "+"
+   } else if (v[3] < 1) {
+   return '-';
+   } else {
+   return '';
+   }
  }
+  console.log(`${v[0]} ${v[1]} ${v[2]} ${v[3]} ${v[8]} ${symbol()} `)
+ }
+ 
