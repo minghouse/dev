@@ -18,7 +18,8 @@ const money_news = async() =>{
     //這行錯了，沒有dataArray這個變數
     //console.log(dataArray); // 輸出解析後的陣列
     //因為上面的while裡面在解析出資料後是把資料放在matchs裡面
-    console.log(matches)
+    // console.log(matches)
+    // return matches
 }
 //執行方法，然後才會跑這個方法裡面的程式
-await money_news()
+const r = await money_news()

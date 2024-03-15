@@ -3,7 +3,7 @@ const yahoo_turnover = async() => {
     const result = await response.text()
     const result1 = result|| ''
     const result2 = result1.match(/"list":(.+),"listMeta":{"rankTime":"(.+)","rankTimeRange/)
-    console.log(result2)
+    console.log(result2[1])
     const data = JSON.parse(result2[1] || '[]')
     const time = (result2[2]||'').split('T')[0] 
     return {
