@@ -3,6 +3,7 @@ const yahoo_turnover = async() => {
     const result = await response.text()
     const result1 = result|| ''
     const result2 = result1.match(/"list":(.+),"listMeta":{"rankTime":"(.+)","rankTimeRange/)
+    console.log(result2)
     const data = JSON.parse(result2[1] || '[]')
     const time = (result2[2]||'').split('T')[0] 
     return {
@@ -18,7 +19,7 @@ const yahoo_turnover = async() => {
     const million = v.turnoverK/100000
     const symbol = v.symbol.replace('.TW', '').replace(/O/g, '');
     
-    console.log(`${symbol} ${v.symbolName} ${v.price} ${v.change} ${million}`)
+    //console.log(`${symbol} ${v.symbolName} ${v.price} ${v.change} ${million}`)
   }
   // console.log(r) 
   
