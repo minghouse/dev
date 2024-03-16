@@ -19,7 +19,12 @@ const money_news = async() =>{
     //console.log(dataArray); // 輸出解析後的陣列
     //因為上面的while裡面在解析出資料後是把資料放在matchs裡面
     // console.log(matches)
-    // return matches
+    return matches
 }
 //執行方法，然後才會跑這個方法裡面的程式
 const r = await money_news()
+//console.log(r)
+const ten = r.slice(0,10)
+   for (const v of ten){
+     console.log(`${v.title}  ${v.time} ${v.url} ${v.description}`)   
+   }
