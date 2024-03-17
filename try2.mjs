@@ -26,34 +26,66 @@ const r = await money_news()
 //console.log(r)
 const ten = r.slice(0,10)
 //console.log(ten)
-for (const v of ten){
-    //console.log(`${v.title}  ${v.time} ${v.url} ${v.description}`)
-    const content = async() =>{
-        const response = await fetch(v.url);
-        const result = await response.text()
-        const contentRegex = /<section class="article-body__editor" id ="article_body">(.*?)<\/section>/s;
-        const match = result.match(contentRegex)
-        if (match && match[1]) {
-            const newsContent = match[1].trim(); // 第一個捕獲組對應到內容
-            // console.log(newsContent); // 或者您可以對 newsContent 進行進一步的處理
-            //---------------------------------
-            const contentRegex2 = /<p>\s*(.*?)\s*<\/p>/gs;
-            const matches = [];
-            console.log("a")
-            let match2;
-            while ((match2 = contentRegex2.exec(newsContent)) !== null) {
-                const content2 = match2[1].trim();
-                matches.push(content2);
-            }
-            //matches = ['第一句','第二句',...]
-            //matches2 = '第一句\n第二句\n....'
-            const matches2 = matches.join("\n")
-            console.log(matches2)
-            //----------------.-----------------
-        } else {
-            console.log("未找到新聞內容");
+
+//----------------------------
+//顯示執行時間
+const timestamp_start = new Date().getTime();
+//----------------------------
+
+//console.log(`${v.title}  ${v.time} ${v.url} ${v.description}`)
+const content = async(v) =>{
+    const response = await fetch(v.url);
+    const result = await response.text()
+    const contentRegex = /<section class="article-body__editor" id ="article_body">(.*?)<\/section>/s;
+    const match = result.match(contentRegex)
+    if (match && match[1]) {
+        const newsContent = match[1].trim(); // 第一個捕獲組對應到內容
+        // console.log(newsContent); // 或者您可以對 newsContent 進行進一步的處理
+        //---------------------------------
+        const contentRegex2 = /<p>\s*(.*?)\s*<\/p>/gs;
+        const matches = [];
+        let match2;
+        while ((match2 = contentRegex2.exec(newsContent)) !== null) {
+            const content2 = match2[1].trim();
+            matches.push(content2);
         }
+        //matches = ['第一句','第二句',...]
+        //matches2 = '第一句\n第二句\n....'
+        const matches2 = matches.join("\n")
+        console.log(matches2)
+        //----------------.-----------------
+    } else {
+        console.log("未找到新聞內容");
     }
-    await content()
+}
+const promises = [];    
+for (const v of ten){
+    promises.push(content(v));
+}
+try {
+    
+    await Promise.all(promises)
+    const timestamp_end = new Date().getTime();
+    console.log((timestamp_end - timestamp_start) / 1000);
+    
+} catch(error) {
+    console.error("Error fetching news content:", error); 
+
 }
 
+//Promise.all(promises)
+    //.then(() => {
+        // 所有新闻内容获取完成后执行时间计算
+       // const timestamp_end = new Date().getTime();
+       // console.log((timestamp_end - timestamp_start) / 1000);
+    //})
+    //.catch(error => {
+       // console.error("Error fetching news content:", error);
+   // });
+//promise.all()
+
+//----------------------------
+//顯示執行時間
+//const timestamp_end = new Date().getTime();
+//console.log((timestamp_end-timestamp_start)/1000);
+//----------------------------
