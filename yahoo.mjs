@@ -11,6 +11,7 @@ const yahoo_turnover = async() => {
       time: time
     }
     
+    
   }
   const r = await yahoo_turnover()
    
