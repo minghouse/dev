@@ -52,26 +52,24 @@ const content = async(v) =>{
         //matches = ['第一句','第二句',...]
         //matches2 = '第一句\n第二句\n....'
         const matches2 = matches.join("\n")
-        console.log(matches2)
+        // console.log(matches2)
+        console.log(`訪問網址成功: ${v.url}`)
         //----------------.-----------------
     } else {
         console.log("未找到新聞內容");
     }
 }
-const promises = [];    
-for (const v of ten){
-    promises.push(content(v));
-}
-try {
-    
-    await Promise.all(promises)
-    const timestamp_end = new Date().getTime();
-    console.log((timestamp_end - timestamp_start) / 1000);
-    
-} catch(error) {
-    console.error("Error fetching news content:", error); 
-
-}
+// const promises = [];    
+// for (const v of ten){
+//     promises.push(content(v));
+// }
+// try {
+//     await Promise.all(promises)
+//     const timestamp_end = new Date().getTime();
+//     console.log((timestamp_end - timestamp_start) / 1000);
+// } catch(error) {
+//     console.error("Error fetching news content:", error); 
+// }
 
 //Promise.all(promises)
     //.then(() => {
@@ -83,6 +81,29 @@ try {
        // console.error("Error fetching news content:", error);
    // });
 //promise.all()
+
+//中間會有錯誤的模擬
+const promises = [];    
+for (const v of ten){
+    if (promises.length === 5) {
+        promises.push(new Promise((resolve, reject) => {
+            setTimeout(() => {
+                reject('訪問網址無效')
+            }, 1000);
+        }));
+        continue
+    }
+    promises.push(content(v));
+}
+
+try {
+    await Promise.all(promises)
+    const timestamp_end = new Date().getTime();
+    console.log((timestamp_end - timestamp_start) / 1000);
+} catch(error) {
+    console.error("Error fetching news content:", error); 
+}
+
 
 //----------------------------
 //顯示執行時間
