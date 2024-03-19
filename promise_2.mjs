@@ -1,4 +1,4 @@
-
+//是能夠實現知道幾個成功幾個失敗，然後誰失敗的寫法
 const my_fetch = (url) => {
     return new Promise((resolve, reject) => {
         const callback = () => {
