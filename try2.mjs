@@ -93,13 +93,21 @@ for (const v of ten){
         }));
         continue
     }
-    promises.push(content(v));
+    promises.push(content(v).catch(error => {
+        console.error("Error in content() promise:", error);
+        return reject; // 或者其他适当的错误处理方式
+    }));
 }
 
 try {
     await Promise.all(promises)
     const timestamp_end = new Date().getTime();
     console.log((timestamp_end - timestamp_start) / 1000);
+    results.forEach((result, index) => {
+        if (result === reject) {
+            console.error(`Error in content() for element ${ten[index]}`);
+        }
+    });
 } catch(error) {
     console.error("Error fetching news content:", error); 
 }
