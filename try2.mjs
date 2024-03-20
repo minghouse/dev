@@ -93,10 +93,13 @@ for (const v of ten){
         }));
         continue
     }
+    // 第二個錯誤是這裡，裡面是reject()返回錯誤，那Promise之後應該也要連結.catch(error => { ... }) 這樣的寫法
+    //這寫法的目的是捕獲Promise的執行錯誤，然後通過{}裡面寫的return返回我們指定的資料內容
     promises.push(content(v).catch(error => {
         console.error("Error in content() promise:", error);
-        return reject; // 或者其他适当的错误处理方式
+        return null; // 或者其他适当的错误处理方式   
     }));
+    
 }
 
 try {
