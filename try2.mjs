@@ -86,11 +86,15 @@ const content = async(v) =>{
 const promises = [];    
 for (const v of ten){
     if (promises.length === 5) {
-        promises.push(new Promise((resolve, reject) => {
+        const p = new Promise((resolve, reject) => {
             setTimeout(() => {
                 reject('訪問網址無效')
             }, 1000);
-        }));
+        })
+        p.catch(error => {
+            return error
+        }) 
+        promises.push(p);
         continue
     }
     // 第二個錯誤是這裡，裡面是reject()返回錯誤，那Promise之後應該也要連結.catch(error => { ... }) 這樣的寫法

@@ -38,7 +38,7 @@ for (const v of urls){
 try {
     const result = await Promise.all(promises)
     console.log(result)
-
+    xxxxxxx
     for (const k in result) {
         const v = result[k]
         if (v[1] != 'ok') {
