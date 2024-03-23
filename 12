@@ -1,0 +1,64 @@
+<div class="MainLeftV2 FL">
+    <div title="台股新聞" class="IndexMainTitle" style="width:605px;height:27px;background-image: url(/images/look_news_L.png)"><h3>台股新聞</h3></div>
+    <div class="SpaceLine FL" style="width:660px;"></div>
+    
+    <div class="FR" style="width:100%">
+        <table border="0" cellSpacing="0" cellPadding="0">
+          <tr>
+<td class="TabTitleFocus" onclick="document.location.href='?NType=1002';"><h3 title='台股新聞'>台股新聞</h3></td><td class="TabTitle" onclick="document.location.href='?NType=2002';"><h3 title='台股快報'>台股快報</h3></td><td class="TabTitle" onclick="document.location.href='?NType=0008';"><h3 title='期權新聞'>期權新聞</h3></td><td class="TabTitle" onclick="document.location.href='?NType=0011';"><h3 title='數報新聞'>數報新聞</h3></td><td class="TabTitleBlockRight">&nbsp;</td>
+</tr>
+
+          <tr>
+            <td height="100%" style="width:100%"  colspan="5" >
+            <div class="ListingBoxFocus">
+                <div class="NewsTitle">
+<a href="NewsContent.aspx?SN=5433727001&PU=1002"><h3>《半導體》環球晶 子公司將實現100％綠電</h3></a><div class="NewsContent">【時報-台北電】環球晶（6488）衝刺綠色製造，丹麥和義大利的營運據點，已實現其對綠色製造的承諾。環球晶丹麥子公司Topsil，預計2024年下半年成為首座使用自發自用100％綠電的半導體長晶工廠。
+　透過興建裝置容量...<a href="NewsContent.aspx?SN=5433727001&PU=1002">(詳全文)</a></div><div class="NewsDate">時報新聞   2024/03/23   17:01</div></div>
+<div class="NewsLine"></div>
+<div class="NewsTitle">
+<a href="NewsContent.aspx?SN=5433726001&PU=1002"><h3>《國際產業》中芯供貨華為涉違法 華府將評估</h3></a><div class="NewsContent">【時報-台北電】美國對中國晶片產業重拳出擊，偕荷蘭等盟友對先進製造技術出口嚴加管控。對於中國資通訊大廠華為2023年8月底推出的Mate 60 Pro旗艦新機在製造環節涉違反美國法規，負責出口管制的美國商務部工業暨安...<a href="NewsContent.aspx?SN=5433726001&PU=1002">(詳全文)</a></div><div class="NewsDate">時報新聞   2024/03/23   16:49</div></div>
+<div class="NewsLine"></div>
+<div class="NewsTitle">
+<a href="NewsContent.aspx?SN=5433725001&PU=1002"><h3>《國際產業》傳赴美尋求雙重上市 新秀麗股跌</h3></a><div class="NewsContent">【時報-台北電】在香港掛牌的全球最大行李箱製造商新秀麗（Samsonite），基於提升股票流動性，傳出擬赴美國雙重上市，但投資人並不樂見，引發股價暴跌。
+　在赴美上市消息傳出後，新秀麗港股股價22日一度重挫12％，...<a href="NewsContent.aspx?SN=5433725001&PU=1002">(詳全文)</a></div><div class="NewsDate">時報新聞   2024/03/23   16:40</div></div>
+<div class="NewsLine"></div>
+<!-- 新聞列表文字自定大小 --><div class="AdSText"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3585513160636075" data-ad-slot="3164341944" data-ad-format="auto"></ins>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script></div>
+<div class="NewsLine"></div>
+<div class="NewsTitle">
+<a href="NewsContent.aspx?SN=5433724001&PU=1002"><h3>《動休閒》國際賽事挺 明係H2營運添柴火</h3></a><div class="NewsContent">【時報-台北電】自行車專業組裝廠商明係（6804）看好第三季有巴黎奧運、自行車環法賽等國際賽事陸續登場，有望助攻自行車下半年銷售。明係總經理黃慶忠表示，原預計今年5月出貨的新車款，受到客戶還在調整庫存影響，...<a href="NewsContent.aspx?SN=5433724001&PU=1002">(詳全文)</a></div><div class="NewsDate">時報新聞   2024/03/23   16:30</div></div>
+<div class="NewsLine"></div>
+<div class="NewsTitle">
+<a href="NewsContent.aspx?SN=5433723001&PU=1002"><h3>《國際產業》景氣低迷 FedEx營收連六季萎縮</h3></a><div class="NewsContent">【時報-台北電】美國快遞巨頭聯邦快遞（FedEx）21日美股盤後公布上季業績，儘管全球景氣低迷拖累營收連續六季萎縮，由於撙節成本有成，獲利優於市場預期，激勵股價勁揚。
+　投資人樂見聯邦快遞削減成本，和董事會批...<a href="NewsContent.aspx?SN=5433723001&PU=1002">(詳全文)</a></div><div class="NewsDate">時報新聞   2024/03/23   16:30</div></div>
+<div class="NewsLine"></div>
+<div class="NewsTitle">
+<a href="NewsContent.aspx?SN=5433722001&PU=1002"><h3>《產業》電費將稀釋獲利...產業界：成本很難轉嫁</h3></a><div class="NewsContent">【時報-台北電】萬眾矚目的電價決定上調，幾乎所有產業均表示成本勢必增加。綜合各產業的看法，目前景氣不佳，成本很難轉嫁大部分只能自行吸收，只能將設法開源節流，用電大戶的鋼鐵業龍頭中鋼表示，估計年增8億～10...<a href="NewsContent.aspx?SN=5433722001&PU=1002">(詳全文)</a></div><div class="NewsDate">時報新聞   2024/03/23   16:20</div></div>
+<div class="NewsLine"></div>
+<div class="NewsTitle">
+<a href="NewsContent.aspx?SN=5433720001&PU=1002"><h3>《其他股》鉛錠供過於求 泰銘3月營運承壓</h3></a><div class="NewsContent">【時報-台北電】購料來源多元化奏效，泰銘（9927）去年營收和獲利雙雙告捷，今年將持續此一策略，今年前二月表現亮眼，不過，因國際鉛錠市場近期出現供過於求現象，「供應商交倉量增大」，加上美元近期走強，鉛價受...<a href="NewsContent.aspx?SN=5433720001&PU=1002">(詳全文)</a></div><div class="NewsDate">時報新聞   2024/03/23   16:11</div></div>
+<div class="NewsLine"></div>
+<div class="NewsTitle">
+<a href="NewsContent.aspx?SN=5433719001&PU=1002"><h3>《財政》青安貸款脫鉤升息 由政府同額利息補貼半碼</h3></a><div class="NewsContent">【時報記者葉時安台北報導】為協助無自有住宅家庭購屋安家，財政部99年12月推出「青年安心成家購屋優惠貸款」(青安貸款)，由台灣銀行等8家公股銀行以自有資金辦理，嗣為擴大政策效益推出青安貸款精進方案，自112年8...<a href="NewsContent.aspx?SN=5433719001&PU=1002">(詳全文)</a></div><div class="NewsDate">時報新聞   2024/03/23   16:10</div></div>
+<div class="NewsLine"></div>
+<div class="NewsTitle">
+<a href="NewsContent.aspx?SN=5433718001&PU=1002"><h3>《金融》金管會六管齊下阻詐 Q2起OTP簡訊增列中文幣別</h3></a><div class="NewsContent">【時報-台北電】金管會多管齊下全力防止金融詐騙，光是銀行加強臨櫃關懷，2023年全年就攔阻破萬件、金額高達75.89億元，年增79％，今年1月單月就攔阻6.31億元。詐騙手法推陳出新，金管會持續精進阻詐手段，將要求銀...<a href="NewsContent.aspx?SN=5433718001&PU=1002">(詳全文)</a></div><div class="NewsDate">時報新聞   2024/03/23   16:08</div></div>
+<div class="NewsLine"></div>
+<div class="NewsTitle">
+<a href="NewsContent.aspx?SN=5433717001&PU=1002"><h3>《鋼鐵股》美上半年降息聲起 螺絲廠振奮</h3></a><div class="NewsContent">【時報-台北電】美國預計今年內將會有三次降息，專家預估將會出現在6月，這對鋼鐵業者來說無疑是好消息，貿易商認為在降息的心理下，目前觀望的買盤可望被刺激逢低進場備料建庫，若是去年第四季的歐美買進熱潮再現，...<a href="NewsContent.aspx?SN=5433717001&PU=1002">(詳全文)</a></div><div class="NewsDate">時報新聞   2024/03/23   16:00</div></div>
+<div class="NewsLine"></div>
+
+
+                <!--頁碼 Start-->
+<div class="NewsPage">
+<div class="FL" style="font-size:15px;">顯示第1至10筆資料，共184筆</div><div class="NewsPageNo">
+<a class="focus" href="?NType=1002&PGNum=1">1</a><a href="?NType=1002&PGNum=2">2</a><a href="?NType=1002&PGNum=3">3</a><a href="?NType=1002&PGNum=4">4</a><a href="?NType=1002&PGNum=5">5</a><a href="?NType=1002&PGNum=2">下頁</a><a href="?NType=1002&PGNum=19">末頁</a></div>
+</div>
+<!--頁碼 End-->
+
+
+            </td>
+          </tr>
+        </table>
+      </div>
+  </div>
