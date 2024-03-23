@@ -5,6 +5,7 @@ const moneylink_news = async() =>{
         const response = await fetch(`https://ww2.money-link.com.tw/RealtimeNews/Index.aspx?NType=1002&PGNum=${page_i}`)
         const result = await response.text()
         const regex = /<div class="NewsTitle">\s*<a\s+href="([^"]+)"[^>]*>\s*<h3>(.*?)<\/h3>\s*<\/a>\s*<div class="NewsContent">(.*?)<\/div>\s*<div class="NewsDate">([\d/]+)\s*(?:\d{2}:\d{2})?<\/div>/gs;
+        //<div class="NewsTitle">\s*<a\s+href="([^"]+)"[^>]*>\s*<h3>(.*?)<\/h3>\s*<\/a>\s*<div class="NewsContent">(.*?)<\/div>\s*<div class="NewsDate">(.*?)<\/div>/gs;
         const matches = result.matchAll(regex);
         for (const match of matches) {
             const link = match[1];
