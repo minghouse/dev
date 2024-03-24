@@ -55,7 +55,8 @@ const content = async(v) =>{
         // console.log(matches2)
         //這裡要調整的原因是，參考了promise_2.mjs，處理完資料就return的方式返回，因為直接印出來會干擾結果判讀，導致不仔細看的話會以為正常
         // console.log(`訪問網址成功: ${v.url}`)
-        return `訪問網址成功: ${v.url}`
+        // return `訪問網址成功: ${v.url}`
+        return matches2
         //----------------.-----------------
     } else {
         // console.log("未找到新聞內容");
@@ -114,7 +115,7 @@ for (const v of ten){
     
     promises.push(content(v).catch(error => {
         console.error("Error in content() promise:", error);
-        throw error; // 或者其他适当的错误处理方式   
+        return error; // 或者其他适当的错误处理方式   
     }));
     
 }
@@ -144,6 +145,8 @@ try {
         if (/無效/.test(result)) {
             //當符合這個if條件，我就印出來結果
             console.log(`第${Number(index)+1}筆有問題，返回的錯誤是:${result}`)
+        } else {
+            console.log(result)
         }
     }
 } catch(error) {

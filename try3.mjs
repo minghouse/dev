@@ -4,14 +4,20 @@ const moneylink_news = async() =>{
         page_i++
         const response = await fetch(`https://ww2.money-link.com.tw/RealtimeNews/Index.aspx?NType=1002&PGNum=${page_i}`)
         const result = await response.text()
-        const regex = /<div class="NewsTitle">\s*<a\s+href="([^"]+)"[^>]*>\s*<h3>(.*?)<\/h3>\s*<\/a>\s*<div class="NewsContent">(.*?)<\/div>\s*<div class="NewsDate">([\d/]+)\s*(?:\d{2}:\d{2})?<\/div>/gs;
-        //<div class="NewsTitle">\s*<a\s+href="([^"]+)"[^>]*>\s*<h3>(.*?)<\/h3>\s*<\/a>\s*<div class="NewsContent">(.*?)<\/div>\s*<div class="NewsDate">(.*?)<\/div>/gs;
+        //const regex = /<div class="NewsTitle">\s*<a\s+href="([^"]+)"[^>]*>\s*<h3>(.*?)<\/h3>\s*<\/a>\s*<div class="NewsContent">(.*?)<\/div>\s*<div class="NewsDate">([\d/]+)\s*(?:\d{2}:\d{2})?<\/div>/gs;
+        const regex = /<div class="NewsTitle">\s*<a\s+href="([^"]+)"[^>]*>\s*<h3>(.*?)<\/h3>\s*<\/a>\s*<div class="NewsContent">(.*?)<\/div>\s*<div class="NewsDate">(.*?)<\/div>/gs;
         const matches = result.matchAll(regex);
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero indexed
+        const day = String(today.getDate()).padStart(2, '0');
+        const formattedDate = `${year}${month}${day}`;
         for (const match of matches) {
             const link = match[1];
             const title = match[2];
             const description = match[3].trim();
             const newsDate = match[4].trim(); //這個newsDate會抓到的不單純只是日期，應該要抓到的是這樣的格式:  2024/03/23 16:40
+            //<div class="NewsDate">時報新聞   2024/03/23   17:01</div>
             const matchDate = newsDate.match(/\d{4}\/\d{2}\/\d{2}/); //這行沒問題了
             if (matchDate && matchDate.length > 0) { //這我想不到會有抓不到日期的情況，只好假設可能發生?
                 const newsDate = matchDate[0].replace(/\//g, ""); // 格式化新闻日期为 YYYYMMDD
