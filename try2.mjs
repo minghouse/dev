@@ -6,6 +6,7 @@ const money_news = async() =>{
 
 // 用正则表达式进行匹配
     var matches = [];
+    
     var match;
     while ((match = regex.exec(result)) !== null) {
         var title = match[1].trim();
@@ -21,6 +22,7 @@ const money_news = async() =>{
     // console.log(matches)
     return matches
 }
+
 //執行方法，然後才會跑這個方法裡面的程式
 const r = await money_news()
 //console.log(r)
