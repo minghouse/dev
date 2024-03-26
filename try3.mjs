@@ -56,7 +56,7 @@ const content = async(news) =>{
     //const contentRegex = /<div class="Content" id="NewsMainContent">(.*?)<\/div id = "oneadIRDFPTag">/gs;
     const contentRegex = /<div class="Content" id="NewsMainContent">((?:<div[^>]*>[\s\S]*?<\/div>)*[\s\S]*?)<\/div>/gs;
     const contentMatch = result.match(contentRegex);
-    console.log(contentMatch[4])
+    console.log(contentMatch[1])
     let content;
     if (contentMatch && contentMatch[1]) {
         content = contentMatch[1].trim();
