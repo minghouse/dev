@@ -48,14 +48,15 @@ const moneylink_news = async() =>{
 const r = await moneylink_news()
 // console.log(r)
 const ten = r.slice(0,10)
-console.log(ten)
+//console.log(ten)
 const content = async(news) =>{
     const response = await fetch(news.link);
     const result = await response.text()
     //console.log(result)
-    const contentRegex = /<div class="Content" id="NewsMainContent">(.*?)<\div id = "oneadIRDFPTag">/gs;
+    //const contentRegex = /<div class="Content" id="NewsMainContent">(.*?)<\/div id = "oneadIRDFPTag">/gs;
+    const contentRegex = /<div class="Content" id="NewsMainContent">((?:<div[^>]*>[\s\S]*?<\/div>)*[\s\S]*?)<\/div>/gs;
     const contentMatch = result.match(contentRegex);
-    console.log(contentMatch[1])
+    console.log(contentMatch[4])
     let content;
     if (contentMatch && contentMatch[1]) {
         content = contentMatch[1].trim();
