@@ -1,6 +1,11 @@
 //這隻模擬了9個成功1個失敗的時候，promise會怎麼運作  
 //我預設把這行('https://xxx/6')註解了，這樣執行的時候代表9筆都成功
 // 妳取消註解就會變成9筆成功 1筆失敗
+/**
+ * 自訂的my_fetch
+ * @param {string} url 
+ * @returns 
+ */
 const my_fetch = (url) => {
     return new Promise((resolve, reject) => {
         const callback = () => {
@@ -22,7 +27,7 @@ const urls = [
     'https://xxx/3',
     'https://xxx/4',
     'https://xxx/5',
-    // 'https://xxx/6',
+    'https://xxx/6',
     'https://xxx/7',
     'https://xxx/8',
     'https://xxx/9',
@@ -34,7 +39,7 @@ for (const v of urls){
     const content_promise = my_fetch(v)
     promises.push(content_promise)
 }
-
+// console.log(promises)
 try {
     const result = await Promise.all(promises)
     console.log(result)

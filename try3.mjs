@@ -15,7 +15,7 @@ const moneylink_news = async() =>{
         const formattedDate = `${year}${month}${day}`;
         
         for (const match of matches) {
-            const link = match[1];
+            const link = `https://ww2.money-link.com.tw/RealtimeNews/${match[1]}`;
             const title = match[2];
             const description = match[3].trim();
             const newsDate = match[4].trim(); //這個newsDate會抓到的不單純只是日期，應該要抓到的是這樣的格式:  2024/03/23 16:40
@@ -46,20 +46,29 @@ const moneylink_news = async() =>{
 }  
 
 const r = await moneylink_news()
-//console.log(r)
+// console.log(r)
 const ten = r.slice(0,10)
-const content = async(v) =>{
-    const response = await fetch(v.link);
+console.log(ten)
+const content = async(news) =>{
+    const response = await fetch(news.link);
     const result = await response.text()
-    const contentRegex = /<div class="Content" id="NewsMainContent">(.*?)<\/div>/s;
+    //console.log(result)
+    const contentRegex = /<div class="Content" id="NewsMainContent">(.*?)<\div id = "oneadIRDFPTag">/gs;
     const contentMatch = result.match(contentRegex);
-    let content2 = contentMatch ? contentMatch[1].trim() : "未找到内容";
+    console.log(contentMatch[1])
+    let content;
+    if (contentMatch && contentMatch[1]) {
+        content = contentMatch[1].trim();
+    } else {
+        content = "未找到内容";
+    }
 
     // 去除内容中的 HTML 标签
-    content2 = content2.replace(/<[^>]*>/g, '');
+    content = content.replace(/<[^>]*>/g, '');
 
-    return content2;
+    return content;
 };
+
 const promises = [];
 for (const news of ten) {
     promises.push(content(news).catch(error => {
@@ -68,4 +77,20 @@ for (const news of ten) {
     }));
     
 }
-
+try {
+    
+    const results = await Promise.all(promises)
+     
+    for (let index in results) {
+        const result = results[index]
+        if (/無效/.test(result)) {
+            
+            console.log(`第${Number(index)+1}筆有問題，返回的錯誤是:${result}`)
+        } else {
+            console.log(result)
+        }
+    }
+} catch(error) {
+   
+    console.error("Error fetching news content:", error); 
+}
