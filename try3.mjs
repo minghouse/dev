@@ -52,10 +52,23 @@ const ten = r.slice(0,10)
 const content = async(news) =>{
     const response = await fetch(news.link);
     const result = await response.text()
-    const result2 = result.split('<p>')
-    for (var i = 0; i < result2.length; i++) {
-        console.log(result[i]);
+    const result2 = result.split('<div class="Content" id="NewsMainContent">')
+    if (result2.length < 2) {
+        // 如果分割后的数组长度小于2，则表示未找到对应的div，返回空字符串或者进行其他错误处理
+        return '';
     }
+    
+    // 取第二部分（索引为1），即目标内容部分
+    const targetPart = result2[1];
+    
+    // 使用split将目标内容部分分割，以获取紧跟在该div后面的部分（例如，可能存在</div>等内容）
+    const contentParts = targetPart.split('<div class="tags">');
+    
+    // 取第一部分，即目标内容
+    const content = contentParts[0];
+    console.log(content)
+    return content.trim(); // 可以选择去除首尾的空白字符
+}
     //console.log(result)
     //const contentRegex = /<div class="Content" id="NewsMainContent">(.*?)<\/div id = "oneadIRDFPTag">/gs;
     //const contentRegex = /<div class="Content" id="NewsMainContent">((?:<div[^>]*>[\s\S]*?<\/div>)*[\s\S]*?)<\/div>/gs;
@@ -72,7 +85,7 @@ const content = async(news) =>{
     // content = content.replace(/<[^>]*>/g, '');
 
     // return content;
-};
+
 
 const promises = [];
 for (const news of ten) {
@@ -90,12 +103,12 @@ try {
         const result = results[index]
         if (/無效/.test(result)) {
             
-            console.log(`第${Number(index)+1}筆有問題，返回的錯誤是:${result}`)
+           // console.log(`第${Number(index)+1}筆有問題，返回的錯誤是:${result}`)
         } else {
-            console.log(result)
+            //console.log(result)
         }
     }
 } catch(error) {
    
-    console.error("Error fetching news content:", error); 
+   // console.error("Error fetching news content:", error); 
 }
