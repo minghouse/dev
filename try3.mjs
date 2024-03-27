@@ -65,10 +65,22 @@ const content = async(news) =>{
     const contentParts = targetPart.split('<div class="tags">');
     
     // 取第一部分，即目标内容
-    const content = contentParts[0];
-    console.log(content)
-    return content.trim(); // 可以选择去除首尾的空白字符
+    const content2 = contentParts[0];
+    //console.log(content)
+    //return content2.trim(); // 可以选择去除首尾的空白字符
+    const pattern = /<p>(.*?)<\/p>/gs;
+    var news_content2 = [];
+    var match;
+    while ((match = pattern.exec(content2)) !== null) {
+        news_content2.push(match[1]);
+    }
+    const content3 = news_content2.join("\n")
+    return content3
 }
+
+
+
+
     //console.log(result)
     //const contentRegex = /<div class="Content" id="NewsMainContent">(.*?)<\/div id = "oneadIRDFPTag">/gs;
     //const contentRegex = /<div class="Content" id="NewsMainContent">((?:<div[^>]*>[\s\S]*?<\/div>)*[\s\S]*?)<\/div>/gs;
@@ -88,8 +100,8 @@ const content = async(news) =>{
 
 
 const promises = [];
-for (const news of ten) {
-    promises.push(content(news).catch(error => {
+for (const news_content2 of ten) {
+    promises.push(content(news_content2).catch(error => {
         console.error("Error in content() promise:", error);
         return error; // 或者其他适当的错误处理方式   
     }));
@@ -103,12 +115,12 @@ try {
         const result = results[index]
         if (/無效/.test(result)) {
             
-           // console.log(`第${Number(index)+1}筆有問題，返回的錯誤是:${result}`)
+           console.log(`第${Number(index)+1}筆有問題，返回的錯誤是:${result}`)
         } else {
-            //console.log(result)
+            console.log(result)
         }
     }
 } catch(error) {
    
-   // console.error("Error fetching news content:", error); 
+    console.error("Error fetching news content:", error); 
 }
