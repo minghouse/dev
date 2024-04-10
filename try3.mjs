@@ -80,25 +80,6 @@ const content = async(news) =>{
 
 
 
-
-    //console.log(result)
-    //const contentRegex = /<div class="Content" id="NewsMainContent">(.*?)<\/div id = "oneadIRDFPTag">/gs;
-    //const contentRegex = /<div class="Content" id="NewsMainContent">((?:<div[^>]*>[\s\S]*?<\/div>)*[\s\S]*?)<\/div>/gs;
-    //const contentMatch = result.match(contentRegex);
-    //console.log(contentMatch[1])
-    //let content;
-    // if (contentMatch && contentMatch[1]) {
-    //     content = contentMatch[1].trim();
-    // } else {
-    //     content = "未找到内容";
-    // }
-
-    // // 去除内容中的 HTML 标签
-    // content = content.replace(/<[^>]*>/g, '');
-
-    // return content;
-
-
 const promises = [];
 for (const news_content2 of ten) {
     promises.push(content(news_content2).catch(error => {
