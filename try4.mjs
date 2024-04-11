@@ -22,8 +22,13 @@ const iwplay = async() =>{
     }
     
     // 將抓取到的新聞打印到控制台上
-    console.log(newsList);
+    //console.log(newsList);
 }
     
 // 調用函數
-iwplay();
+const r = await iwplay();
+const content = async(news) =>{
+    const response = await fetch(r.url);
+    const result = await response.text()
+    
+}
