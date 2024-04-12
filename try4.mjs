@@ -47,4 +47,10 @@ const content = async(r) =>{
 
     return textContent.trim();
 }
-content()
+try {
+    const c = await content(r[0])
+    console.log(c)
+} catch(error) {
+   
+    console.error("Error fetching news content:", error); 
+}
