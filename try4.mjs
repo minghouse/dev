@@ -34,8 +34,8 @@ const iwplay = async() =>{
 // 調用函數
 const r = await iwplay()
 //console.log(r)
-const content = async(r) =>{
-    const response = await fetch(r.url);
+const content = async(b) =>{
+    const response = await fetch(b.url);
     const result = await response.text()
     const regex = /<p[^>]*>(.*?)<\/p>/g;
     let match;
@@ -48,8 +48,16 @@ const content = async(r) =>{
     return textContent.trim();
 }
 try {
-    const c = await content(r[0])
-    console.log(c)
+    // const c = await content(r[0])
+    // console.log(c)
+    // for (const v of content) 這錯在使用content
+    const out = []
+    for (const v of r) {
+        const result = await content(v)
+        v.full_content = result
+        out.push(v)
+    }
+    // console.log(out)
 } catch(error) {
    
     console.error("Error fetching news content:", error); 
