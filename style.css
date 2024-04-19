@@ -2,15 +2,83 @@
     padding : 0;
     margin : 0;
 }
-header, section, footer{
+/* header, section, footer{
     background-color: chocolate;
-    
-}
-h2 { 
+    border: 5px rgb(241, 128, 177)solid;
+    padding: 30px 50px;
+    margin: 30px;
+
+} */
+/* h2 { 
     color: blueviolet;
 
 }
 p{ 
     color: brown;
     font-size: 36px;
+} */
+
+header{
+    background-color: black;
+    height: 80px;
+    width: 100%;
+    position: relative;
+    
+}
+h1{
+    color: aliceblue;
+    position: absolute;
+    left: 100px;
+    top:0;
+    line-height: 80px;
+    background-image: url("images/123.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    text-indent: 200px;
+}
+header ul{
+    position: absolute;
+    right: 5vw;
+    top: 0;
+    line-height: 80px;
+
+}
+header li{
+    display: inline;
+    margin-right: 4vw;
+}
+header a{
+    color: aliceblue;
+    text-decoration: none;
+}
+header a:hover{
+    text-decoration: underline;
+}
+.news{
+    background-color: cadetblue;
+    color:rgb(62, 7, 130) ;
+    height:95vh;
+    background-image: url("images/00efb1e1d443521316966bc7e141fb41-38869.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    align-items:center ;
+    justify-content: center;
+}
+.news h2{
+    font-size: 60px;
+}
+.news p{
+    color: brown;
+    font-size: 18px;
+    margin: 25px 0;
+}
+.news a{
+    color: rgb(148, 39, 66);
+    text-decoration: none;
+    border: 1px solid;
+
 }
