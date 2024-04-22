@@ -186,9 +186,30 @@ input:focus{
     outline: none;
     border-color: blue;
 }
+.menu{
+    display: none;
+}
 /* 響應式設計 */
 @media screen and (max-width:768px){
    header ul{
     display: none;
    } 
+   header h1{
+    left:50%;
+    transform: translateX(-50%);
+   }
+   .news h2{
+    font-size: 40px;
+   }
+   .menu{
+    display: block;
+    background-color: transparent;
+    color: white;
+    font-size: 35px;
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    border: none;
+    cursor: pointer;
+   }
 }
