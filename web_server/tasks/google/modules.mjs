@@ -1,6 +1,8 @@
 const CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
 const PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY;
-const SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
+
+// const SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
+const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
 
 // 將私鑰轉換為 CryptoKey 格式
 async function getCryptoKey(privateKey) {

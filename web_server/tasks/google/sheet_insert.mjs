@@ -1,12 +1,29 @@
 import getAccessToken from './modules.mjs';
-
-const sheet_load = async (req, res) => { 
+/**
+ * @example
+ * const res = await fetch('/google/sheet_insert', {
+ *    method: 'POST',
+ *    headers: {
+ *        'Content-Type': 'application/json',
+ *    },
+ *    body: JSON.stringify({
+ *        range: '工作表8',
+ *        datas: [
+ *            ['0', '0', '0'],
+ *            ['6', '7', '8'],
+ *        ],
+ *    }),
+ * })
+ * const data = await res.json()
+ * console.log(data)
+ */
+const sheet_insert = async (req, res) => { 
     // 配置參數
  
     const SPREADSHEET_ID = '1DYU3NZmGLrj0G2ruQOyLxhOqLgBkSQ_mQ4-KPlYG-yE';
     // const RANGE = 'AI整理-中國時報!A2:F5';
     const RANGE = req.body.range
-    const datas = JSON.parse(req.body.datas)
+    const datas = req.body.datas
 
     // 訪問 Google Sheets API
     async function accessGoogleSheets() {
@@ -14,16 +31,12 @@ const sheet_load = async (req, res) => {
             const accessToken = await getAccessToken();
             // console.log('Access Token:', accessToken);
 
-            // const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}`, {
-            //     method: 'GET',
-            //     headers: { Authorization: `Bearer ${accessToken}` },
-            // });
             //寫入 google sheet, valueInputOption: RAW (原始資料) or USER_ENTERED (使用者輸入)
-            const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}:append?valueInputOption=USER_ENTERED`, {
+            const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}:append?valueInputOption=RAW`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${accessToken}` },
                 body: JSON.stringify({
-                    range: RANGE,
+                    // range: RANGE,
                     majorDimension: 'ROWS',
                     values: datas
                 })
@@ -43,4 +56,4 @@ const sheet_load = async (req, res) => {
     res.json(result)
 }
 
-export default sheet_load
+export default sheet_insert

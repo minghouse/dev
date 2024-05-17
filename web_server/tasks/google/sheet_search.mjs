@@ -1,6 +1,12 @@
 import getAccessToken from './modules.mjs';
 
-const sheet_load = async (req, res) => { 
+/**
+ * @example
+ * const res = await fetch('/google/sheet_search?range=工作表8!A2:C5')
+ * const data = await res.json()
+ * console.log(data)
+ */
+const sheet_search = async (req, res) => { 
     // 配置參數
  
     const SPREADSHEET_ID = '1DYU3NZmGLrj0G2ruQOyLxhOqLgBkSQ_mQ4-KPlYG-yE';
@@ -29,7 +35,9 @@ const sheet_load = async (req, res) => {
 
     const sheetData = await accessGoogleSheets()
     const result = sheetData
+    //允許跨域請求
+    res.setHeader('Access-Control-Allow-Origin', '*')
     res.json(result)
 }
 
-export default sheet_load
+export default sheet_search
