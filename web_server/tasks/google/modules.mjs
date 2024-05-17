@@ -7,7 +7,8 @@ async function getCryptoKey(privateKey) {
     const pemKey = privateKey
         .replace(/-----BEGIN PRIVATE KEY-----/, '')
         .replace(/-----END PRIVATE KEY-----/, '')
-        .replace(/\n/g, '');
+        .replace(/\n/g, '')
+        .replace(/\\n/g, '');
     const binaryKey = Uint8Array.from(atob(pemKey), c => c.charCodeAt(0));
 
     return await crypto.subtle.importKey(
