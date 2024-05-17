@@ -2,9 +2,9 @@
   "name": "your-app-name",
   "version": "1.0.0",
   "description": "Your app description",
-  "main": "app.mjs",
+  "main": "web_server/app.mjs",
   "scripts": {
-    "start": "node app.mjs"
+    "start": "node web_server/app.mjs"
   },
   "dependencies": {
     "express": "^4.17.1"
