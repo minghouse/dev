@@ -6,9 +6,11 @@
   "scripts": {
     "start": "node web_server/app.mjs"
   },
+  "type": "module",
   "dependencies": {
     "express": "^4.17.1",
-    "body-parser": "^1.19.0"
+    "body-parser": "^1.19.0",
+    "dayjs": "^1.10.4"
   },
   "engines": {
     "node": "20.x"

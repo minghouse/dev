@@ -1,6 +1,6 @@
 const CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
 const PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY;
-
+  
 // const SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
 const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
 
@@ -83,4 +83,30 @@ async function getAccessToken() {
     return data.access_token;
 }
 
-export default getAccessToken
+// 訪問 Google Sheets API
+async function accessGoogleSheets(SPREADSHEET_ID, RANGE) {
+    try {
+        const accessToken = await getAccessToken();
+        // console.log('Access Token:', accessToken);
+
+        const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}`, {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        const sheetData = await response.json();
+        // console.log('Sheet Data:', sheetData);
+        return sheetData
+        // document.getElementById('content').innerText = JSON.stringify(sheetData, null, 2);
+    } catch (error) {
+        console.error('Error accessing Google Sheets API:', error);
+        throw error
+    }
+}
+
+const out = {
+    getAccessToken,
+    accessGoogleSheets
+}
+
+export default out

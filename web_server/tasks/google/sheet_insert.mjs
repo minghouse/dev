@@ -1,4 +1,4 @@
-import getAccessToken from './modules.mjs';
+import common from './modules.mjs';
 /**
  * @example
  * const res = await fetch('/google/sheet_insert', {
@@ -28,7 +28,7 @@ const sheet_insert = async (req, res) => {
     // 訪問 Google Sheets API
     async function accessGoogleSheets() {
         try {
-            const accessToken = await getAccessToken();
+            const accessToken = await common.getAccessToken();
             // console.log('Access Token:', accessToken);
 
             //寫入 google sheet, valueInputOption: RAW (原始資料) or USER_ENTERED (使用者輸入)

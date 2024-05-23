@@ -1,6 +1,7 @@
 import express from 'express';
 import google_sheet_search from './tasks/google/sheet_search.mjs';
 import google_sheet_insert from './tasks/google/sheet_insert.mjs';
+import getDatas from './tasks/google/getDatas.mjs';
 
 import bodyParser from 'body-parser';
 
@@ -19,6 +20,9 @@ app.get('/google/sheet_search', (req, res) => {
 });
 app.post('/google/sheet_insert', (req, res) => {
     google_sheet_insert(req, res)
+});
+app.get('/google/getDatas', (req, res) => {
+    getDatas(req, res)
 });
 
 const port = process.env.PORT || 3000;
