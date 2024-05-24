@@ -1,0 +1,4 @@
+{
+    "builds": [{ "src": "web_server/app.mjs", "use": "@now/node" }],
+    "routes": [{ "src": "(.*)", "dest": "web_server/app.mjs" }]
+}
