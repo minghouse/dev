@@ -18,8 +18,11 @@ const getDatas = async () => {
 
     // const sheetData = await common.accessGoogleSheets(SPREADSHEET_ID, RANGE)
 
+    const accessToken = await common.getAccessToken();
+    // console.log('Access Token:', accessToken);
+
     //AI整理-索引
-    const ai_sn_data = await common.accessGoogleSheets(SPREADSHEET_ID, 'AI整理-索引!A1:B20')
+    const ai_sn_data = await common.accessGoogleSheets(SPREADSHEET_ID, 'AI整理-索引!A1:B20', accessToken)
 
     //上面註解的getDatas方法是appscript，這裡改成nodejs
     const ai_sn = {}
@@ -39,7 +42,7 @@ const getDatas = async () => {
     const sheetData_promise = []
     for (const v of sheetData_name) {
         const ai_start = ai_sn[v] - 1000 < 2 ? 2 : ai_sn[v] - 1000
-        sheetData_promise.push(common.accessGoogleSheets(SPREADSHEET_ID, `${v}!A${ai_start}:C${ai_sn[v]}`))
+        sheetData_promise.push(common.accessGoogleSheets(SPREADSHEET_ID, `${v}!A${ai_start}:C${ai_sn[v]}`), accessToken)
     }
     const sheetData = await Promise.all(sheetData_promise)
     const values = sheetData.reduce((acc, cur) => acc.concat(cur.values), [])

@@ -85,10 +85,8 @@ async function getAccessToken() {
 }
 
 // 訪問 Google Sheets API
-async function accessGoogleSheets(SPREADSHEET_ID, RANGE) {
+async function accessGoogleSheets(SPREADSHEET_ID, RANGE, accessToken) {
     try {
-        const accessToken = await getAccessToken();
-        // console.log('Access Token:', accessToken);
 
         const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}`, {
             method: 'GET',
