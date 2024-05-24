@@ -9,7 +9,7 @@ dayjs.extend(dayjs_plugin_timezone)
  * const data = await res.json()
  * console.log(data)
  */
-const getDatas = async () => { 
+const getDatas2 = async (search_date) => { 
     // 配置參數
  
     const SPREADSHEET_ID = '1DYU3NZmGLrj0G2ruQOyLxhOqLgBkSQ_mQ4-KPlYG-yE';
@@ -23,8 +23,8 @@ const getDatas = async () => {
 
     const now = dayjs();
     const date_now = (()=>{
-        if (req.query.search_date) {
-            return req.query.search_date.replace(/-/g,'')
+        if (search_date) {
+            return search_date.replace(/-/g,'')
         }
 
         let r = dayjs(now).tz('Asia/Taipei').format('YYYYMMDD')
@@ -265,8 +265,8 @@ const getDatas = async () => {
     })
 
     if (result.length == 0) {
-        req.query.search_date = dayjs(date_now).add(-1, 'day').format('YYYY-MM-DD')
-        getDatas2(req, res)
+        search_date = dayjs(date_now).add(-1, 'day').format('YYYY-MM-DD')
+        getDatas2(search_date)
         return
     }
 
@@ -285,4 +285,4 @@ const getDatas = async () => {
     return out
 }
 
-export default getDatas
+export default getDatas2
