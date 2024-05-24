@@ -1,10 +1,7 @@
 import common from './modules.js';
-import dayjs from 'https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js';
-import utc from 'https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js';
-import timezone from 'https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js';
 
-dayjs.extend(utc)
-dayjs.extend(timezone)
+dayjs.extend(dayjs_plugin_utc)
+dayjs.extend(dayjs_plugin_timezone)
 
 /**
  * @example
