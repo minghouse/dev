@@ -266,7 +266,7 @@ const getDatas3 = async (search_date) => {
 
     if (result.length == 0) {
         search_date = dayjs(date_now).add(-1, 'day').format('YYYY-MM-DD')
-        getDatas2(search_date)
+        getDatas3(search_date)
         return
     }
 
