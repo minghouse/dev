@@ -20,7 +20,7 @@ const getDatas6 = async (search_date) => {
 
     const now = dayjs();
     const date_start = dayjs(now).tz('Asia/Taipei').add(-24 * 14, 'hours').format('YYYY-MM-DD HH:mm');
-    const date_end = dayjs(now).add(0, 'hours').format('YYYY-MM-DD HH:mm');
+    const date_end = dayjs(now).tz('Asia/Taipei').add(0, 'hours').format('YYYY-MM-DD HH:mm');
 
     const accessToken = await common.getAccessToken();
     // console.log('Access Token:', accessToken);
@@ -49,7 +49,7 @@ const getDatas6 = async (search_date) => {
         })()
         const ai_end = (() => {
             if (v == 'AI每周整理') {
-                return 20
+                return ai_sn[v]
             }
             return 4000
         })()
@@ -62,7 +62,7 @@ const getDatas6 = async (search_date) => {
     values.sort(function (a, b) {
         return a[0] < b[0] ? 1 : -1
     })
-
+    
     const datas = []
     for (const v of values) {
         if (!(v[0] >= date_start && v[0] <= date_end)) {
