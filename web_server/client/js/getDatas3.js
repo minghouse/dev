@@ -179,7 +179,6 @@ const getDatas3 = async (search_date) => {
             }
             return yahoo_turnover.data
         }
-
         const result = turnover_data_all.find(v => v[0] == dayjs(date_now).format('YYYY-MM-DD')) || []
         return JSON.parse(result[1] || '[]')
     })()
@@ -192,11 +191,14 @@ const getDatas3 = async (search_date) => {
         // 计算漲幅百分比（c2）
         const c2 = ((c1 / Number(c)) * 100).toFixed(2)
         a[16] = Number(c2) || 0
+        // return c2 <= 10 && c2 >= -10
         return a
     })
 
     result.sort(function (a, b) {
-        return Number(a[4].replace(/,/g,'')) < Number(b[4].replace(/,/g,'')) ? 1 : -1
+      const c1 = Number(a[8].replace(/,/g,'')) - /\+/.test(a[9])?a[10]:0-a[10]
+      const c2 = Number(b[8].replace(/,/g,'')) - /\+/.test(b[9])?b[10]:0-b[10]
+      return (Number(a[8].replace(/,/g,''))/c1*100).toFixed(2) >= (Number(b[8].replace(/,/g,''))/c2*100).toFixed(2) ? 1 : -1
     })
     const result_20_name = result.map(v=>v[1]) //股票名稱
     
