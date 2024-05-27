@@ -461,6 +461,7 @@
     </script> -->
     <script type="module">
       import getDatas5 from './js/getDatas5.js';
+      import getDatas5_buy from './js/getDatas5_buy.js';
       import getDatas5_buy_history from './js/getDatas5_buy_history.js';
 
       //股票代號/名稱
@@ -1060,10 +1061,8 @@
         buyModal.hide()
 
         const new_promise = () => {
-          return new Promise((resolve, reject) => {
-            google.script.run.withSuccessHandler((data)=>{
-              resolve(data)
-            }).getDatas5_buy(form_data);
+          return new Promise(async (resolve, reject) => {
+            resolve(await getDatas5_buy(form_data))
           })
         }
         const result = await new_promise()
