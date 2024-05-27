@@ -22,8 +22,8 @@ const sheet_insert = async (req, res) => {
  
     const SPREADSHEET_ID = '1DYU3NZmGLrj0G2ruQOyLxhOqLgBkSQ_mQ4-KPlYG-yE';
     // const RANGE = 'AI整理-中國時報!A2:F5';
-    const RANGE = req.body.range
-    const datas = req.body.datas
+    const RANGE = req.body.range || req.query.range 
+    const datas = req.body.datas || JSON.parse(req.query.datas)
 
     // 訪問 Google Sheets API
     async function accessGoogleSheets() {

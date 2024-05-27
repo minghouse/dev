@@ -29,15 +29,15 @@ const getDatas5_buy = async (form_data) => {
         form_data.buy_category, stock[0], stock[1], date_now, buy_number, form_data.buy_price, form_data.buy_note
     ]
 
-    const response = await fetch('https://dev-cpzu.onrender.com/google/sheet_insert', {
-        method: 'POST',
+    const response = await fetch(`https://dev-cpzu.onrender.com/google/sheet_insert?range=${encodeURIComponent("自選股")}&datas=${encodeURIComponent(JSON.stringify([data]))}`, {
+        method: 'GET',
         headers: {
-            'Content-Type': 'application/json',
+            // 'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            range: '自選股',
-            datas: [data],
-        }),
+        // body: JSON.stringify({
+        //     range: '自選股',
+        //     datas: [data],
+        // }),
     });
 
     const out = {

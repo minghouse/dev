@@ -24,6 +24,9 @@ app.get('/google/sheet_search', (req, res) => {
 app.post('/google/sheet_insert', (req, res) => {
     google_sheet_insert(req, res)
 });
+app.get('/google/sheet_insert', (req, res) => {
+    google_sheet_insert(req, res)
+});
 app.get('/google/getDatas', (req, res) => {
     getDatas(req, res)
 });
