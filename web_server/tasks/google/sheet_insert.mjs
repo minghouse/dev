@@ -53,6 +53,7 @@ const sheet_insert = async (req, res) => {
 
     const sheetData = await accessGoogleSheets()
     const result = sheetData
+    res.setHeader('Access-Control-Allow-Origin', '*')
     res.json(result)
 }
 
