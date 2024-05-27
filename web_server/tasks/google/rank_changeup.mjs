@@ -16,7 +16,7 @@ const getDatas = async (req, res) => {
     // 配置參數
  
     const yahoo_turnover = await (async () => {
-        const response = UrlFetchApp.fetch(`https://tw.stock.yahoo.com/rank/change-up`);
+        const response = await fetch(`https://tw.stock.yahoo.com/rank/change-up`);
         const result = (await response.text() || '').match(/"list":(.+),"listMeta":{"rankTime":"(.+)","rankTimeRange/)
         const data = JSON.parse(result[1] || '[]')
         const time = (result[2]||'').split('T')[0]
