@@ -91,7 +91,7 @@ const getDatas5 = async (search_date) => {
             return 4000
         })()
         
-        sheetData_promise.push(common.accessGoogleSheets(SPREADSHEET_ID, `${v}!A${ai_start}:F${ai_end}`, accessToken))
+        sheetData_promise.push(common.accessGoogleSheets(SPREADSHEET_ID, `${v}!A${ai_start}:G${ai_end}`, accessToken))
     }
     const sheetData = await Promise.all(sheetData_promise)
 
