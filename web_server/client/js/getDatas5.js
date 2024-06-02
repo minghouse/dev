@@ -180,8 +180,8 @@ const getDatas5 = async (search_date) => {
                                 from: 'news',
                                 where: `where create_date > '${date_start.split(' ')[0]}' AND content REGEXP '(${result_20_name.join('|')})'`
                             }
-                            const res = await fetch('http://127.0.0.1:3000/azure_mysql/select', {
-                            // const res = await fetch('https://dev-cpzu.onrender.com/azure_mysql/select', {
+                            // const res = await fetch('http://127.0.0.1:3000/azure_mysql/select', {
+                            const res = await fetch('https://dev-cpzu.onrender.com/azure_mysql/select', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
