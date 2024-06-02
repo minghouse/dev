@@ -58,6 +58,7 @@ const select = async (req, res) => {
         where: req.body.where
     }
 
+    res.setHeader('Access-Control-Allow-Origin', '*')
     //檢查參數
     if (!params.select || !params.from) {
         res.status(400).send('select, from is required')
@@ -76,7 +77,6 @@ const select = async (req, res) => {
 
         const result = rows
         //允許跨域請求
-        res.setHeader('Access-Control-Allow-Origin', '*')
         res.json(result)
     } catch (e) {
         console.error(e)
@@ -110,6 +110,7 @@ const insert = async (req, res) => {
         values: req.body.values
     }
 
+    res.setHeader('Access-Control-Allow-Origin', '*')
     //檢查參數
     if (!params.into || !params.values) {
         res.status(400).send('into, values is required')
@@ -128,7 +129,6 @@ const insert = async (req, res) => {
 
         const result = rows
         //允許跨域請求
-        res.setHeader('Access-Control-Allow-Origin', '*')
         res.json(result)
     } catch (e) {
         console.error(e)
