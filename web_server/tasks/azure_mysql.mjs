@@ -1,4 +1,5 @@
 import mysql from 'mysql2/promise';
+import dayjs from 'dayjs';
 
 const ca = `-----BEGIN CERTIFICATE-----
 MIICsjCCAZoCCQDe1QK5Efu90jANBgkqhkiG9w0BAQsFADAbMQswCQYDVQQGEwJB
@@ -28,8 +29,11 @@ const mysqlConfig = {
     ssl: {
         ca: ca,
         rejectUnauthorized: false
-    }
+    },
+    // compress: true  // 启用压缩
 };
+
+const pool = mysql.createPool(mysqlConfig);
 
 /**
  * @example
@@ -71,10 +75,10 @@ const select = async (req, res) => {
 
     try {
         //連線資料庫
-        const connection = await mysql.createConnection(mysqlConfig);
+        const connection = await pool.getConnection();
         const [rows] = await connection.execute(`SELECT ${params.select} FROM ${params.from} ${params.where}`);
-        connection.end();
-
+        // connection.end();
+        connection.release();
         const result = rows
         //允許跨域請求
         res.json(result)
