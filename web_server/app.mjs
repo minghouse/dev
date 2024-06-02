@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import google_sheet_search from './tasks/google/sheet_search.mjs';
 import google_sheet_insert from './tasks/google/sheet_insert.mjs';
 import getDatas from './tasks/google/getDatas.mjs';
@@ -13,6 +14,7 @@ import bodyParser from 'body-parser';
  * http server
  */
 const app = express();
+app.use(cors())
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {

@@ -1006,6 +1006,7 @@
             try {
               resolve(await getDatas5(search_date))
             } catch (error) {
+              console.log(error)
               google.script.run.withSuccessHandler((data)=>{
                 resolve(data)
               }).getDatas5(search_date);
