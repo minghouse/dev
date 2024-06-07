@@ -105,7 +105,7 @@ const getDatas5 = async (search_date) => {
                     sheetData_promise.push(new Promise(async (resolve, reject) => {
                         try {
                             const form_data = {
-                                select: '*',
+                                select: 'source, category, create_date, create_time, url, title, short_content, content',
                                 from: 'news',
                                 where: `where create_date > '${date_start.split(' ')[0]}' AND content REGEXP '(${result_20_name.join('|')})'`
                             }
@@ -209,26 +209,6 @@ const getDatas5 = async (search_date) => {
         } else if (sheetData_name[k] == '每日收盤價') {
             aftertrading_data_all.push(...sheetData[k].values)
         } else if (sheetData_name[k] == 'news') {
-            // CREATE TABLE `news` (
-            //     `id` BIGINT(19) NOT NULL AUTO_INCREMENT,
-            //     `source` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '新聞來源' COLLATE 'utf8mb4_general_ci',
-            //     `category` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '分類' COLLATE 'utf8mb4_general_ci',
-            //     `create_date` DATE NOT NULL COMMENT '建立日期',
-            //     `create_time` TIME NOT NULL COMMENT '建立時間',
-            //     `url` VARCHAR(700) NOT NULL DEFAULT '' COMMENT '網址' COLLATE 'utf8mb4_general_ci',
-            //     `title` TEXT NOT NULL COMMENT '標題' COLLATE 'utf8mb4_general_ci',
-            //     `short_content` TEXT NOT NULL COMMENT '摘要' COLLATE 'utf8mb4_general_ci',
-            //     `content` LONGTEXT NOT NULL COMMENT '內容' COLLATE 'utf8mb4_general_ci',
-            //     PRIMARY KEY (`id`) USING BTREE,
-            //     UNIQUE INDEX `source_url` (`source`, `url`) USING BTREE,
-            //     INDEX `source` (`source`) USING BTREE,
-            //     INDEX `create_date` (`create_date`) USING BTREE
-            // )
-            // COLLATE='utf8mb4_general_ci'
-            // ENGINE=InnoDB
-            // AUTO_INCREMENT=106
-            // ;
-            
             const news = sheetData[k]
             for (const v of news) {
                 if (!values[v.source]) {

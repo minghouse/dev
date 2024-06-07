@@ -9,6 +9,7 @@ import rank_changeup from './tasks/google/rank_changeup.mjs';
 import azure_mysql from './tasks/azure_mysql.mjs';
 
 import bodyParser from 'body-parser';
+import compression from 'compression'; // Import the compression module
 
 /**
  * http server
@@ -16,6 +17,7 @@ import bodyParser from 'body-parser';
 const app = express();
 app.use(cors())
 app.use(bodyParser.json());
+app.use(compression()); // Use compression middleware for gzip compression
 
 app.get('/', (req, res) => {
     res.send('Hello World')
