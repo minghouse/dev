@@ -554,6 +554,9 @@
 
       //計算損益
       const calculate_cost = (a, b, c) => {
+        a=a.replaceAll(',', '')
+        b=b.replaceAll(',', '')
+        c=c.replaceAll(',', '')
         //計算成本
         const a1 = Number(a)*Number(b)
         const a2 = Number((a1 * 0.1425 / 100 > 1 ? a1 * 0.1425 / 100 : 1).toFixed(0))
