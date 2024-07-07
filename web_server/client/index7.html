@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/css/select2.min.css" rel="stylesheet" />
+    <!-- chartjs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.0/dist/chart.min.js" crossorigin="anonymous"></script>
+    <!-- chartjs-plugin-zoom -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js" crossorigin="anonymous"></script>
+
+    <style>
+      .iw-table-draw {
+        font-size: 10px;
+      }
+      .iw-table-draw th, .iw-table-draw td {
+        padding: 3px;
+      }
+
+      table {
+        width: max-content;
+        font-size: 105%;
+      }
+      .table>:not(caption)>*>* {
+        padding: .2rem .2rem;
+      }
+
+      #dialog_news, #dialog_news2 {
+        font-size: 120%;
+      }
+      .my_index {
+        left: 20px !important;
+        top: -10px !important;
+        z-index: 5;
+      }
+      .my_index0 {
+        z-index: 0 !important;
+      }
+
+      .my-badge-sn {
+        font-size:70%;
+      }
+      .my-f-70 {
+        font-size:70%;
+      }
+
+      .fade-in {
+        opacity: 0;
+      }
+
+      .fade-in.active {
+        opacity: 1;
+        transition: opacity 2s ease;
+      }
+
+      /* RWD */
+      .d-1000 {
+        display: none;
+      }
+      .d-1000-cell {
+        display: none;
+      }
+      .d-1000-inline {
+        display: none;
+      }
+      @media (min-width: 850px) {
+        /*td隱藏/顯示*/
+        .d-1000 {
+          display: block;
+        }
+        .d-1000-cell {
+          display: table-cell;
+        }
+        .d-1000-inline {
+          display: inline;
+        }
+        .d-1000-none {
+          display: none;
+        }
+      }
+    </style>
+    <style>
+      /* 样式可根据需要进行调整 */
+      .select2-container {
+        width: 100%;
+      }
+      .select2 {
+        width: 100% !important;
+      }
+      .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 38px;
+      }
+      .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 38px;
+      }
+      .select2-container .select2-selection--single {
+        line-height: 38px;
+        height: 38px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid px-1">
+      <nav class="navbar mt-1 rounded" style="background-color: #e3f2fd;">
+          <div class="container-fluid">
+          <span class="navbar-brand fw-bold">我的關注</span>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav me-auto mt-2 mb-lg-0">
+              <li class="nav-item border-top">
+                <a class="nav-link" href="index.html" data-href="?page=1">每日新聞分析</a>
+              </li>
+              <li class="nav-item border-top">
+                <a class="nav-link" href="index6.html" data-href="?page=6">每周新聞分析</a>
+              </li>
+              <li class="nav-item border-top">
+                <a class="nav-link" href="index2.html" data-href="?page=2">每日成交值排行</a>
+              </li>
+              <li class="nav-item border-top">
+                <a class="nav-link" href="index3.html" data-href="?page=3">每日漲幅排行</a>
+              </li>
+              <li class="nav-item border-top">
+                <a class="nav-link" href="index5.html" data-href="?page=5">自選股</a>
+              </li>
+              <li class="nav-item border-top">
+                <a class="nav-link active" href="index7.html" data-href="?page=7">我的關注</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      <!-- <div class="mt-2 d-flex">
+        <div class=" me-auto">
+        </div>
+        <div class="d-flex">
+          
+          <div class="input-group">
+            <div class="input-group">
+              <span class="input-group-text">類別:</span>
+              <select class="form-select" id="search_text">
+                <option value="">ALL</option>
+              </select>
+            </div>
+            
+        </div>
+        <div class="input-group ms-2" style="height: fit-content;">
+          <input type="date" class="form-control rounded-start px-1" placeholder="" id="search_date" >
+          <button class="btn btn-outline-secondary" type="button" id="search">查詢</button>
+        </div>
+        </div>
+      </div> -->
+      <div class="mt-2 table-responsive border rounded">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col" width="10">#</th>
+              <th scope="col" style="min-width:80px">商品</th>
+              <!-- <th scope="col" width="100" class="text-end d-1000-cell">今餘股數</th>
+              <th scope="col" width="100" class="text-end d-1000-cell">成交均價</th> -->
+              <!-- <th scope="col" width="100" class="text-end ">預估損益</th>
+              <th scope="col" width="120" class="text-end d-1000-cell">預估獲利率</th> -->
+              <!-- <th scope="col" class="text-center " style="min-width:80px">收盤價 -->
+              <th scope="col" width="120">新聞
+                <!-- <a href="javascript:void(0);" class="text-decoration-none" id="show_text_news"><i class="fa-solid fa-circle-question"></i></a> -->
+              </th>
+            </tr>
+          </thead>
+          <tbody id="table_tbody">
+            <tr id="table_tr">
+              <th scope="row" class="align-middle" rowspan="2">1</th>
+              <td class="align-middle">讀取中...</td>
+              <!-- <td class="align-middle text-end d-1000-cell"></td>
+              <td class="align-middle text-end d-1000-cell"></td>
+              <td class="align-middle text-end fade-in active"></td>
+              <td class="align-middle text-end fade-in active d-1000-cell"></td>
+              <td class="align-middle text-center">
+                <div class="d-inline position-relative">
+                  <span class="fade-in active"></span>
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="continuous_up" style="font-size: 65%;">
+                    0
+                  </span>
+                  <span></span>
+                </div>
+              </td> -->
+              <td class="align-middle">
+                <div class="row g-1">
+                  <!-- <div class="col">
+                    <button type="button" class="btn btn-primary btn-sm position-relative" id="b_news">
+                      新聞
+                      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        0
+                      </span>
+                    </button>
+                  </div>
+                  <div class="col">
+                    <button type="button" class="btn btn-primary btn-sm position-relative" id="b_news_ai">
+                      分析
+                      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        0
+                      </span>
+                    </button>
+                  </div> -->
+                  <div class="col">
+                    <button type="button" class="btn btn-primary btn-sm position-relative" id="b_news_favourite">
+                      關注
+                      <!-- <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        0
+                      </span> -->
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr id="table_tr">
+              <td colspan="7">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+    
+    <!--新聞-->
+    <div class="modal" tabindex="-1" id="dialog_news">
+      <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modal title</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="card w-100 mb-2">
+              <div class="card-body">
+                <h5 class="card-title fw-bold">Card title</h5>
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                <h6 class="card-subtitle mb-2 text-muted d-flex">
+                  <div id="news_time">
+
+                  </div>
+                  <div class="ms-auto" id="news_link">
+                    <a href="#" class="card-link" target="_blank">Card link</a>
+                  </div>
+                </h6>
+              </div>
+            </div>
+          </div>
+          <!-- <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+          </div> -->
+        </div>
+      </div>
+    </div>
+
+    <!--讀取中-->
+    <div class="modal" tabindex="-1" id="dialog_Loading" data-bs-backdrop="static">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="d-flex align-items-center">
+              <strong>Loading...</strong>
+              <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--系統訊息-->
+    <div class="modal" tabindex="-1" id="dialog_alert" data-bs-backdrop="static">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">系統訊息</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <script src="	https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/select2.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- <script type="module">
+      import sheet_search from 'https://minghouse.github.io/dev/web_server/client/sheet_search.js';
+      try {
+        // const res = await fetch('https://dev-cpzu.onrender.com/google/sheet_search?range=AI整理-索引!B1:B1')
+        // const data = await res.json()
+        const data = await sheet_search('AI整理-索引!B1:B1')
+        window.scriptURL = `https://script.google.com/macros/s/${data.values[0][0]}/exec`
+        // console.log(scriptURL)
+      } catch (error) {
+        console.error(error)
+      }
+    </script> -->
+    <script type="module">
+
+      /////////////////////////////////
+
+      //Menu控制
+      const dom_dialog_Loading = new bootstrap.Modal('#dialog_Loading', {
+        keyboard: false
+      })
+      // function loadNewPage(result, userObject) {
+      //   var newURL = result + userObject;
+      //   window.open(newURL,"_top"); 
+      // }
+      // document.querySelectorAll('nav li a').forEach(v=> {
+      //   v.addEventListener('click', function() {
+      //     const newURL = v.getAttribute('data-href');
+      //     dom_dialog_Loading.show()
+      //     if (window.scriptURL) {
+      //       loadNewPage(window.scriptURL, newURL)
+      //       return 
+      //     }
+      //     google.script.run.withSuccessHandler(loadNewPage).withUserObject(newURL).getScriptURL();
+      //   })
+      // })
+
+      //初始化
+      const table_tr = document.querySelector('#table_tr').cloneNode(true)
+      const table_tr2 = document.querySelectorAll('#table_tr')[1].cloneNode(true)
+
+      //系統訊息彈窗
+      const dom_dialog_alert = new bootstrap.Modal('#dialog_alert', {
+        keyboard: false
+      })
+
+    // CREATE TABLE `news_favourite` (
+    //     `id` BIGINT(19) NOT NULL AUTO_INCREMENT,
+    //     `create_date` DATE NOT NULL COMMENT '建立日期',
+    //     `stock` VARCHAR(10) NOT NULL DEFAULT '' COMMENT '股票代號' COLLATE 'utf8mb4_general_ci',
+    //     `stock_name` VARCHAR(20) NOT NULL DEFAULT '' COMMENT '股票名稱' COLLATE 'utf8mb4_general_ci',
+    //     `ai_news` JSON NOT NULL COMMENT 'ai分析內容',
+    //     `news_url` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '新聞網址' COLLATE 'utf8mb4_general_ci',
+    //     `news_source` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '新聞來源' COLLATE 'utf8mb4_general_ci',
+    //     `news_date` DATETIME NOT NULL COMMENT '新聞時間',
+    //     PRIMARY KEY (`id`) USING BTREE,
+    //     INDEX `stock` (`stock`) USING BTREE,
+    //     INDEX `news_date` (`news_date`) USING BTREE
+    // )
+    // COMMENT='我的最愛'
+    // COLLATE='utf8mb4_general_ci'
+    // ENGINE=InnoDB
+    // ;
+
+    // CREATE TABLE `news_favourite_note` (
+    //     `stock` VARCHAR(10) NOT NULL DEFAULT '' COMMENT '股票代號' COLLATE 'utf8mb4_general_ci',
+    //     `create_date` DATE NOT NULL COMMENT '建立日期',
+    //     `stock_name` VARCHAR(20) NOT NULL DEFAULT '' COMMENT '股票名稱' COLLATE 'utf8mb4_general_ci',
+    //     `note` MEDIUMTEXT NOT NULL COMMENT '備註' COLLATE 'utf8mb4_general_ci',
+    //     PRIMARY KEY (`stock`) USING BTREE,
+    //     INDEX `stock` (`stock`) USING BTREE
+    // )
+    // COMMENT='我的最愛-備註'
+    // COLLATE='utf8mb4_general_ci'
+    // ENGINE=InnoDB
+    // ;
+    
+      //讀取我的最愛資料
+      const form_data = {
+          select: '*',
+          from: `
+            (
+            SELECT a.stock, a.stock_name, ai_news, news_url, news_source, news_date, a.create_date, note
+            FROM (SELECT * FROM news_favourite ORDER BY create_date) as a left join news_favourite_note as b on a.stock = b.stock
+            ORDER BY create_date DESC
+            ) AS c
+          `,
+          where: `GROUP BY stock`
+      }
+      const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/select', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(form_data)
+      })
+      favourite_data = await res.json()
+    </script>
+  </body>
+</html>

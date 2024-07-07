@@ -76,7 +76,8 @@ const select = async (req, res) => {
     try {
         //連線資料庫
         const connection = await pool.getConnection();
-        const [rows] = await connection.execute(`SELECT ${params.select} FROM ${params.from} ${params.where}`);
+        const [rows] = await connection.execute(`SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
+            SELECT ${params.select} FROM ${params.from} ${params.where}`);
         // connection.end();
         connection.release();
         const result = rows

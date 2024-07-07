@@ -142,7 +142,8 @@ const getDatas3 = async (search_date) => {
         if (dayjs(date_now).day() !== 0 && dayjs(date_now).day() !== 6 && date_now == now.format('YYYYMMDD')) {
             //取得當日的成交金額排序前20
             const yahoo_turnover = await (async () => {
-                const response = await fetch(`https://dev-cpzu.onrender.com/google/rank_changeup`);
+                // const response = await fetch(`https://dev-cpzu.onrender.com/google/rank_changeup`);
+                const response = await fetch(`https://node-dev.azurewebsites.net/google/rank_changeup`);
                 const result = await response.json() || {}
                 return result
             })()
