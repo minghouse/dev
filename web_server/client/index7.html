@@ -154,25 +154,28 @@
         </div>
         </div>
       </div> -->
-      <div class="mt-2 table-responsive border rounded">
+      <div class="mt-2 table-responsive  rounded">
         <table class="table">
           <thead>
             <tr>
-              <th scope="col" width="10">#</th>
-              <th scope="col" style="min-width:80px">商品</th>
+              <!-- <th scope="col" width="10">#</th> -->
+              <th scope="col" style="min-width:80px">
+                <!-- 商品 -->
+              </th>
               <!-- <th scope="col" width="100" class="text-end d-1000-cell">今餘股數</th>
               <th scope="col" width="100" class="text-end d-1000-cell">成交均價</th> -->
               <!-- <th scope="col" width="100" class="text-end ">預估損益</th>
               <th scope="col" width="120" class="text-end d-1000-cell">預估獲利率</th> -->
               <!-- <th scope="col" class="text-center " style="min-width:80px">收盤價 -->
-              <th scope="col" width="120">新聞
+              <th scope="col" width="120">
+                <!-- 新聞 -->
                 <!-- <a href="javascript:void(0);" class="text-decoration-none" id="show_text_news"><i class="fa-solid fa-circle-question"></i></a> -->
               </th>
             </tr>
           </thead>
           <tbody id="table_tbody">
-            <tr id="table_tr">
-              <th scope="row" class="align-middle" rowspan="2">1</th>
+            <tr id="table_tr" style="background: aliceblue;">
+              <!-- <th scope="row" class="align-middle" rowspan="2">1</th> -->
               <td class="align-middle">讀取中...</td>
               <!-- <td class="align-middle text-end d-1000-cell"></td>
               <td class="align-middle text-end d-1000-cell"></td>
@@ -205,19 +208,45 @@
                       </span>
                     </button>
                   </div> -->
-                  <div class="col">
+                  <div class="col text-end pe-2">
                     <button type="button" class="btn btn-primary btn-sm position-relative" id="b_news_favourite">
-                      關注
-                      <!-- <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                      More
+                      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                         0
-                      </span> -->
+                      </span>
                     </button>
                   </div>
                 </div>
               </td>
             </tr>
-            <tr id="table_tr">
-              <td colspan="7">
+            <tr id="table_tr" class="d-none">
+              <td colspan="2">
+                <div class="row g-1">
+                  <div class="col-12">
+                    <div class="card w-100 border-0">
+                      <div class="card-body p-0">
+                        <!-- <h5 class="card-title fw-bold">Card title</h5> -->
+                        <p class="card-text mb-1">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        <h6 class="card-subtitle mb-2 text-muted d-flex">
+                          <div id="news_time">
+
+                          </div>
+                          <div class="ms-auto" id="news_link">
+                            <a href="#" class="card-link" target="_blank">Card link</a>
+                          </div>
+                        </h6>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <div class="card w-100 mb-2">
+                      <div class="card-body">
+                        <h5 class="card-title fw-bold">筆記</h5>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -226,18 +255,18 @@
 
     </div>
     
-    <!--新聞-->
-    <div class="modal" tabindex="-1" id="dialog_news">
+    <!--我的最愛-->
+    <div class="modal" tabindex="-1" id="dialog_favourite" data-bs-backdrop="static">
       <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Modal title</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
-            <div class="card w-100 mb-2">
+          <div class="modal-body" id="favourite_news">
+            <div class="card w-100 mb-2" id="favourite_news_tr">
               <div class="card-body">
-                <h5 class="card-title fw-bold">Card title</h5>
+                <!-- <h5 class="card-title fw-bold">Card title</h5> -->
                 <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
                 <h6 class="card-subtitle mb-2 text-muted d-flex">
                   <div id="news_time">
@@ -335,46 +364,21 @@
       //初始化
       const table_tr = document.querySelector('#table_tr').cloneNode(true)
       const table_tr2 = document.querySelectorAll('#table_tr')[1].cloneNode(true)
+      const favourite_news_tr = document.querySelector('#favourite_news_tr').cloneNode(true)
 
       //系統訊息彈窗
       const dom_dialog_alert = new bootstrap.Modal('#dialog_alert', {
         keyboard: false
       })
 
-    // CREATE TABLE `news_favourite` (
-    //     `id` BIGINT(19) NOT NULL AUTO_INCREMENT,
-    //     `create_date` DATE NOT NULL COMMENT '建立日期',
-    //     `stock` VARCHAR(10) NOT NULL DEFAULT '' COMMENT '股票代號' COLLATE 'utf8mb4_general_ci',
-    //     `stock_name` VARCHAR(20) NOT NULL DEFAULT '' COMMENT '股票名稱' COLLATE 'utf8mb4_general_ci',
-    //     `ai_news` JSON NOT NULL COMMENT 'ai分析內容',
-    //     `news_url` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '新聞網址' COLLATE 'utf8mb4_general_ci',
-    //     `news_source` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '新聞來源' COLLATE 'utf8mb4_general_ci',
-    //     `news_date` DATETIME NOT NULL COMMENT '新聞時間',
-    //     PRIMARY KEY (`id`) USING BTREE,
-    //     INDEX `stock` (`stock`) USING BTREE,
-    //     INDEX `news_date` (`news_date`) USING BTREE
-    // )
-    // COMMENT='我的最愛'
-    // COLLATE='utf8mb4_general_ci'
-    // ENGINE=InnoDB
-    // ;
+      //我的關注彈窗
+      const dom_dialog_favourite = new bootstrap.Modal('#dialog_favourite', {
+        keyboard: false
+      })
 
-    // CREATE TABLE `news_favourite_note` (
-    //     `stock` VARCHAR(10) NOT NULL DEFAULT '' COMMENT '股票代號' COLLATE 'utf8mb4_general_ci',
-    //     `create_date` DATE NOT NULL COMMENT '建立日期',
-    //     `stock_name` VARCHAR(20) NOT NULL DEFAULT '' COMMENT '股票名稱' COLLATE 'utf8mb4_general_ci',
-    //     `note` MEDIUMTEXT NOT NULL COMMENT '備註' COLLATE 'utf8mb4_general_ci',
-    //     PRIMARY KEY (`stock`) USING BTREE,
-    //     INDEX `stock` (`stock`) USING BTREE
-    // )
-    // COMMENT='我的最愛-備註'
-    // COLLATE='utf8mb4_general_ci'
-    // ENGINE=InnoDB
-    // ;
-    
       //讀取我的最愛資料
       const form_data = {
-          select: '*',
+          select: 'stock, stock_name, ai_news, news_url, news_source, news_date, create_date, count(*) as count, note',
           from: `
             (
             SELECT a.stock, a.stock_name, ai_news, news_url, news_source, news_date, a.create_date, note
@@ -391,7 +395,78 @@
           },
           body: JSON.stringify(form_data)
       })
-      favourite_data = await res.json()
+      const favourite_data = await res.json()
+
+      //顯示我的最愛
+      const table_tbody = document.querySelector('#table_tbody')
+      table_tbody.innerHTML = ''
+      let i = 1
+      for (const v of favourite_data) {
+          const dom = table_tr.cloneNode(true)
+          // dom.querySelector('th').textContent = i
+          dom.querySelector('td').textContent = `${v.stock_name}(${v.stock})`
+          //渲染count
+          dom.querySelector('#b_news_favourite .badge').textContent = v.count
+          if (v.count == 1) {
+            dom.querySelector('#b_news_favourite .badge').classList.add('d-none')
+            dom.querySelector('#b_news_favourite').classList.add('d-none')
+          }
+          table_tbody.append(dom)
+          const dom2 = table_tr2.cloneNode(true)
+          dom2.classList.remove('d-none')
+          //顯示v.ai_news v.news_url v.news_source v.news_date v.note
+          dom2.querySelector('#news_time').textContent = dayjs(v.news_date).format('YYYY-MM-DD HH:mm:ss')
+          dom2.querySelector('#news_link a').textContent = v.news_source
+          dom2.querySelector('#news_link a').href = v.news_url
+          dom2.querySelectorAll('.card-text')[0].innerHTML = `<ol class="ps-3 mb-1">${v.ai_news.map(v2=> `<li>${v2}</li>`).join('')}</ol>`
+          dom2.querySelectorAll('.card-text')[1].innerHTML = v.note.replace(/\n/g, '<br>')
+          table_tbody.append(dom2)
+
+          //綁定b_news_favourite事件
+          dom.querySelector('#b_news_favourite').addEventListener('click', async () => {
+            //show modal
+            dom_dialog_Loading.show()
+
+            //讀取指定stock的關注
+            const form_data2 = {
+              select: '*',
+              from: `news_favourite`,
+              where: `where stock = '${v.stock}' order by create_date desc`
+            }
+            const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/select', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(form_data2)
+            })
+            const favourite_data2 = await res.json()
+            
+            //hide modal
+            dom_dialog_Loading.hide()
+
+            // console.log(favourite_data2)
+            //顯示modal
+            const favourite_news = document.querySelector('#favourite_news')
+            favourite_news.innerHTML = ''
+            for (const v2 of favourite_data2) {
+              const dom = favourite_news_tr.cloneNode(true)
+              //顯示v.ai_news v.news_url v.news_source v.news_date v.note
+              dom.querySelector('#news_time').textContent = dayjs(v2.news_date).format('YYYY-MM-DD HH:mm:ss')
+              dom.querySelector('#news_link a').textContent = v2.news_source
+              dom.querySelector('#news_link a').href = v2.news_url
+              dom.querySelector('.card-text').innerHTML = `<ol class="ps-3 mb-1">${v2.ai_news.map(v3=> `<li>${v3}</li>`).join('')}</ol>`
+              favourite_news.append(dom)
+            }
+            const dom_title = document.querySelector('#dialog_favourite .modal-title')
+            dom_title.textContent = `${v.stock_name}(${v.stock})`
+
+            dom_dialog_favourite.show()
+          })
+
+          i++
+      }
+
     </script>
   </body>
 </html>
