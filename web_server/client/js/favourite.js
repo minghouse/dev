@@ -19,7 +19,7 @@ let favourite_dom
 
 //favourite_submit click event
 document.querySelector('#favourite_submit').addEventListener('click', async () => {
-    const create_date = dayjs().format('YYYY-MM-DD')
+    const create_date = dayjs().format('YYYY-MM-DD HH:mm:ss')
     const note = document.querySelector('#favourite_note').value
     // console.log(select_favourite)
     

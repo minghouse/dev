@@ -240,8 +240,15 @@
                   </div>
                   <div class="col-12">
                     <div class="card w-100 mb-2">
-                      <div class="card-body">
-                        <h5 class="card-title fw-bold">筆記</h5>
+                      <div class="card-body p-2">
+                        <h5 class="card-title fw-bold d-flex">
+                          <div>筆記</div>
+                          <div class="ms-auto">
+                            <button type="button" class="btn btn-primary btn-sm position-relative" id="b_news_note">
+                              <i class="fas fa-edit"></i>
+                            </button>
+                          </div>
+                        </h5>
                         <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
                       </div>
                     </div>
@@ -318,6 +325,31 @@
       </div>
     </div>
 
+    <!-- 加入我的最愛 -->
+    <div class="modal fade" id="favouriteModal" data-bs-backdrop="static">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">編輯關注</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form class="needs-validation" id="favourite_form" novalidate>
+              <div class="row mb-2">
+                <label class="col-12 col-form-label">備註</label>
+                <div class="col-12">
+                  <textarea class="form-control" id="favourite_note" rows="10"></textarea>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="favourite_submit">儲存</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script src="	https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
@@ -376,6 +408,11 @@
         keyboard: false
       })
 
+      //加入我的最愛彈窗
+      const favouriteModal = new bootstrap.Modal('#favouriteModal', {
+        keyboard: false
+      })
+
       //讀取我的最愛資料
       const form_data = {
           select: 'stock, stock_name, ai_news, news_url, news_source, news_date, create_date, count(*) as count, note',
@@ -386,7 +423,7 @@
             ORDER BY create_date DESC
             ) AS c
           `,
-          where: `GROUP BY stock`
+          where: `GROUP BY stock ORDER BY create_date DESC`
       }
       const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/select', {
           method: 'POST',
@@ -464,9 +501,43 @@
             dom_dialog_favourite.show()
           })
 
+          //綁定b_news_note事件
+          dom2.querySelector('#b_news_note').addEventListener('click', async () => {
+            stock = v.stock
+            // console.log(favourite_data2)
+            //顯示modal
+            const favourite_note = document.querySelector('#favourite_note')
+            favourite_note.innerHTML = v.note
+
+            favouriteModal.show()
+          })
           i++
       }
 
+      //綁定favourite_submit
+      let stock = ''
+      document.querySelector('#favourite_submit').addEventListener('click', async () => {
+        
+        //更新note
+        const form_data3 = {
+          into: 'news_favourite_note',
+          values: `('${stock}', '${dayjs().format('YYYY-MM-DD HH:mm:ss')}', '', '${document.querySelector('#favourite_note').value}') ON DUPLICATE KEY UPDATE note = '${document.querySelector('#favourite_note').value}'`
+        }
+        const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/insert', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(form_data3)
+        })
+        const data = await res.json()
+
+        favouriteModal.hide()
+
+        //更新成功
+        dom_dialog_alert.show()
+        document.querySelector('#dialog_alert .modal-body').textContent = '更新成功'
+      })
     </script>
   </body>
 </html>
