@@ -20,12 +20,13 @@ let favourite_dom
 //favourite_submit click event
 document.querySelector('#favourite_submit').addEventListener('click', async () => {
     const create_date = dayjs().format('YYYY-MM-DD HH:mm:ss')
+    const stock = document.querySelector('#favourite_stock').value
     const note = document.querySelector('#favourite_note').value
     // console.log(select_favourite)
     
     const form_data = {
         into: 'news_favourite_note (stock, create_date, stock_name, note)',
-        values: `('${select_favourite.stock}', '${create_date}', '${select_favourite.stock_name}', '${note}') ON DUPLICATE KEY UPDATE note = '${note}'`
+        values: `('${stock}', '${create_date}', '${select_favourite.stock_name}', '${note}') ON DUPLICATE KEY UPDATE note = '${note}'`
     }
     const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/insert', {
         method: 'POST',
@@ -39,7 +40,7 @@ document.querySelector('#favourite_submit').addEventListener('click', async () =
 
     const form_data2 = {
         into: 'news_favourite (create_date, stock, stock_name, ai_news, news_url, news_source, news_date)',
-        values: `('${create_date}', '${select_favourite.stock}', '${select_favourite.stock_name}', '${select_favourite.ai_news}', '${select_favourite.news_url}', '${select_favourite.news_source}', '${select_favourite.news_date}')`
+        values: `('${create_date}', '${stock}', '${select_favourite.stock_name}', '${select_favourite.ai_news}', '${select_favourite.news_url}', '${select_favourite.news_source}', '${select_favourite.news_date}')`
     }
     const res2 = await fetch('https://node-dev.azurewebsites.net/azure_mysql/insert', {
         method: 'POST',
@@ -101,7 +102,24 @@ const insert = async function (dom) {
     //       </div>
 
     const stock_name = parent_dom.querySelector('.card-title').textContent.replace('：', '').replace(/（.+/, '')
-    const stock = stock_obj[stock_name]
+    const stock = (() => {
+        //找到最接近的股票代號
+        let stock = ''
+        //先找到第一個字符合的陣列
+        const stock_list_filter = stock_list.filter(v=> new RegExp(`^${stock_name[0]}`).test(v[1]))
+        for (let i = stock_name.length; i > 0; i--) {
+            for (const v of stock_list_filter) {
+                if (new RegExp(`^${stock_name.substring(0, i)}`).test(v[1])) {
+                    stock = v[0]
+                    break
+                }
+            }
+            if (stock) {
+                break
+            }
+        }
+        return stock
+    })()
     const news_url = parent_dom.querySelectorAll('#news_link a')[1].href
     const news_source = parent_dom.querySelectorAll('#news_link a')[1].textContent
     const news_date = parent_dom.querySelector('#news_time').textContent
@@ -111,11 +129,13 @@ const insert = async function (dom) {
         ai_news.push(v.textContent)
     }
 
-    if (!stock) {
-        document.querySelector('#dialog_alert .modal-body').textContent = '股票代號錯誤'
-        dialog_alert.show()
-        return
-    }
+    // if (!stock) {
+    //     document.querySelector('#dialog_alert .modal-body').textContent = '股票代號錯誤'
+    //     dialog_alert.show()
+    //     return
+    // }
+    
+    $('#favourite_stock').val(stock).trigger('change');
 
     //檢查是否已加入我的最愛
     const favourite_data = get_favourite_data().find(v2=> v2.news_url == news_url)
@@ -126,7 +146,7 @@ const insert = async function (dom) {
     document.querySelector('#favourite_note').value += `${create_date}: `
 
     select_favourite = {
-        stock,
+        // stock,
         stock_name,
         news_url,
         news_source,
@@ -147,9 +167,17 @@ const get_favourite_data = () => {
     return favourite_data
 }
 
+/**
+ * get stock_list
+ */
+const get_stock_list = () => {
+    return stock_list
+}
+
 // export default favourite
 window.favourite = {
     init,
     insert,
     get_favourite_data,
+    get_stock_list
 }
