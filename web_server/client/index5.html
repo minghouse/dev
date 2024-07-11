@@ -130,6 +130,9 @@
               <li class="nav-item border-top">
                 <a class="nav-link" href="index7.html" data-href="?page=7">我的關注</a>
               </li>
+              <li class="nav-item border-top">
+                <a class="nav-link" href="index8.html" data-href="?page=7">區間漲幅排行</a>
+              </li>
             </ul>
           </div>
         </div>
@@ -880,7 +883,7 @@
             }
             
             //新聞按鈕
-            td[6].querySelector('#b_news span').textContent = `${v.news.filter(v2 => v2[1] >= data.now).length}`
+            td[6].querySelector('#b_news span').textContent = `${v.news.filter(v2 => v2[1] >= data.now).length}/${v.news.length}`
             td[6].querySelector('#b_news').addEventListener('click', function() {
               dom_news.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
               dom_news.querySelector('.modal-body').innerHTML = ''
@@ -907,7 +910,7 @@
                 return true
               }
               return false
-            }).length}`
+            }).length}/${v.news_ai.length}`
             
             td[6].querySelector('#b_news_ai').addEventListener('click', function() {
               dom_news2.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
