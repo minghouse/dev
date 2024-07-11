@@ -158,11 +158,12 @@ const getDatas8 = async (search_date, search_date2) => {
 
     //fetch https://node-dev.azurewebsites.net/afterTrading search_date & search_date2
     const result = await (async ()=>{
-        // const response = await fetch(`https://node-dev.azurewebsites.net/afterTrading?search_date=${search_date}`);
-        const response = await fetch(`http://127.0.0.1:3000/afterTrading?date=${search_date}`);
+        const response = await fetch(`https://node-dev.azurewebsites.net/afterTrading?search_date=${search_date}`);
+        // const response = await fetch(`http://127.0.0.1:3000/afterTrading?date=${search_date}`);
         const left_data = await response.json() || []
 
-        const response2 = await fetch(`http://127.0.0.1:3000/afterTrading?date=${search_date2}`);
+        const response2 = await fetch(`https://node-dev.azurewebsites.net/afterTrading?search_date=${search_date2}`);
+        // const response2 = await fetch(`http://127.0.0.1:3000/afterTrading?date=${search_date2}`);
         const right_data = await response2.json() || []
 
         //for rigght_data 然後找到left_data相同股票代號的資料，計算出漲跌幅，並且將資料放入right_data
