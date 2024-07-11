@@ -158,11 +158,11 @@ const getDatas8 = async (search_date, search_date2) => {
 
     //fetch https://node-dev.azurewebsites.net/afterTrading search_date & search_date2
     const result = await (async ()=>{
-        const response = await fetch(`https://node-dev.azurewebsites.net/afterTrading?search_date=${search_date}`);
+        const response = await fetch(`https://node-dev.azurewebsites.net/afterTrading?date=${search_date}`);
         // const response = await fetch(`http://127.0.0.1:3000/afterTrading?date=${search_date}`);
         const left_data = await response.json() || []
 
-        const response2 = await fetch(`https://node-dev.azurewebsites.net/afterTrading?search_date=${search_date2}`);
+        const response2 = await fetch(`https://node-dev.azurewebsites.net/afterTrading?date=${search_date2}`);
         // const response2 = await fetch(`http://127.0.0.1:3000/afterTrading?date=${search_date2}`);
         const right_data = await response2.json() || []
 
@@ -207,11 +207,11 @@ const getDatas8 = async (search_date, search_date2) => {
         return a[1] < b[1] ? 1 : -1
     })
 
-    if (result.length == 0) {
-        search_date = dayjs(search_date).add(-1, 'day').format('YYYY-MM-DD')
-        getDatas8(search_date)
-        return
-    }
+    // if (result.length == 0) {
+    //     search_date = dayjs(search_date).add(-1, 'day').format('YYYY-MM-DD')
+    //     getDatas8(search_date)
+    //     return
+    // }
 
     const out = {
         error_msg: error_msg,
