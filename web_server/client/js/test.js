@@ -80,8 +80,8 @@ const get_after_trading = async (date_now) => {
 }
 
 //指定兩個日期的收盤價
-const date_now = '2024-07-10'
-const date_yesterday = '2024-01-02'
+const date_now = '2024-07-11'
+const date_yesterday = '2024-06-11'
 
 const right_data = await get_after_trading(date_now);
 const left_data = await get_after_trading(date_yesterday);

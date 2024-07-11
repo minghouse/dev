@@ -7,6 +7,7 @@ import getDatas2 from './tasks/google/getDatas2.mjs';
 import rank_turnover from './tasks/google/rank_turnover.mjs';
 import rank_changeup from './tasks/google/rank_changeup.mjs';
 import azure_mysql from './tasks/azure_mysql.mjs';
+import afterTrading from './tasks/afterTrading.mjs';
 
 import bodyParser from 'body-parser';
 import compression from 'compression'; // Import the compression module
@@ -49,6 +50,9 @@ app.post('/azure_mysql/select', (req, res) => {
 });
 app.post('/azure_mysql/insert', (req, res) => {
     azure_mysql.insert(req, res)
+});
+app.get('/afterTrading', (req, res) => {
+    afterTrading(req, res)
 });
 
 const port = process.env.PORT || 3000;
