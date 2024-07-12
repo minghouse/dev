@@ -338,7 +338,9 @@
             // dom.querySelector('.card-title').textContent = v[1]
             const td = dom.querySelectorAll('td')
             // td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}`
-            td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}`
+            td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}
+            <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+            `
             //
             td[1].textContent = `${v.stock[3]}`
             td[2].textContent = `${v.stock[2]}`
