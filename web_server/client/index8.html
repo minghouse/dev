@@ -308,6 +308,8 @@
         const search_date = document.querySelector('#search_date').value
         const search_date2 = document.querySelector('#search_date2').value
         const show_data = (data) => {
+          document.querySelector('#search_date').value = data.search_date
+          document.querySelector('#search_date2').value = data.search_date2
 
           if (data.error_msg) {
             document.querySelector('#dialog_alert .modal-body').textContent = data.error_msg
@@ -343,7 +345,10 @@
             `
             //
             td[1].textContent = `${v.stock[3]}`
-            td[2].textContent = `${v.stock[2]}`
+            td[2].innerHTML = `${v.stock[2]}<br>
+              <span class="${v.stock[5] > 0 ? 'text-danger' : v.stock[5] < 0 ? 'text-success' : ''}">
+                ${v.stock[5] >0 ? '<i class="fa-solid fa-arrow-up"></i>' : v.stock[5] < 0 ? '<i class="fa-solid fa-arrow-down"></i>' : ''}
+                ${Math.abs(v.stock[5])||''}`
             td[3].textContent = `${v.stock[4]}%`
 
             
@@ -474,8 +479,8 @@
       // get_datas()
 
       //預設前一天
-      document.querySelector('#search_date2').value = dayjs().subtract(1, 'day').format('YYYY-MM-DD')
-      document.querySelector('#search_date').value = dayjs().subtract(2, 'day').format('YYYY-MM-DD')
+      document.querySelector('#search_date2').value = dayjs().format('YYYY-MM-DD')
+      document.querySelector('#search_date').value = dayjs().subtract(1, 'day').format('YYYY-MM-DD')
 
       //綁定查詢事件
       document.querySelectorAll('#table_tr').forEach(v => v.remove())

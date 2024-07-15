@@ -3,6 +3,40 @@ import common from './modules.js';
 dayjs.extend(dayjs_plugin_utc)
 dayjs.extend(dayjs_plugin_timezone)
 
+let something = []
+
+/**
+ * 指定日期如果沒有開市，就往前一天找，直到找到為止
+ * @example
+ * const res = await work_date('2024-01-01')
+ * console.log(res)
+ * //Returns: '2023-12-29'
+ */
+const work_date = async (date) => {
+    if (something.length == 0) {
+        const open = await fetch(`https://www.twse.com.tw/rwd/zh/holidaySchedule/holidaySchedule?response=json`)
+        const data = await open.json();
+        something = data.data
+    }
+
+    //將上面有日期的資料轉換為只有日期的陣列 EX: [ '20240101', '20240102', ... ]
+    const trueorfalse = [];
+    for (const v of something){
+        if (/交易日/.test(v[1])){
+            continue
+        }
+        trueorfalse.push(v[0])
+    }
+    //從trueorfalse裡面找date在第幾個位置
+    const indexOfdate = trueorfalse.indexOf(date)
+    //if date is not in trueorfalse and date is not sunday or saturday
+    if (indexOfdate < 0 && dayjs(date).day() !== 0 && dayjs(date).day() !== 6) {
+        return date
+    }
+    
+    return await work_date(dayjs(date).add(-1, 'day').format('YYYY-MM-DD'))
+}
+
 /**
  * @example
  * const res = await fetch('/google/getDatas')
@@ -158,13 +192,17 @@ const getDatas8 = async (search_date, search_date2) => {
 
     //fetch https://node-dev.azurewebsites.net/afterTrading search_date & search_date2
     const result = await (async ()=>{
-        const response = await fetch(`https://node-dev.azurewebsites.net/afterTrading?date=${search_date}`);
-        // const response = await fetch(`http://127.0.0.1:3000/afterTrading?date=${search_date}`);
-        const left_data = await response.json() || []
+        search_date = await work_date(search_date)
+        search_date2 = await work_date(search_date2)
+        const prev_search_date = await work_date(dayjs(search_date).add(-1, 'day').format('YYYY-MM-DD'))
 
-        const response2 = await fetch(`https://node-dev.azurewebsites.net/afterTrading?date=${search_date2}`);
-        // const response2 = await fetch(`http://127.0.0.1:3000/afterTrading?date=${search_date2}`);
+        const r1 = fetch(`https://node-dev.azurewebsites.net/afterTrading?date=${search_date}`)
+        const r2 = fetch(`https://node-dev.azurewebsites.net/afterTrading?date=${search_date2}`)
+        const r3 = fetch(`https://node-dev.azurewebsites.net/afterTrading?date=${prev_search_date}`)
+        const [response, response2, response3] = await Promise.all([r1, r2, r3])
+        const left_data = await response.json() || []
         const right_data = await response2.json() || []
+        const prev_data = await response3.json() || []
 
         //for rigght_data 然後找到left_data相同股票代號的資料，計算出漲跌幅，並且將資料放入right_data
         function get_change_rate(right_data, left_data){
@@ -180,6 +218,8 @@ const getDatas8 = async (search_date, search_date2) => {
             }
             return right_data;
         }
+
+        //search_date到search_date2的漲幅
         const new_right_data = get_change_rate(right_data, left_data)
         //由大到小排序?[4]
         new_right_data.sort(function(a,b){
@@ -187,6 +227,26 @@ const getDatas8 = async (search_date, search_date2) => {
             if (isNaN(b[4])) b[4] = 0
             return b[4]-a[4];
         });
+
+        //prev_search_date到search_date的漲幅
+        const new_prev_data = get_change_rate(left_data, prev_data)
+        //由大到小排序?[4]
+        new_prev_data.sort(function(a,b){
+            if (isNaN(a[4])) a[4] = 0
+            if (isNaN(b[4])) b[4] = 0
+            return b[4]-a[4];
+        });
+
+        //計算每一隻股票的名次變化
+        for (const k in new_right_data) {
+            const v = new_right_data[k]
+            const prev = new_prev_data.findIndex(v2=>v2[0] == v[0])
+            if (prev >= 0) {
+                v.push(prev - Number(k))
+            } else {
+                v.push(null)
+            }
+        }
 
         //返回前200筆
         return new_right_data.slice(0, 200)
@@ -217,8 +277,8 @@ const getDatas8 = async (search_date, search_date2) => {
         error_msg: error_msg,
         now: dayjs().tz('Asia/Taipei').add(-1, 'day').format('YYYY-MM-DD HH:mm'),
         now_week: dayjs().tz('Asia/Taipei').add(-14, 'day').format('YYYY-MM-DD HH:mm'),
-        search_date: dayjs(search_date).format('YYYY-MM-DD'),
-        // news: news
+        search_date: search_date,
+        search_date2: search_date2,
         news: result,
         news_1: values_news,
         news_2: values2_datas_split
