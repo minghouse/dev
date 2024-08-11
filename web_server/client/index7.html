@@ -444,7 +444,9 @@
       for (const v of favourite_data) {
           const dom = table_tr.cloneNode(true)
           // dom.querySelector('th').textContent = i
-          dom.querySelector('td').textContent = `${v.stock_name}(${v.stock})`
+          dom.querySelector('td').innerHTML = `${v.stock_name}(${v.stock})
+          <a href="https://www.fugle.tw/ai/${v.stock}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+          `
           //渲染count
           dom.querySelector('#b_news_favourite .badge').textContent = v.count
           if (v.count == 1) {

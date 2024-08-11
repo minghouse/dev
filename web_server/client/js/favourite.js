@@ -63,6 +63,25 @@ document.querySelector('#favourite_submit').addEventListener('click', async () =
     init()
 })
 
+const find_stock = (stock_name) => {
+    //找到最接近的股票代號
+    let stock = ''
+    //先找到第一個字符合的陣列
+    const stock_list_filter = stock_list.filter(v=> new RegExp(`^${stock_name[0]}`).test(v[1]))
+    for (let i = stock_name.length; i > 0; i--) {
+        for (const v of stock_list_filter) {
+            if (new RegExp(`^${stock_name.substring(0, i)}`).test(v[1])) {
+                stock = v[0]
+                break
+            }
+        }
+        if (stock) {
+            break
+        }
+    }
+    return stock
+}
+
 /**
  * init favourite
  */
@@ -105,24 +124,7 @@ const insert = async function (dom) {
     //       </div>
 
     const stock_name = parent_dom.querySelector('.card-title').textContent.replace('：', '').replace(/（.+/, '')
-    const stock = (() => {
-        //找到最接近的股票代號
-        let stock = ''
-        //先找到第一個字符合的陣列
-        const stock_list_filter = stock_list.filter(v=> new RegExp(`^${stock_name[0]}`).test(v[1]))
-        for (let i = stock_name.length; i > 0; i--) {
-            for (const v of stock_list_filter) {
-                if (new RegExp(`^${stock_name.substring(0, i)}`).test(v[1])) {
-                    stock = v[0]
-                    break
-                }
-            }
-            if (stock) {
-                break
-            }
-        }
-        return stock
-    })()
+    const stock = find_stock(stock_name)
     const news_url = parent_dom.querySelectorAll('#news_link a')[1].href
     const news_source = parent_dom.querySelectorAll('#news_link a')[1].textContent
     const news_date = parent_dom.querySelector('#news_time').textContent

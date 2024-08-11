@@ -228,7 +228,14 @@
           const dom = news.cloneNode(true)
           dom.querySelector('.card-subtitle #news_time').textContent = `${v[0]}`
           const text = v[2].split("\n")
-          dom.querySelector('.card-title').textContent = text[0]
+          // dom.querySelector('.card-title').textContent = text[0]
+          const stock = text[0].match(/[0-9]+/g)
+          dom.querySelector('.card-title').innerHTML = `${text[0]}`
+          if (stock) {
+            dom.querySelector('.card-title').innerHTML += `
+              <a href="https://www.fugle.tw/ai/${stock}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+            `
+          }
           // dom.querySelector('.card-title').remove()
           const text2 = text.slice(1, text.length - 1).map(v2=> `<li>${v2.replace(/^[0-9]+\./, '')}</li>`)
           dom.querySelector('.card-text').innerHTML = `<ol class="m-0 ps-4">${text2.join("")}</ol>`

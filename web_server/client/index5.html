@@ -756,7 +756,9 @@
             dom2.setAttribute('data-category', v.stock[2])
             const td = dom.querySelectorAll('td')
             // td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}`
-            td[0].innerHTML = `${v.stock[1]}<span class="d-1000-none"><br></span><span class="d-1000-inline"> (</span>${v.stock[0]}<span class="d-1000-inline"> )</span>`
+            td[0].innerHTML = `${v.stock[1]}<span class="d-1000-none"><br></span><span class="d-1000-inline"> (</span>${v.stock[0]}<span class="d-1000-inline"> )</span>
+            <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+            `
             //轉為億，小數點後兩位，四捨五入
             // td[3].textContent = `${(v.stock[4].replace(/,/g, '')/100000000).toFixed(2)}億`
             td[3].textContent = `-`
@@ -766,7 +768,6 @@
               td[2].textContent = `${v.stock[7].toLocaleString()}`
               td[3].innerHTML = `<span class="${c1 > 0? 'text-danger': (c1 < 0 ? 'text-success':'')}">${(c1).toLocaleString()}</span>`
               td[3].innerHTML = td[3].innerHTML + `
-                <a href="javascript:void(0);" class="text-decoration-none" id="show_chartjs"><i class="fa-solid fa-chart-line"></i></a>
                 <span class="d-1000-none"><br></span>
                 <div class="d-none" id="continuous_up_data">${JSON.stringify(v.stock)}</div>
                 <span class="badge rounded-pill text-bg-info d-1000-none ${c1 > 0? 'text-danger': (c1 < 0 ? 'text-success':'')}">${c2}%</span>
@@ -866,11 +867,11 @@
                   dom_dialog_news.show()
               })
             }
-            if (dom.querySelector('#show_chartjs')) {
-              dom.querySelector('#show_chartjs').addEventListener('click', async () => {
-                await show_chartjs(v.stock)
-              })
-            }
+            // if (dom.querySelector('#show_chartjs')) {
+            //   dom.querySelector('#show_chartjs').addEventListener('click', async () => {
+            //     await show_chartjs(v.stock)
+            //   })
+            // }
 
             //亮燈標示
             const end_price = Number(v.stock[8].replace(/,/g, ''))
@@ -885,7 +886,9 @@
             //新聞按鈕
             td[6].querySelector('#b_news span').textContent = `${v.news.filter(v2 => v2[1] >= data.now).length}/${v.news.length}`
             td[6].querySelector('#b_news').addEventListener('click', function() {
-              dom_news.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
+              dom_news.querySelector('.modal-title').innerHTML = `${v.stock[1]}(${v.stock[0]})
+              <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+              `
               dom_news.querySelector('.modal-body').innerHTML = ''
               for (const v2 of v.news) {
                   const dom_news_card_clone = dom_news_card.cloneNode(true)

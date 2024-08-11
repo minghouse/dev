@@ -141,8 +141,8 @@
                   <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="continuous_up" style="font-size: 65%;">
                     0
                   </span>
-                  <a href="javascript:void(0);" class="text-decoration-none" id="show_chartjs"><i class="fa-solid fa-chart-line"></i></a>
-                  <br>
+                  <!-- <a href="javascript:void(0);" class="text-decoration-none" id="show_chartjs"><i class="fa-solid fa-chart-line"></i></a>
+                  <br> -->
                   <span></span>
                 </div>
               </td>
@@ -357,97 +357,97 @@
       })
 
       //顯示圖表
-      const dialog_chartjs = document.querySelector('#dialog_chartjs')
-      const dom_dialog_chartjs = new bootstrap.Modal(dialog_chartjs, {
-        keyboard: false
-      })
-      const show_chartjs = async (stock) => {
-        document.querySelector('#dialog_chartjs .modal-title').textContent = stock
-        dom_dialog_chartjs.show()
-        dialog_chartjs.querySelector('.modal-body').innerHTML = `
-          <div class="spinner-border spinner-border-sm" role="status">
-            <span class="visually-hidden"></span>
-          </div>
-          Loading...
-        `
+      // const dialog_chartjs = document.querySelector('#dialog_chartjs')
+      // const dom_dialog_chartjs = new bootstrap.Modal(dialog_chartjs, {
+      //   keyboard: false
+      // })
+      // const show_chartjs = async (stock) => {
+      //   document.querySelector('#dialog_chartjs .modal-title').textContent = stock
+      //   dom_dialog_chartjs.show()
+      //   dialog_chartjs.querySelector('.modal-body').innerHTML = `
+      //     <div class="spinner-border spinner-border-sm" role="status">
+      //       <span class="visually-hidden"></span>
+      //     </div>
+      //     Loading...
+      //   `
 
-        const buy_stock = stock
-        const new_promise = () => {
-          return new Promise(async (resolve, reject) => {
-            resolve(await getDatas5_buy_history(buy_stock))
-          })
-        }
-        const result = await new_promise()
-        // console.log(result)
+      //   const buy_stock = stock
+      //   const new_promise = () => {
+      //     return new Promise(async (resolve, reject) => {
+      //       resolve(await getDatas5_buy_history(buy_stock))
+      //     })
+      //   }
+      //   const result = await new_promise()
+      //   // console.log(result)
 
-        //翻轉數據
-        result.data.reverse()
+      //   //翻轉數據
+      //   result.data.reverse()
 
-        //繪圖
-        dialog_chartjs.querySelector('.modal-body').innerHTML = `<canvas id="myChart" class="w-100" height="400"></canvas>`
-        const ctx = document.getElementById('myChart').getContext('2d');
+      //   //繪圖
+      //   dialog_chartjs.querySelector('.modal-body').innerHTML = `<canvas id="myChart" class="w-100" height="400"></canvas>`
+      //   const ctx = document.getElementById('myChart').getContext('2d');
 
-        const labels = result.data.map(v=>v.label)
-        //繪製result和cost(Y的單位不同, 所以要把cost的Y軸放在右邊)
-        const myChart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [
-              {
-                label: '收盤價',
-                data: result.data.map(v=>v.data),
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1,
-                fill: false,
-                yAxisID: 'y-axis-0'
-              }
-            ]
-          },
-          options: {
-            scales: {
-              x: {
-                ticks: {
-                  callback: function(value, index, values) {
-                    return labels[value]
-                  }
-                }
-              },
-              'y-axis-0': {
-                type: 'linear',
-                position: 'left',
-              },
+      //   const labels = result.data.map(v=>v.label)
+      //   //繪製result和cost(Y的單位不同, 所以要把cost的Y軸放在右邊)
+      //   const myChart = new Chart(ctx, {
+      //     type: 'line',
+      //     data: {
+      //       labels: labels,
+      //       datasets: [
+      //         {
+      //           label: '收盤價',
+      //           data: result.data.map(v=>v.data),
+      //           borderColor: 'rgba(255, 99, 132, 1)',
+      //           borderWidth: 1,
+      //           fill: false,
+      //           yAxisID: 'y-axis-0'
+      //         }
+      //       ]
+      //     },
+      //     options: {
+      //       scales: {
+      //         x: {
+      //           ticks: {
+      //             callback: function(value, index, values) {
+      //               return labels[value]
+      //             }
+      //           }
+      //         },
+      //         'y-axis-0': {
+      //           type: 'linear',
+      //           position: 'left',
+      //         },
               
-            },
-            responsive: true,
-            plugins: {
-              zoom: {
-                pan: {
-                  enabled: true,
-                  mode: 'x',
-                  speed: 10,
-                  threshold: 10
-                },
-                zoom: {
-                  wheel: {
-                    enabled: true,
-                  },
-                  drag: {
-                    enabled: true
-                  },
-                  pinch: {
-                    enabled: true
-                  },
-                  mode: 'x',
-                  speed: 0.1
-                }
-              }
-            }
+      //       },
+      //       responsive: true,
+      //       plugins: {
+      //         zoom: {
+      //           pan: {
+      //             enabled: true,
+      //             mode: 'x',
+      //             speed: 10,
+      //             threshold: 10
+      //           },
+      //           zoom: {
+      //             wheel: {
+      //               enabled: true,
+      //             },
+      //             drag: {
+      //               enabled: true
+      //             },
+      //             pinch: {
+      //               enabled: true
+      //             },
+      //             mode: 'x',
+      //             speed: 0.1
+      //           }
+      //         }
+      //       }
           
-          }
-        });
+      //     }
+      //   });
 
-      }
+      // }
 
       //讀取資料
       const get_datas = async ()=>{
@@ -486,7 +486,9 @@
             // dom.querySelector('.card-title').textContent = v[1]
             const td = dom.querySelectorAll('td')
             // td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}`
-            td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}`
+            td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}
+            <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+            `
             //轉為億，小數點後兩位，四捨五入
             td[1].textContent = `${(v.stock[4].replace(/,/g, '')/100000000).toFixed(2)}億`
 
@@ -616,7 +618,9 @@
             }).length}/${v.news_ai.length}`
             
             td[3].querySelector('#b_news_ai').addEventListener('click', function() {
-              dom_news2.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
+              dom_news2.querySelector('.modal-title').innerHTML = `${v.stock[1]}(${v.stock[0]})
+              <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+              `
               dom_news2.querySelector('.modal-body').innerHTML = ''
               for (const v2 of v.news_ai) {
                   const dom_news_card_clone = dom_news_card2.cloneNode(true)
@@ -643,9 +647,9 @@
             })
 
             //綁定收盤價按鈕
-            dom.querySelector('#show_chartjs').addEventListener('click', () => {
-              show_chartjs(v.stock[0])
-            })
+            // dom.querySelector('#show_chartjs').addEventListener('click', () => {
+            //   show_chartjs(v.stock[0])
+            // })
             
             document.querySelector('#table_tbody').append(dom)
           }
