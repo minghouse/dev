@@ -35,8 +35,18 @@
   <body>
     <div class="container-fluid px-1">
       <nav class="navbar mt-2 rounded" style="background-color: #e3f2fd;">
-          <div class="container-fluid">
-          <a class="navbar-brand fw-bold" href="#">每日新聞分析</a>
+          <div class="container-fluid justify-content-start">
+          <a class="navbar-brand fw-bold me-auto" href="#">每日新聞分析</a>
+          <!-- <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="button-addon2">
+            <button class="btn btn-outline-secondary" type="button" id="button-addon2">Button</button>
+          </div> -->
+          <div class="input-group me-2" style="width: 200px">
+            <input type="text" class="form-control" placeholder="要查詢的內容" id="text-search">
+            <button class="btn btn-outline-secondary" type="button" id="button-search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+          </div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -174,9 +184,9 @@
     import getDatas from './js/getDatas.js';
 
     //Menu控制
-    // const dom_dialog_Loading = new bootstrap.Modal('#dialog_Loading', {
-    //     keyboard: false
-    // })
+    const dom_dialog_Loading = new bootstrap.Modal('#dialog_Loading', {
+        keyboard: false
+    })
     // function loadNewPage(result, userObject) {
     //     var newURL = result + userObject;
     //     window.open(newURL,"_top"); 
@@ -220,7 +230,7 @@
     const show_data = (data) => {
       const news_div = document.querySelector('#news_div')
       const news = document.querySelector('#news').cloneNode(true)
-      document.querySelector('#news').remove()
+      document.querySelectorAll('#news').forEach(v=> v.remove())
 
       for (const k in data) {
           // if (k==0) continue
@@ -252,6 +262,7 @@
       }
     }
 
+    let news_data = []
     try {
         // const res = await fetch('https://dev-cpzu.onrender.com/google/getDatas')
         // const data = await res.json()
@@ -259,13 +270,51 @@
         // show_data(await getDatas())
         //pormise all
         const data = await Promise.all([getDatas(), favourite.init()])
+        news_data = data[0]
         show_data(data[0])
     } catch (error) {
         console.log(error)
         google.script.run.withSuccessHandler(function(data) {
+            news_data = data
             show_data(data)
         }).getDatas();
     }
+
+    //--------------------------------------------------------------------------------
+    //搜尋
+    const dom_button_search = document.querySelector('#button-search')
+    dom_button_search.addEventListener('click', async function() {
+      const text_search = document.querySelector('#text-search').value
+      if (text_search == '') {
+        return
+      }
+      // dom_dialog_Loading.show()
+      dom_button_search.disabled = true
+      dom_button_search.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'
+      await new Promise(resolve=> setTimeout(resolve, 50))
+
+      show_data(news_data)
+      const news_div = document.querySelectorAll('#news')
+      for (const v of news_div) {
+        if (v.querySelector('.card-title').innerHTML.includes(text_search)) {
+          v.style.display = ''
+          //將出現的關鍵字標示黃底
+          v.querySelector('.card-title').innerHTML = v.querySelector('.card-title').innerHTML.replace(new RegExp(text_search, 'g'), `<span class="bg-warning">${text_search}</span>`)
+        } else {
+          v.style.display = 'none'
+        }
+        if (v.querySelector('.card-text').innerHTML.includes(text_search)) {
+          v.style.display = ''
+          //將出現的關鍵字標示黃底
+          v.querySelector('.card-text').innerHTML = v.querySelector('.card-text').innerHTML.replace(new RegExp(text_search, 'g'), `<span class="bg-warning">${text_search}</span>`)
+        } else {
+          v.style.display = 'none'
+        }
+      }
+      // dom_dialog_Loading.hide()
+      dom_button_search.disabled = false
+      dom_button_search.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i>'
+    })
     
     </script>
   </body>
