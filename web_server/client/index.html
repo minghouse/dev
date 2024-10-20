@@ -181,6 +181,7 @@
       }
     </script> -->
     <script type="module">
+    import stock_list from './js/stock_list.js';
     import getDatas from './js/getDatas.js';
 
     //Menu控制
@@ -240,6 +241,10 @@
           const text = v[2].split("\n")
           // dom.querySelector('.card-title').textContent = text[0]
           const stock = text[0].match(/[0-9]+/g)
+          //過濾觀光餐旅
+          if (stock_list.findIndex(v2=> v2[0] == stock && v2[4] == '觀光餐旅' ) >= 0) {
+            continue
+          }
           dom.querySelector('.card-title').innerHTML = `${text[0]}`
           if (stock) {
             dom.querySelector('.card-title').innerHTML += `
