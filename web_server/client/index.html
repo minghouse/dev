@@ -251,9 +251,10 @@
               <a href="https://www.fugle.tw/ai/${stock}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
             `
           }
+          
           // dom.querySelector('.card-title').remove()
           const text2 = text.slice(1, text.length - 1).map(v2=> `<li>${v2.replace(/^[0-9]+\./, '')}</li>`)
-          dom.querySelector('.card-text').innerHTML = `<ol class="m-0 ps-4">${text2.join("")}</ol>`
+          dom.querySelector('.card-text').innerHTML = `<div class="fw-bold">${v[3]||''}</div><ol class="m-0 ps-4">${text2.join("")}</ol>`
           const news_url = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `$1`).replace(/\n/g, '')
           dom.querySelector('.card-subtitle #news_link').innerHTML = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `<a href="javascript:void(0);" onclick="favourite.insert(this)" class="text-warning pe-2"><i class="fa-regular fa-star"></i></a> <a href="$1" target="_blank">${v[1]}</a>\n`).replace(/\n/g, '<br>')
 
