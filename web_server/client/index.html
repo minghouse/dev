@@ -80,8 +80,8 @@
       <div class="mt-2 table-responsive" id="news_div">
         <div class="card mb-2" id="news">
           <div class="card-body">
-            <h5 class="card-title">載入中，請稍後</h5>
-            <p class="card-text mb-2"></p>
+            <h5 class="card-title d-flex">載入中，請稍後</h5>
+            <p class="card-text mb-2 d-none"></p>
             <h6 class="card-subtitle text-muted d-flex">
               <div id="news_time">
 
@@ -233,9 +233,18 @@
       const news = document.querySelector('#news').cloneNode(true)
       document.querySelectorAll('#news').forEach(v=> v.remove())
 
-      for (const k in data) {
+      //按data裡面的v[0] group
+      const group_data = []
+      for (const v of data) {
+        if (group_data.findIndex(v2=> v2[0] == v[0]) < 0) {
+          group_data.push([v[0], []])
+        }
+        group_data.find(v2=> v2[0] == v[0])[1].push(v)
+      }
+
+      for (const k in group_data) {
           // if (k==0) continue
-          const v = data[k]
+          const v = group_data[k][1][0]
           const dom = news.cloneNode(true)
           dom.querySelector('.card-subtitle #news_time').textContent = `${v[0]}`
           const text = v[2].split("\n")
@@ -245,18 +254,39 @@
           if (stock_list.findIndex(v2=> v2[0] == stock && v2[4] == '觀光餐旅' ) >= 0) {
             continue
           }
-          dom.querySelector('.card-title').innerHTML = `${text[0]}`
-          if (stock) {
-            dom.querySelector('.card-title').innerHTML += `
-              <a href="https://www.fugle.tw/ai/${stock}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
-            `
+          dom.querySelector('.card-title').innerHTML = `
+            <div class="fw-bold">${v[3]||''}</div>
+            <a href="javascript:void(0)" class="text-decoration-none ms-auto"><i class="fa-solid fa-caret-down"></i></a>
+          `
+          //綁定點擊事件
+          dom.querySelector('.card-title a').addEventListener('click', function() {
+            if (dom.querySelector('.card-text').classList.contains('d-none')) {
+              dom.querySelector('.card-text').classList.remove('d-none')
+              this.innerHTML = '<i class="fa-solid fa-caret-up"></i>'
+            } else {
+              dom.querySelector('.card-text').classList.add('d-none')
+              this.innerHTML = '<i class="fa-solid fa-caret-down"></i>'
+            }
+          })
+
+          for (const k2 in group_data[k][1]) {
+            const v2 = group_data[k][1][k2]
+            let fugle = ''
+            const text = v2[2].split("\n")
+            const stock = text[0].match(/[0-9]+/g)
+            if (stock) {
+              fugle = `
+                <a href="https://www.fugle.tw/ai/${stock}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+              `
+            }
+            
+            // dom.querySelector('.card-title').remove()
+            const text2 = text.slice(1, text.length - 1).map(v3=> `<li>${v3.replace(/^[0-9]+\./, '')}</li>`)
+            dom.querySelector('.card-text').innerHTML += `${k2>0?'<br>':''}<div>${text[0]}${fugle}</div><ol class="m-0 ps-4">${text2.join("")}</ol>`
           }
-          
-          // dom.querySelector('.card-title').remove()
-          const text2 = text.slice(1, text.length - 1).map(v2=> `<li>${v2.replace(/^[0-9]+\./, '')}</li>`)
-          dom.querySelector('.card-text').innerHTML = `<div class="fw-bold">${v[3]||''}</div><ol class="m-0 ps-4">${text2.join("")}</ol>`
+
           const news_url = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `$1`).replace(/\n/g, '')
-          dom.querySelector('.card-subtitle #news_link').innerHTML = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `<a href="javascript:void(0);" onclick="favourite.insert(this)" class="text-warning pe-2"><i class="fa-regular fa-star"></i></a> <a href="$1" target="_blank">${v[1]}</a>\n`).replace(/\n/g, '<br>')
+          dom.querySelector('.card-subtitle #news_link').innerHTML += `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `<a href="javascript:void(0);" onclick="favourite.insert(this)" class="text-warning pe-2"><i class="fa-regular fa-star"></i></a> <a href="$1" target="_blank">${v[1]}</a>\n`).replace(/\n/g, '<br>')
 
           //檢查是否已加入我的最愛
           const favourite_data = favourite.get_favourite_data().find(v2=> v2.news_url == news_url)
