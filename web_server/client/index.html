@@ -277,6 +277,7 @@
             if (stock) {
               fugle = `
                 <a href="https://www.fugle.tw/ai/${stock}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+                <a href="https://wwwuat.moneydj.com/kmdj/wiki/wikisubjectlist.aspx?op=3&b=${text[0].split('（')[0]}&c=" class="text-decoration-none" id="show_chartjs" target="_blank">介</a>
               `
             }
             
@@ -370,7 +371,7 @@
       document.querySelector('#text-search').value = ''
       dom_button_search.click()
     })
-    
+
     //熱門
     const dom_button_hot = document.querySelector('#button-hot')
     dom_button_hot.addEventListener('click', async function() {
