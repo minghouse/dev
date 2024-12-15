@@ -42,6 +42,12 @@
             <button class="btn btn-outline-secondary" type="button" id="button-addon2">Button</button>
           </div> -->
           <div class="input-group me-2" style="width: 200px">
+            <button class="btn btn-outline-secondary" type="button" id="button-all">
+              A
+            </button>
+            <button class="btn btn-outline-secondary" type="button" id="button-hot">
+              熱
+            </button>
             <input type="text" class="form-control" placeholder="要查詢的內容" id="text-search">
             <button class="btn btn-outline-secondary" type="button" id="button-search">
               <i class="fa-solid fa-magnifying-glass"></i>
@@ -80,7 +86,7 @@
       <div class="mt-2 table-responsive" id="news_div">
         <div class="card mb-2" id="news">
           <div class="card-body">
-            <h5 class="card-title d-flex">載入中，請稍後</h5>
+            <h5 class="card-title d-flex" style="cursor: pointer;">載入中，請稍後</h5>
             <p class="card-text mb-2 d-none"></p>
             <h6 class="card-subtitle text-muted d-flex">
               <div id="news_time">
@@ -228,19 +234,11 @@
       dropdownParent: $('#favouriteModal')
     });
 
-    const show_data = (data) => {
-      const news_div = document.querySelector('#news_div')
-      const news = document.querySelector('#news').cloneNode(true)
+    const news_div = document.querySelector('#news_div')
+    const news = document.querySelector('#news').cloneNode(true)
+    
+    const show_data = (group_data) => {
       document.querySelectorAll('#news').forEach(v=> v.remove())
-
-      //按data裡面的v[0] group
-      const group_data = []
-      for (const v of data) {
-        if (group_data.findIndex(v2=> v2[0] == v[0]) < 0) {
-          group_data.push([v[0], []])
-        }
-        group_data.find(v2=> v2[0] == v[0])[1].push(v)
-      }
 
       for (const k in group_data) {
           // if (k==0) continue
@@ -259,13 +257,15 @@
             <a href="javascript:void(0)" class="text-decoration-none ms-auto"><i class="fa-solid fa-caret-down"></i></a>
           `
           //綁定點擊事件
-          dom.querySelector('.card-title a').addEventListener('click', function() {
+          dom.querySelector('.card-title').addEventListener('click', function() {
             if (dom.querySelector('.card-text').classList.contains('d-none')) {
               dom.querySelector('.card-text').classList.remove('d-none')
-              this.innerHTML = '<i class="fa-solid fa-caret-up"></i>'
+              this.querySelector('i').classList.remove('fa-caret-down')
+              this.querySelector('i').classList.add('fa-caret-up')
             } else {
               dom.querySelector('.card-text').classList.add('d-none')
-              this.innerHTML = '<i class="fa-solid fa-caret-down"></i>'
+              this.querySelector('i').classList.remove('fa-caret-up')
+              this.querySelector('i').classList.add('fa-caret-down')
             }
           })
 
@@ -286,7 +286,7 @@
           }
 
           const news_url = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `$1`).replace(/\n/g, '')
-          dom.querySelector('.card-subtitle #news_link').innerHTML += `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `<a href="javascript:void(0);" onclick="favourite.insert(this)" class="text-warning pe-2"><i class="fa-regular fa-star"></i></a> <a href="$1" target="_blank">${v[1]}</a>\n`).replace(/\n/g, '<br>')
+          dom.querySelector('.card-subtitle #news_link').innerHTML = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `<a href="javascript:void(0);" onclick="favourite.insert(this)" class="text-warning pe-2"><i class="fa-regular fa-star"></i></a> <a href="$1" target="_blank">${v[1]}</a>\n`).replace(/\n/g, '<br>')
 
           //檢查是否已加入我的最愛
           const favourite_data = favourite.get_favourite_data().find(v2=> v2.news_url == news_url)
@@ -306,8 +306,17 @@
         // show_data(await getDatas())
         //pormise all
         const data = await Promise.all([getDatas(), favourite.init()])
-        news_data = data[0]
-        show_data(data[0])
+        
+        //按data裡面的v[0] group
+        const group_data = []
+        for (const v of data[0]) {
+          if (group_data.findIndex(v2=> v2[0] == v[0]) < 0) {
+            group_data.push([v[0], []])
+          }
+          group_data.find(v2=> v2[0] == v[0])[1].push(v)
+        }
+        news_data = group_data
+        show_data(JSON.parse(JSON.stringify(group_data)))
     } catch (error) {
         console.log(error)
         google.script.run.withSuccessHandler(function(data) {
@@ -320,8 +329,9 @@
     //搜尋
     const dom_button_search = document.querySelector('#button-search')
     dom_button_search.addEventListener('click', async function() {
-      const text_search = document.querySelector('#text-search').value
+      const text_search = (document.querySelector('#text-search').value || '').split(' ')
       if (text_search == '') {
+        show_data(JSON.parse(JSON.stringify(news_data)))
         return
       }
       // dom_dialog_Loading.show()
@@ -329,27 +339,44 @@
       dom_button_search.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'
       await new Promise(resolve=> setTimeout(resolve, 50))
 
-      show_data(news_data)
+      show_data(JSON.parse(JSON.stringify(news_data)))
       const news_div = document.querySelectorAll('#news')
       for (const v of news_div) {
-        if (v.querySelector('.card-title').innerHTML.includes(text_search)) {
-          v.style.display = ''
-          //將出現的關鍵字標示黃底
-          v.querySelector('.card-title').innerHTML = v.querySelector('.card-title').innerHTML.replace(new RegExp(text_search, 'g'), `<span class="bg-warning">${text_search}</span>`)
-        } else {
-          v.style.display = 'none'
+        v.style.display = 'none'
+        for (const v2 of text_search) {
+          if (v.querySelector('.card-title').innerHTML.includes(v2) || v.querySelector('.card-text').innerHTML.includes(v2)) {
+            v.style.display = ''
+            //將出現的關鍵字標示黃底
+            v.querySelector('.card-title').innerHTML = v.querySelector('.card-title').innerHTML.replace(new RegExp(v2, 'g'), `<span class="bg-warning">${v2}</span>`)
+            v.querySelector('.card-text').innerHTML = v.querySelector('.card-text').innerHTML.replace(new RegExp(v2, 'g'), `<span class="bg-warning">${v2}</span>`)
+          } else {
+          }
         }
-        if (v.querySelector('.card-text').innerHTML.includes(text_search)) {
-          v.style.display = ''
-          //將出現的關鍵字標示黃底
-          v.querySelector('.card-text').innerHTML = v.querySelector('.card-text').innerHTML.replace(new RegExp(text_search, 'g'), `<span class="bg-warning">${text_search}</span>`)
-        } else {
-          v.style.display = 'none'
+      }
+      for (const v of news_div) {
+        if (v.style.display == 'none') {
+          v.remove()
         }
       }
       // dom_dialog_Loading.hide()
       dom_button_search.disabled = false
       dom_button_search.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i>'
+    })
+
+    //全部
+    const dom_button_all = document.querySelector('#button-all')
+    dom_button_all.addEventListener('click', async function() {
+      //帶入搜尋條件：全部
+      document.querySelector('#text-search').value = ''
+      dom_button_search.click()
+    })
+    
+    //熱門
+    const dom_button_hot = document.querySelector('#button-hot')
+    dom_button_hot.addEventListener('click', async function() {
+      //帶入搜尋條件：熱門族群 潛力股 焦點股
+      document.querySelector('#text-search').value = '熱門族群 潛力股 焦點股'
+      dom_button_search.click()
     })
     
     </script>
