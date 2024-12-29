@@ -282,7 +282,11 @@
       for (const v of news_div) {
         v.style.display = 'none'
         for (const v2 of text_search) {
-          if (!is_not && v2=='AI推薦' && v.querySelector('.card-subtitle #recommendation')) {
+          if (!is_not && v2=='AI推薦' && v.querySelector('.card-subtitle #recommendation') && 
+            !v.querySelector('.card-title').innerHTML.includes('熱門族群') &&
+            !v.querySelector('.card-title').innerHTML.includes('潛力股') &&
+            !v.querySelector('.card-title').innerHTML.includes('焦點股') 
+          ) {
             v.style.display = ''
           } else if (!is_not && v.querySelector('.card-title').innerHTML.includes(v2)) {
             v.style.display = ''
