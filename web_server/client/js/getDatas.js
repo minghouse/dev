@@ -34,15 +34,16 @@ const getDatas = async () => {
 
     const sheetData_name = [
         "AI整理-經濟日報",
-        "AI整理-中國時報",
+        // "AI整理-中國時報",
         "AI整理-yahoo財經",
         // "AI整理-工商時報",
-        "AI整理-時報新聞"
+        "AI整理-時報新聞",
+        "AI整理-IEK",
     ]
     const sheetData_promise = []
     for (const v of sheetData_name) {
-        const ai_start = ai_sn[v] - 1000 < 2 ? 2 : ai_sn[v] - 1000
-        sheetData_promise.push(common.accessGoogleSheets(SPREADSHEET_ID, `${v}!A${ai_start}:E${ai_sn[v]}`, accessToken))
+        const ai_start = ai_sn[v] - 1500 < 2 ? 2 : ai_sn[v] - 1500
+        sheetData_promise.push(common.accessGoogleSheets(SPREADSHEET_ID, `${v}!A${ai_start}:F${ai_sn[v]}`, accessToken))
     }
     const sheetData = await Promise.all(sheetData_promise)
     const values = sheetData.reduce((acc, cur) => acc.concat(cur.values), [])
@@ -66,7 +67,7 @@ const getDatas = async () => {
             const check = v3.filter(v4 => /^[0-9]+\./.test(v4)).length
 
             if (/：$/.test(v3[0]) && /^新聞出處/.test(v3[v3.length - 1]) && check == v3.length - 2 && v3.length > 2) {
-                datas.push([v[0], v[1], v2, v[4]])
+                datas.push([v[0], v[1], v2, v[4], v[5]])
             }
         }
     }
