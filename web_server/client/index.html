@@ -389,7 +389,7 @@
             //使用a fontawesome ai icon
             dom.querySelector('.card-subtitle #news_time').innerHTML = `<a href="javascript:void(0)" class="text-decoration-none" id="recommendation"><i class="fa-regular fa-face-smile-beam"></i></a> ${dom.querySelector('.card-subtitle #news_time').innerHTML}`
             dom.querySelector('.card-subtitle #recommendation').addEventListener('click', function() {
-              document.querySelector('#dialog_recommendation .modal-body').textContent = v[4]
+              document.querySelector('#dialog_recommendation .modal-body').innerHTML = `${v[4]?`<b>主題</b>: ${v[4]}<br>`:''}${v[5]?`<b>標籤</b>: ${v[5]}<br>`:''}${v[6]?`<b>資訊</b>: ${v[6]}<br>`:''}${v[7]?`<b>風險</b>: ${v[7]}<br>`:''}`
               dom_dialog_recommendation.show()
             })
           }
