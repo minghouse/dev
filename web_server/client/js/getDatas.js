@@ -43,7 +43,7 @@ const getDatas = async () => {
     const sheetData_promise = []
     for (const v of sheetData_name) {
         const ai_start = ai_sn[v] - 1500 < 2 ? 2 : ai_sn[v] - 1500
-        sheetData_promise.push(common.accessGoogleSheets(SPREADSHEET_ID, `${v}!A${ai_start}:I${ai_sn[v]}`, accessToken))
+        sheetData_promise.push(common.accessGoogleSheets(SPREADSHEET_ID, `${v}!A${ai_start}:J${ai_sn[v]}`, accessToken))
     }
     const sheetData = await Promise.all(sheetData_promise)
     const values = sheetData.reduce((acc, cur) => acc.concat(cur.values), [])
