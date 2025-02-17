@@ -1,3 +1,7 @@
+import express from "express";
+import https from "https";
+import fs from "fs";
+import path from "path";
 import express from 'express';
 import cors from 'cors';
 import google_sheet_search from './tasks/google/sheet_search.mjs';
@@ -11,6 +15,15 @@ import afterTrading from './tasks/afterTrading.mjs';
 
 import bodyParser from 'body-parser';
 import compression from 'compression'; // Import the compression module
+
+const __filename = fileURLToPath(import.meta.url); // 獲取檔案的完整路徑
+const __dirname = path.dirname(__filename);       // 獲取檔案所在的目錄
+const sslOptions = {
+    key: fs.readFileSync(`${__dirname}/privatekey.pem`),
+    cert: fs.readFileSync(`${__dirname}/certificate.pem`),
+    passphrase: "54321633",
+    //allowHTTP1: true
+};
 
 /**
  * http server
@@ -56,6 +69,10 @@ app.get('/afterTrading', (req, res) => {
 });
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+// app.listen(port, () => {
+//     console.log(`Server is running on port ${port}`)
+// });
+// 啟動 HTTPS 伺服器
+https.createServer(sslOptions, app).listen(port, () => {
     console.log(`Server is running on port ${port}`)
 });
