@@ -11,6 +11,7 @@ import getDatas2 from './tasks/google/getDatas2.mjs';
 import rank_turnover from './tasks/google/rank_turnover.mjs';
 import rank_changeup from './tasks/google/rank_changeup.mjs';
 import azure_mysql from './tasks/azure_mysql.mjs';
+import gcp_mysql from './tasks/gcp_mysql.mjs';
 import afterTrading from './tasks/afterTrading.mjs';
 
 import bodyParser from 'body-parser';
@@ -63,6 +64,15 @@ app.post('/azure_mysql/select', (req, res) => {
 });
 app.post('/azure_mysql/insert', (req, res) => {
     azure_mysql.insert(req, res)
+});
+app.post('/gcp_mysql/select', (req, res) => {
+    console.log(`/gcp_mysql/select, IP: ${req.ip}`)
+    gcp_mysql.select(req, res)
+});
+app.post('/gcp_mysql/insert', (req, res) => {
+    //印出訪問的IP
+    console.log(`/gcp_mysql/insert, IP: ${req.ip}`)
+    gcp_mysql.insert(req, res)
 });
 app.get('/afterTrading', (req, res) => {
     afterTrading(req, res)
