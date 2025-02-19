@@ -51,14 +51,14 @@ const getDatas3 = async (search_date) => {
 
     const sheetData_name = [
         "經濟日報",
-        "中國時報",
+        // "中國時報",
         "yahoo財經",
-        "工商時報",
+        "IEK",
         "時報新聞",
         "AI整理-經濟日報",
-        "AI整理-中國時報",
+        // "AI整理-中國時報",
         "AI整理-yahoo財經",
-        "AI整理-工商時報",
+        "AI整理-IEK",
         "AI整理-時報新聞",
         "AI每周整理",
         "每日漲幅排名"
