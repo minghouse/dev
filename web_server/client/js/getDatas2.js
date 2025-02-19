@@ -108,7 +108,7 @@ const getDatas2 = async (search_date) => {
                     getDatas6_datas.push([v[0], 'AI每周整理', content])
                 }
             }
-        } else if ([ "AI整理-經濟日報", "AI整理-中國時報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞" ].includes(sheetData_name[k])) {
+        } else if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-IEK", "AI整理-時報新聞" ].includes(sheetData_name[k])) {
             const values2_datas = sheetData[k]
             for (const v of values2_datas.values) {
                 if (v[0] < date_start) {
