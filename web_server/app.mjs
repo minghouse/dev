@@ -10,6 +10,7 @@ import getDatas from './tasks/google/getDatas.mjs';
 import getDatas2 from './tasks/google/getDatas2.mjs';
 import rank_turnover from './tasks/google/rank_turnover.mjs';
 import rank_changeup from './tasks/google/rank_changeup.mjs';
+import turnover_rate from './tasks/google/turnover_rate.mjs';
 import azure_mysql from './tasks/azure_mysql.mjs';
 import gcp_mysql from './tasks/gcp_mysql.mjs';
 import afterTrading from './tasks/afterTrading.mjs';
@@ -58,6 +59,9 @@ app.get('/google/rank_turnover', (req, res) => {
 });
 app.get('/google/rank_changeup', (req, res) => {
     rank_changeup(req, res)
+});
+app.get('/google/turnover_rate', (req, res) => {
+    turnover_rate(req, res)
 });
 app.post('/azure_mysql/select', (req, res) => {
     azure_mysql.select(req, res)

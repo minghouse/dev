@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/css/select2.min.css" rel="stylesheet" />
+    <!-- chartjs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.0/dist/chart.min.js" crossorigin="anonymous"></script>
+    <!-- chartjs-plugin-zoom -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js" crossorigin="anonymous"></script>
+
+    <style>
+      .iw-table-draw {
+        font-size: 10px;
+      }
+      .iw-table-draw th, .iw-table-draw td {
+        padding: 3px;
+      }
+
+      table {
+        width: max-content;
+        font-size: 105%;
+      }
+      .table>:not(caption)>*>* {
+        padding: .2rem .2rem;
+      }
+
+      #dialog_news, #dialog_news2 {
+        font-size: 120%;
+      }
+      .my_index {
+        left: 20px !important;
+        top: -10px !important;
+        z-index: 5;
+      }
+      .my_index0 {
+        z-index: 0 !important;
+      }
+
+      .my-badge-sn {
+        font-size:70%;
+      }
+      .my-f-70 {
+        font-size:70%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid px-1">
+      <nav class="navbar mt-1 rounded" style="background-color: #e3f2fd;">
+          <div class="container-fluid">
+          <a class="navbar-brand fw-bold" href="#">每日漲幅排行</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav me-auto mt-2 mb-lg-0">
+              <li class="nav-item border-top">
+                <a class="nav-link" href="index.html" data-href="?page=1">每日新聞分析</a>
+              </li>
+              <li class="nav-item border-top">
+                <a class="nav-link" href="index6.html" data-href="?page=6">每周新聞分析</a>
+              </li>
+              <li class="nav-item border-top">
+                <a class="nav-link" href="index2.html" data-href="?page=2">每日成交值排行</a>
+              </li>
+              <li class="nav-item border-top">
+                <a class="nav-link active" href="index3.html" data-href="?page=3">每日漲幅排行</a>
+              </li>
+              <li class="nav-item border-top">
+                <a class="nav-link" href="index5.html" data-href="?page=5">自選股</a>
+              </li>
+              <li class="nav-item border-top">
+                <a class="nav-link" href="index7.html" data-href="?page=7">我的關注</a>
+              </li>
+              <li class="nav-item border-top">
+                <a class="nav-link" href="index8.html" data-href="?page=7">區間漲幅排行</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      <div class="mt-2 d-flex">
+        <div class=" me-auto">
+        </div>
+        <div class="">
+          
+          <div class="input-group">
+            <!-- <div class="btn-group me-2" role="group" aria-label="Basic checkbox toggle button group">
+              <input type="checkbox" class="btn-check" id="price1" checked>
+              <label class="btn btn-outline-primary position-relative my_index0" for="price1">漲
+                <span class="position-absolute top-0 start-100 badge rounded-pill bg-danger my_index" id="price1_badge">
+                  0
+                </span>
+              </label>
+
+              <input type="checkbox" class="btn-check" id="price2">
+              <label class="btn btn-outline-primary position-relative my_index0" for="price2">平
+                <span class="position-absolute top-0 start-100 badge rounded-pill bg-danger my_index" id="price2_badge">
+                  0
+                </span>
+              </label>
+
+              <input type="checkbox" class="btn-check" id="price3">
+              <label class="btn btn-outline-primary position-relative my_index0" for="price3">跌
+                <span class="position-absolute top-0 start-100 badge rounded-pill bg-danger my_index" id="price3_badge">
+                  0
+                </span>
+              </label>
+            </div> -->
+            <input type="date" class="form-control rounded-start" placeholder="" id="search_date" disabled >
+            <button class="btn btn-outline-secondary disabled" type="button" id="search">查詢</button>
+          </div>
+        </div>
+      </div>
+      <div class="mt-2 table-responsive border rounded">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col" width="10">#</th>
+              <th scope="col" style="min-width:80px">名稱</th>
+              <th scope="col" width="100">成交值</th>
+              <th scope="col" style="min-width:80px">收盤價
+                <a href="javascript:void(0);" class="text-decoration-none my-f-70" id="show_text_end_price">❔</a></th>
+              <th scope="col" width="120">新聞
+                <a href="javascript:void(0);" class="text-decoration-none my-f-70" id="show_text_news">❔</a>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="table_tbody">
+            <tr id="table_tr">
+              <th scope="row" class="align-middle">1</th>
+              <td class="align-middle">讀取中...</td>
+              <td class="align-middle"></td>
+              <td class="align-middle">
+                <div class="d-inline position-relative">
+                  <span></span>
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="continuous_up" style="font-size: 65%;">
+                    0
+                  </span>
+                  <!-- <a href="javascript:void(0);" class="text-decoration-none" id="show_chartjs"><i class="fa-solid fa-chart-line"></i></a>
+                  <br> -->
+                  <span></span>
+                </div>
+              </td>
+              <td class="align-middle">
+                <div class="row g-1">
+                  <div class="col">
+                    <button type="button" class="btn btn-primary btn-sm position-relative" id="b_news">
+                      新聞
+                      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        0
+                      </span>
+                    </button>
+                  </div>
+                  <div class="col">
+                    <button type="button" class="btn btn-primary btn-sm position-relative" id="b_news_ai">
+                      分析
+                      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        0
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+    
+    <!--新聞-->
+    <div class="modal" tabindex="-1" id="dialog_news">
+      <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modal title</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="card w-100 mb-2">
+              <div class="card-body">
+                <h5 class="card-title fw-bold">Card title</h5>
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                <h6 class="card-subtitle mb-2 text-muted d-flex">
+                  <div id="news_time">
+
+                  </div>
+                  <div class="ms-auto" id="news_link">
+                    <a href="#" class="card-link" target="_blank">Card link</a>
+                  </div>
+                </h6>
+              </div>
+            </div>
+          </div>
+          <!-- <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+          </div> -->
+        </div>
+      </div>
+    </div>
+
+    <!--分析-->
+    <div class="modal" tabindex="-1" id="dialog_news2">
+      <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">分析</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="card w-100 mb-2">
+              <div class="card-body">
+                <h5 class="card-title">Card title</h5>
+                <p class="card-text mb-2"></p>
+                <h6 class="card-subtitle text-muted d-flex">
+                  <div id="news_time">
+
+                  </div>
+                  <div class="ms-auto" id="news_link">
+                    
+                  </div>
+                </h6>
+              </div>
+            </div>
+          </div>
+          <!-- <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+          </div> -->
+        </div>
+      </div>
+    </div>
+
+    <!--讀取中-->
+    <div class="modal" tabindex="-1" id="dialog_Loading" data-bs-backdrop="static">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="d-flex align-items-center">
+              <strong>Loading...</strong>
+              <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--系統訊息-->
+    <div class="modal" tabindex="-1" id="dialog_alert" data-bs-backdrop="static">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">系統訊息</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 收盤價 -->
+    <div class="modal" tabindex="-1" id="dialog_chartjs" data-bs-backdrop="static">
+      <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">收盤價</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="	https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
+    <!-- <script type="module">
+      import sheet_search from 'https://minghouse.github.io/dev/web_server/client/sheet_search.js';
+      try {
+        // const res = await fetch('https://dev-cpzu.onrender.com/google/sheet_search?range=AI整理-索引!B1:B1')
+        // const data = await res.json()
+        const data = await sheet_search('AI整理-索引!B1:B1')
+        window.scriptURL = `https://script.google.com/macros/s/${data.values[0][0]}/exec`
+        // console.log(scriptURL)
+      } catch (error) {
+        console.error(error)
+      }
+    </script> -->
+    <script type="module">
+      import getDatas9 from './js/getDatas9.js';
+      import getDatas5_buy_history from './js/getDatas5_buy_history.js';
+
+      //Menu控制
+      // const dom_dialog_Loading = new bootstrap.Modal('#dialog_Loading', {
+      //   keyboard: false
+      // })
+      // function loadNewPage(result, userObject) {
+      //   var newURL = result + userObject;
+      //   window.open(newURL,"_top"); 
+      // }
+      // document.querySelectorAll('nav li a').forEach(v=> {
+      //   v.addEventListener('click', function() {
+      //     const newURL = v.getAttribute('data-href');
+      //     dom_dialog_Loading.show()
+      //     if (window.scriptURL) {
+      //       loadNewPage(window.scriptURL, newURL)
+      //       return 
+      //     }
+      //     google.script.run.withSuccessHandler(loadNewPage).withUserObject(newURL).getScriptURL();
+      //   })
+      // })
+
+      //初始化
+      const table_tr = document.querySelector('#table_tr').cloneNode(true)
+      const dom_news = document.querySelector('#dialog_news')
+      const dom_dialog_news = new bootstrap.Modal(dom_news, {
+        keyboard: false
+      })
+      const dom_news2 = document.querySelector('#dialog_news2')
+      const dom_dialog_news2 = new bootstrap.Modal(dom_news2, {
+        keyboard: false
+      })
+      const dom_news_card = dom_news.querySelector('.card').cloneNode(true)
+      dom_news.querySelector('.card').remove()
+
+      const dom_news_card2 = dom_news2.querySelector('.card').cloneNode(true)
+      dom_news2.querySelector('.card').remove()
+
+      //系統訊息彈窗
+      const dom_dialog_alert = new bootstrap.Modal('#dialog_alert', {
+        keyboard: false
+      })
+
+      //綁定收盤價旁邊的問號
+      document.querySelector('#show_text_end_price').addEventListener('click', () => {
+        document.querySelector('#dialog_alert .modal-body').textContent = "每日收盤都比前一天高的連續天數"
+        dom_dialog_alert.show()
+      })
+      //綁定新聞旁邊的問號
+      document.querySelector('#show_text_news').addEventListener('click', () => {
+        document.querySelector('#dialog_alert .modal-body').textContent = "這裡顯示的是24小時內的新聞數量"
+        dom_dialog_alert.show()
+      })
+
+      //顯示圖表
+      // const dialog_chartjs = document.querySelector('#dialog_chartjs')
+      // const dom_dialog_chartjs = new bootstrap.Modal(dialog_chartjs, {
+      //   keyboard: false
+      // })
+      // const show_chartjs = async (stock) => {
+      //   document.querySelector('#dialog_chartjs .modal-title').textContent = stock
+      //   dom_dialog_chartjs.show()
+      //   dialog_chartjs.querySelector('.modal-body').innerHTML = `
+      //     <div class="spinner-border spinner-border-sm" role="status">
+      //       <span class="visually-hidden"></span>
+      //     </div>
+      //     Loading...
+      //   `
+
+      //   const buy_stock = stock
+      //   const new_promise = () => {
+      //     return new Promise(async (resolve, reject) => {
+      //       resolve(await getDatas5_buy_history(buy_stock))
+      //     })
+      //   }
+      //   const result = await new_promise()
+      //   // console.log(result)
+
+      //   //翻轉數據
+      //   result.data.reverse()
+
+      //   //繪圖
+      //   dialog_chartjs.querySelector('.modal-body').innerHTML = `<canvas id="myChart" class="w-100" height="400"></canvas>`
+      //   const ctx = document.getElementById('myChart').getContext('2d');
+
+      //   const labels = result.data.map(v=>v.label)
+      //   //繪製result和cost(Y的單位不同, 所以要把cost的Y軸放在右邊)
+      //   const myChart = new Chart(ctx, {
+      //     type: 'line',
+      //     data: {
+      //       labels: labels,
+      //       datasets: [
+      //         {
+      //           label: '收盤價',
+      //           data: result.data.map(v=>v.data),
+      //           borderColor: 'rgba(255, 99, 132, 1)',
+      //           borderWidth: 1,
+      //           fill: false,
+      //           yAxisID: 'y-axis-0'
+      //         }
+      //       ]
+      //     },
+      //     options: {
+      //       scales: {
+      //         x: {
+      //           ticks: {
+      //             callback: function(value, index, values) {
+      //               return labels[value]
+      //             }
+      //           }
+      //         },
+      //         'y-axis-0': {
+      //           type: 'linear',
+      //           position: 'left',
+      //         },
+              
+      //       },
+      //       responsive: true,
+      //       plugins: {
+      //         zoom: {
+      //           pan: {
+      //             enabled: true,
+      //             mode: 'x',
+      //             speed: 10,
+      //             threshold: 10
+      //           },
+      //           zoom: {
+      //             wheel: {
+      //               enabled: true,
+      //             },
+      //             drag: {
+      //               enabled: true
+      //             },
+      //             pinch: {
+      //               enabled: true
+      //             },
+      //             mode: 'x',
+      //             speed: 0.1
+      //           }
+      //         }
+      //       }
+          
+      //     }
+      //   });
+
+      // }
+
+      //讀取資料
+      const get_datas = async ()=>{
+        const search_date = document.querySelector('#search_date').value
+        const show_data = (data) => {
+
+          if (data.error_msg) {
+            document.querySelector('#dialog_alert .modal-body').textContent = data.error_msg
+            dom_dialog_alert.show()
+            return
+          }
+          
+          document.querySelectorAll('#table_tr').forEach(v => v.remove())
+
+          document.querySelector('#search_date').value = data.search_date
+          // const setting_price1 = document.querySelector('#price1').checked
+          // const setting_price2 = document.querySelector('#price2').checked
+          // const setting_price3 = document.querySelector('#price3').checked
+
+          //漲平跌家數統計
+          // document.querySelector('#price1_badge').textContent = data.news.filter(v => /\+/.test(v[9])).length
+          // document.querySelector('#price2_badge').textContent = data.news.filter(v => !/[\+\-]/.test(v[9])).length
+          // document.querySelector('#price3_badge').textContent = data.news.filter(v => /\-/.test(v[9])).length
+
+          const ai_news = []
+          let kk = 0
+          for (const k in data.news) {
+            // if (k==0) continue
+            const v = {
+              stock: data.news[k]
+            }
+            v.news = data.news_1.filter(v2=> (new RegExp(v.stock[1])).test(v2[5]))
+            v.news_ai = data.news_2.filter(v2=> (new RegExp(v.stock[1])).test(v2[2].split("\n")[0]))
+            
+            const dom = table_tr.cloneNode(true)
+            // dom.querySelector('.card-title').textContent = v[1]
+            const td = dom.querySelectorAll('td')
+            // td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}`
+            td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}
+            <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+            `
+            //轉為億，小數點後兩位，四捨五入
+            td[1].textContent = `${(v.stock[4].replace(/,/g, '')/100000000).toFixed(2)}億`
+
+            td[2].querySelector('span').textContent = `${v.stock[8].replace(/,/g, '')}`
+
+            td[2].querySelectorAll('span')[2].textContent = `${v.stock[16]}%`
+            //漲跌標示
+            if (/\+/.test(v.stock[9])) {
+              td[2].querySelector('span').classList.add('text-danger')
+            //   if (!setting_price1) {
+            //     continue
+            //   }
+            // } else if (/\-/.test(v.stock[9])) {
+            //   td[2].querySelector('span').classList.add('text-success')
+            //   if (!setting_price3) {
+            //     continue
+            //   }
+            // } else {
+            //   if (!setting_price2) {
+            //     continue
+            //   }
+            }
+            if (v.stock[17] > 0) {
+              td[2].querySelector('#continuous_up').classList.remove('d-none')
+              td[2].querySelector('#continuous_up').textContent = v.stock[17] - 0 + 1
+            }
+
+            const turnover_data_stock = data.turnover_data_stock.find(v2=>v2.name == v.stock[1])
+            //首次上榜
+            if (!turnover_data_stock) {
+              dom.classList.add('bg-warning', 'bg-opacity-50')
+            }
+            if (turnover_data_stock) {
+              const increase = ((Number(v.stock[8].replace(/,/g, '')) - turnover_data_stock.lowest_close_price)/turnover_data_stock.lowest_close_price*100).toFixed(2)
+              td[1].innerHTML = td[1].innerHTML + `<br>
+                <span class="badge rounded-pill text-bg-info">入榜${turnover_data_stock.timer}次</span>
+                <span class="badge rounded-pill text-bg-info">累漲${increase}%</span>
+              `
+            }
+            
+            //顯示排名&是否熱門
+            const is_fire = v.news.filter(v2 => v2[1] >= data.now).findIndex(v=> /熱門/.test(v[3])) >= 0 ? true : false
+            const is_fire_week = v.news.filter(v2 => v2[1] >= data.now_week).findIndex(v=> /熱門族群/.test(v[3])) >= 0 ? true : false
+            dom.querySelector('th').innerHTML = `${++kk}${is_fire ? `<br><a href="javascript:void(0)" class="text-decoration-none" id="fire">🔥</a>` : ''}`
+            dom.querySelector('th').innerHTML += `${is_fire_week ? `<br><a href="javascript:void(0)" class="text-decoration-none" id="fire_week">&#129512;</a>` : ''}`
+            if (dom.querySelector('th #fire')) {
+              dom.querySelector('th #fire').addEventListener('click', () => {
+                  //取得熱門新聞
+                  const news = v.news.filter(v2 => v2[1] >= data.now && /熱門/.test(v2[3]))
+                  dom_news.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
+                  dom_news.querySelector('.modal-body').innerHTML = ''
+                  for (const v2 of news) {
+                    const dom_news_card_clone = dom_news_card.cloneNode(true)
+                    dom_news_card_clone.querySelector('.card-title').textContent = v2[3]
+                    dom_news_card_clone.querySelector('#news_time').textContent = v2[1]
+                    //渲染內容
+                    const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
+                    dom_news_card_clone.querySelector('.card-text').innerHTML = v2[5].replace(reg, `<span class="bg-warning">$1</span>`)
+
+                    dom_news_card_clone.querySelector('.card-link').href = v2[2]
+                    dom_news_card_clone.querySelector('.card-link').textContent = v2[6]
+                    dom_news.querySelector('.modal-body').append(dom_news_card_clone)
+                  }
+                  dom_dialog_news.show()
+              })
+            }
+            if (dom.querySelector('th #fire_week')) {
+              dom.querySelector('th #fire_week').addEventListener('click', () => {
+                  //取得熱門新聞
+                  const news = v.news.filter(v2 => v2[1] >= data.now_week && /熱門族群/.test(v2[3]))
+                  dom_news.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
+                  dom_news.querySelector('.modal-body').innerHTML = ''
+                  for (const v2 of news) {
+                    const dom_news_card_clone = dom_news_card.cloneNode(true)
+                    dom_news_card_clone.querySelector('.card-title').textContent = v2[3]
+                    dom_news_card_clone.querySelector('#news_time').textContent = v2[1]
+                    //渲染內容
+                    const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
+                    dom_news_card_clone.querySelector('.card-text').innerHTML = v2[5].replace(reg, `<span class="bg-warning">$1</span>`)
+
+                    dom_news_card_clone.querySelector('.card-link').href = v2[2]
+                    dom_news_card_clone.querySelector('.card-link').textContent = v2[6]
+                    dom_news.querySelector('.modal-body').append(dom_news_card_clone)
+                  }
+                  dom_dialog_news.show()
+              })
+            }
+
+            //亮燈標示
+            const end_price = Number(v.stock[8].replace(/,/g, ''))
+            const use_sub = /\+/.test(v.stock[9])?'-':''
+            const light = Math.round(end_price/(end_price+Number(`${use_sub}${Number(v.stock[10])}`))*100)
+            if (light == 110) {
+              td[2].querySelector('span').classList.add('bg-danger', 'text-dark','p-1', 'rounded')
+            } else if (light == 90) {
+              td[2].querySelector('span').classList.add('bg-success', 'text-white','p-1', 'rounded')
+            }
+            
+            //新聞按鈕
+            td[3].querySelector('#b_news span').textContent = `${v.news.filter(v2 => v2[1] >= data.now).length}/${v.news.length}`
+            td[3].querySelector('#b_news').addEventListener('click', function() {
+              dom_news.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
+              dom_news.querySelector('.modal-body').innerHTML = ''
+              for (const v2 of v.news) {
+                  const dom_news_card_clone = dom_news_card.cloneNode(true)
+                  dom_news_card_clone.querySelector('.card-title').textContent = v2[3]
+                  dom_news_card_clone.querySelector('#news_time').textContent = v2[1]
+                  //渲染內容
+                  const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
+                  dom_news_card_clone.querySelector('.card-text').innerHTML = v2[5].replace(reg, `<span class="bg-warning">$1</span>`)
+
+                  dom_news_card_clone.querySelector('.card-link').href = v2[2]
+                  dom_news_card_clone.querySelector('.card-link').textContent = v2[6]
+                  dom_news.querySelector('.modal-body').append(dom_news_card_clone)
+              }
+              dom_dialog_news.show()
+            })
+
+            //分析按鈕
+            td[3].querySelector('#b_news_ai span').textContent = `${v.news_ai.filter(v2 => {
+              if (v2[0] >= data.now) {
+                const text = v2[2].split("\n")
+                ai_news.push(text.slice(0, text.length - 1).join("\n"))
+                return true
+              }
+              return false
+            }).length}/${v.news_ai.length}`
+            
+            td[3].querySelector('#b_news_ai').addEventListener('click', function() {
+              dom_news2.querySelector('.modal-title').innerHTML = `${v.stock[1]}(${v.stock[0]})
+              <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+              `
+              dom_news2.querySelector('.modal-body').innerHTML = ''
+              for (const v2 of v.news_ai) {
+                  const dom_news_card_clone = dom_news_card2.cloneNode(true)
+                  dom_news_card_clone.querySelector('.card-title').remove()
+                  dom_news_card_clone.querySelector('.card-subtitle #news_time').textContent = `${v2[0]}`
+
+                  //渲染內容
+                  const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
+                  const text = v2[2].split("\n")
+                  // dom_news_card_clone.querySelector('.card-title').textContent = text[0]
+                  const text2 = text.slice(1, text.length - 1).map(v3=> `<li>${v3.replace(/^[0-9]+\./, '')}</li>`)
+                  dom_news_card_clone.querySelector('.card-text').innerHTML = `<ol class="m-0 ps-4">${text2.join("").replace(reg, `<span class="bg-warning">$1</span>`)}</ol>`
+
+                  dom_news_card_clone.querySelector('.card-subtitle #news_link').innerHTML = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `<a href="$1" target="_blank">${v2[1]}</a>\n`).replace(/\n/g, '<br>')
+
+                  if (v2[1] == 'AI每周整理') {
+                    dom_news_card_clone.querySelector('.card-text').innerHTML = text.slice(1, text.length - 1).join("<br>")
+                    dom_news_card_clone.querySelector('.card-subtitle #news_link').innerHTML = v2[1]
+                  }
+
+                  dom_news2.querySelector('.modal-body').append(dom_news_card_clone)
+              }
+              dom_dialog_news2.show()
+            })
+
+            //綁定收盤價按鈕
+            // dom.querySelector('#show_chartjs').addEventListener('click', () => {
+            //   show_chartjs(v.stock[0])
+            // })
+            
+            document.querySelector('#table_tbody').append(dom)
+          }
+          // console.log(ai_news.join("\n\n"))
+        }
+        
+        const new_promise = () => {
+          return new Promise(async (resolve, reject) => {
+            try {
+              resolve(await getDatas9(search_date))
+            } catch (error) {
+              google.script.run.withSuccessHandler((data)=>{
+                resolve(data)
+              }).getDatas9(search_date);
+            }
+          })
+        }
+        const result = await new_promise()
+        show_data(result)
+      }
+      get_datas()
+
+      //綁定查詢事件
+      document.querySelector('#search').addEventListener('click', () => {
+        document.querySelectorAll('#table_tr').forEach(v => v.remove())
+        const dom = table_tr.cloneNode(true)
+        document.querySelector('#table_tbody').append(dom)
+        get_datas()
+      })
+
+    </script>
+  </body>
+</html>
