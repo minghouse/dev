@@ -17,7 +17,9 @@ const getDatas = async (req, res) => {
  
     const yahoo_turnover = await (async () => {
         const response = await fetch(`https://www.moneydj.com/Z/ZG/ZG.djhtm?a=BD`);
-        const r1 = await response.text() || ''
+        const decoder = new TextDecoder('big5'); // 指定 Big5 編碼
+        const r1 = decoder.decode(await response.arrayBuffer()); // 轉為 UTF-8 字串
+        // const r1 = await response.text() || ''
         const result = r1.match(/<tr>[\s\S]*?<\/tr>/g)
         // console.log(result)
         //刪除第一筆
@@ -26,6 +28,9 @@ const getDatas = async (req, res) => {
             // console.log(v)
             const v2 = v.match(/<td class="(t3t1|t3t1_rev)">[\s\S]*?<\/td>/g) || []
             const v3 = v.match(/<td class="(t3n1|t3r1|t3g1|t3n1_rev|t3r1_rev|t3g1_rev)">[\s\S]*?<\/td>/g) || []
+            // const name = iconv.decode(Buffer.from((v2[0].match(/GenLink2stk\(\s*'[^']+'\s*,\s*'([^']+)'\s*\)/) || [])[1], 'binary'), 'big5')
+            //big5 to utf8
+            // const name = iconv.decode(Buffer.from((v2[0].match(/GenLink2stk\(\s*'[^']+'\s*,\s*'([^']+)'\s*\)/) || [])[1], 'binary'), 'big5')
             return {
               symbol: (v2[0].match(/GenLink2stk\('([^']+)'/) || [])[1].replace(/(AS|AP)/,''), // 證券代號
               name: (v2[0].match(/GenLink2stk\(\s*'[^']+'\s*,\s*'([^']+)'\s*\)/) || [])[1], // 證券名稱
@@ -37,11 +42,11 @@ const getDatas = async (req, res) => {
   
             }
           })
-          // <div class="t11">日期：02/19</div> 
-          const time = r1.match(/<div class="t11">([^<]+)<\/div>/) || [])[1] || ''
+          // <div class="t11">日期：02/19</div>
+          const time = r1.match(/<div class="t11">日期：([^<]+)<\/div>/)
           return {
             data: data,
-            time: (time.match(/([0-9\/]+)/) || [])[1] || ''
+            time: time ? time[1] : ''
           }
     })()
 
@@ -64,7 +69,9 @@ const getDatas = async (req, res) => {
         //   <td class="t3n1">&nbsp;58,626</td>
         //   <td class="t3n1">&nbsp;67.81%</td>
         //   </tr>
-        const r1 = await response.text() || ''
+        const decoder = new TextDecoder('big5'); // 指定 Big5 編碼
+        const r1 = decoder.decode(await response.arrayBuffer()); // 轉為 UTF-8 字串
+        // const r1 = await response.text() || ''
         const result = r1.match(/<tr>[\s\S]*?<\/tr>/g)
         // console.log(result)
         //刪除第一筆
@@ -73,6 +80,7 @@ const getDatas = async (req, res) => {
           // console.log(v)
           const v2 = v.match(/<td class="(t3t1|t3t1_rev)">[\s\S]*?<\/td>/g) || []
           const v3 = v.match(/<td class="(t3n1|t3r1|t3g1|t3n1_rev|t3r1_rev|t3g1_rev)">[\s\S]*?<\/td>/g) || []
+        //   const name = iconv.decode(Buffer.from((v2[0].match(/GenLink2stk\(\s*'[^']+'\s*,\s*'([^']+)'\s*\)/) || [])[1], 'binary'), 'big5')
           return {
             symbol: (v2[0].match(/GenLink2stk\('([^']+)'/) || [])[1].replace(/(AS|AP)/,''), // 證券代號
             name: (v2[0].match(/GenLink2stk\(\s*'[^']+'\s*,\s*'([^']+)'\s*\)/) || [])[1], // 證券名稱
