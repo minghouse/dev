@@ -88,9 +88,9 @@ if (port == '8080') {
     app.listen(port, () => {
         console.log(`Server is running on port ${port}`)
     });
-    return
+} else {
+    // 啟動 HTTPS 伺服器
+    https.createServer(sslOptions, app).listen(port, () => {
+        console.log(`Server is running on port ${port}`)
+    });
 }
-// 啟動 HTTPS 伺服器
-https.createServer(sslOptions, app).listen(port, () => {
-    console.log(`Server is running on port ${port}`)
-});
