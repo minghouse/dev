@@ -22,7 +22,7 @@ const getDatas9 = async (search_date) => {
     // console.log('Access Token:', accessToken);
 
     
-    const now = dayjs.dayjs();
+    const now = dayjs();
     // let date_now = (()=>{
     //   if (search_date) {
     //     return search_date.replace(/-/g,'')
@@ -37,7 +37,7 @@ const getDatas9 = async (search_date) => {
     //   }
     //   return r
     // })()
-    const date_start = dayjs.dayjs(now).add(-24 * 14, 'hours').format('YYYY-MM-DD HH:mm');
+    const date_start = dayjs(now).add(-24 * 14, 'hours').format('YYYY-MM-DD HH:mm');
   
     // const values = get_data("經濟日報", 5000).map(v=> {
     //   v[6] = '經濟日報'
@@ -154,7 +154,7 @@ const getDatas9 = async (search_date) => {
     // https://www.moneydj.com/Z/ZG/ZG.djhtm?a=BD
     // https://www.moneydj.com/z/zg/zg_BD_1_0.djhtm
     let error_msg = ''
-    const result_1 = (()=>{
+    const result_1 = await (async () => {
         //取得當日的週轉率排行
         const yahoo_turnover3 = await (async () => {
             const response = await fetch(`https://node-dev.azurewebsites.net/google/turnover_rate`);
@@ -180,18 +180,17 @@ const getDatas9 = async (search_date) => {
         // const c2 = ((c1 / Number(c)) * 100).toFixed(2)
         // a[16] = Number(c2) || 0
         // return c2 <= 10 && c2 >= -10
-        a[16] = Number(a[10].replace(/,/g,'')) || 0
-        return a
+        a[16] = Number(a[10].replace(/[\+,%]/g,'')) || 0
     })
 
-    result.sort(function (a, b) {
-      // const c1 = Number(a[8].replace(/,/g,'')) - /\+/.test(a[9])?a[10]:0-a[10]
-      // const c2 = Number(b[8].replace(/,/g,'')) - /\+/.test(b[9])?b[10]:0-b[10]
-      // return (Number(a[8].replace(/,/g,''))/c1*100).toFixed(2) >= (Number(b[8].replace(/,/g,''))/c2*100).toFixed(2) ? 1 : -1
-      //使用周轉率排序
-      return Number(a[11].replace(/(\+%)/g,'')) <= Number(b[11].replace(/(\+%)/g,'')) ? 1 : -1
-    })
-    const result_20 = result.slice(0, 100)
+    // result.sort(function (a, b) {
+    //   // const c1 = Number(a[8].replace(/,/g,'')) - /\+/.test(a[9])?a[10]:0-a[10]
+    //   // const c2 = Number(b[8].replace(/,/g,'')) - /\+/.test(b[9])?b[10]:0-b[10]
+    //   // return (Number(a[8].replace(/,/g,''))/c1*100).toFixed(2) >= (Number(b[8].replace(/,/g,''))/c2*100).toFixed(2) ? 1 : -1
+    //   //使用周轉率排序
+    //   return Number(a[11].replace(/(\+%)/g,'')) <= Number(b[11].replace(/(\+%)/g,'')) ? 1 : -1
+    // })
+    // const result_20 = result.slice(0, 100)
     // console.log(result_20)
     const result_20_name = result.map(v=>v[1]) //股票名稱
   

@@ -52,7 +52,7 @@
     <div class="container-fluid px-1">
       <nav class="navbar mt-1 rounded" style="background-color: #e3f2fd;">
           <div class="container-fluid">
-          <a class="navbar-brand fw-bold" href="#">每日漲幅排行</a>
+          <a class="navbar-brand fw-bold" href="#">週轉率排行</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -68,7 +68,7 @@
                 <a class="nav-link" href="index2.html" data-href="?page=2">每日成交值排行</a>
               </li>
               <li class="nav-item border-top">
-                <a class="nav-link active" href="index3.html" data-href="?page=3">每日漲幅排行</a>
+                <a class="nav-link" href="index3.html" data-href="?page=3">每日漲幅排行</a>
               </li>
               <li class="nav-item border-top">
                 <a class="nav-link" href="index5.html" data-href="?page=5">自選股</a>
@@ -78,6 +78,9 @@
               </li>
               <li class="nav-item border-top">
                 <a class="nav-link" href="index8.html" data-href="?page=7">區間漲幅排行</a>
+              </li>
+              <li class="nav-item border-top">
+                <a class="nav-link active" href="index9.html" data-href="?page=9">週轉率排行</a>
               </li>
             </ul>
           </div>
@@ -122,7 +125,7 @@
             <tr>
               <th scope="col" width="10">#</th>
               <th scope="col" style="min-width:80px">名稱</th>
-              <th scope="col" width="100">成交值</th>
+              <th scope="col" width="120">成交量/週轉率</th>
               <th scope="col" style="min-width:80px">收盤價
                 <a href="javascript:void(0);" class="text-decoration-none my-f-70" id="show_text_end_price">❔</a></th>
               <th scope="col" width="120">新聞
@@ -489,8 +492,8 @@
             td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}
             <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
             `
-            //轉為億，小數點後兩位，四捨五入
-            td[1].textContent = `${(v.stock[4].replace(/,/g, '')/100000000).toFixed(2)}億`
+            //轉為萬，小數點後兩位，四捨五入
+            td[1].innerHTML = `${(v.stock[4].replace(/,/g, '')/10000000).toFixed(2)}萬張<br>${v.stock[11]}`
 
             td[2].querySelector('span').textContent = `${v.stock[8].replace(/,/g, '')}`
 
@@ -516,18 +519,18 @@
               td[2].querySelector('#continuous_up').textContent = v.stock[17] - 0 + 1
             }
 
-            const turnover_data_stock = data.turnover_data_stock.find(v2=>v2.name == v.stock[1])
-            //首次上榜
-            if (!turnover_data_stock) {
-              dom.classList.add('bg-warning', 'bg-opacity-50')
-            }
-            if (turnover_data_stock) {
-              const increase = ((Number(v.stock[8].replace(/,/g, '')) - turnover_data_stock.lowest_close_price)/turnover_data_stock.lowest_close_price*100).toFixed(2)
-              td[1].innerHTML = td[1].innerHTML + `<br>
-                <span class="badge rounded-pill text-bg-info">入榜${turnover_data_stock.timer}次</span>
-                <span class="badge rounded-pill text-bg-info">累漲${increase}%</span>
-              `
-            }
+            // const turnover_data_stock = data.turnover_data_stock.find(v2=>v2.name == v.stock[1])
+            // //首次上榜
+            // if (!turnover_data_stock) {
+            //   dom.classList.add('bg-warning', 'bg-opacity-50')
+            // }
+            // if (turnover_data_stock) {
+            //   const increase = ((Number(v.stock[8].replace(/,/g, '')) - turnover_data_stock.lowest_close_price)/turnover_data_stock.lowest_close_price*100).toFixed(2)
+            //   td[1].innerHTML = td[1].innerHTML + `<br>
+            //     <span class="badge rounded-pill text-bg-info">入榜${turnover_data_stock.timer}次</span>
+            //     <span class="badge rounded-pill text-bg-info">累漲${increase}%</span>
+            //   `
+            // }
             
             //顯示排名&是否熱門
             const is_fire = v.news.filter(v2 => v2[1] >= data.now).findIndex(v=> /熱門/.test(v[3])) >= 0 ? true : false
@@ -661,9 +664,10 @@
             try {
               resolve(await getDatas9(search_date))
             } catch (error) {
-              google.script.run.withSuccessHandler((data)=>{
-                resolve(data)
-              }).getDatas9(search_date);
+              console.log(error)
+              // google.script.run.withSuccessHandler((data)=>{
+              //   resolve(data)
+              // }).getDatas9(search_date);
             }
           })
         }
