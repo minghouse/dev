@@ -83,9 +83,13 @@ app.get('/afterTrading', (req, res) => {
 });
 
 const port = process.env.PORT || 3000;
-// app.listen(port, () => {
-//     console.log(`Server is running on port ${port}`)
-// });
+
+if (port == '8080') {
+    app.listen(port, () => {
+        console.log(`Server is running on port ${port}`)
+    });
+    return
+}
 // 啟動 HTTPS 伺服器
 https.createServer(sslOptions, app).listen(port, () => {
     console.log(`Server is running on port ${port}`)
