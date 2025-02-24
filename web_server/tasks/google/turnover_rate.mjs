@@ -16,7 +16,7 @@ const getDatas = async (req, res) => {
     // 配置參數
  
     const yahoo_turnover = await (async () => {
-        const response = await fetch(`https://www.moneydj.com/Z/ZG/ZG.djhtm?a=BD`);
+        const response = await fetch(`https://www.moneydj.com/z/zg/zg_BD_0_0.djhtm`);
         const decoder = new TextDecoder('big5'); // 指定 Big5 編碼
         const r1 = decoder.decode(await response.arrayBuffer()); // 轉為 UTF-8 字串
         // const r1 = await response.text() || ''
@@ -51,7 +51,7 @@ const getDatas = async (req, res) => {
     })()
 
     const yahoo_turnover2 = await (async () => {
-        const response = await fetch(`https://www.moneydj.com/z/zg/zg_BD_0_0.djhtm`);
+        const response = await fetch(`https://www.moneydj.com/z/zg/zg_BD_1_0.djhtm`);
         // <tr>
         //名次	股票名稱	收盤價	漲跌	漲跌幅	成交量	週轉率
         //   <td class="t3n0" id="oAddCheckbox">1</td>
