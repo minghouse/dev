@@ -104,7 +104,8 @@ const getDatas = async (req, res) => {
     const yahoo_turnover3 = {}
     yahoo_turnover3.time = yahoo_turnover.time
     yahoo_turnover3.data = yahoo_turnover.data.concat(yahoo_turnover2.data).sort(function (a, b) {
-        return Number(a.turnoverK.replace('%', '')) <= Number(b.turnoverK.replace('%', '')) ? 1 : -1
+        // return Number(a.turnoverK.replace('%', '')) <= Number(b.turnoverK.replace('%', '')) ? 1 : -1
+        return Number(a.priceChangePercent.replace('%', '')) <= Number(b.priceChangePercent.replace('%', '')) ? 1 : -1
     })
 
     // console.log(yahoo_turnover3.time)

@@ -273,8 +273,8 @@ const getDatas9 = async (search_date) => {
   
     const out = {
       error_msg: error_msg,
-      // now: dayjs.dayjs().add(-1, 'day').format('YYYY-MM-DD HH:mm'),
-      // now_week: dayjs.dayjs().add(-14, 'day').format('YYYY-MM-DD HH:mm'),
+      now: dayjs().add(-1, 'day').format('YYYY-MM-DD HH:mm'),
+      now_week: dayjs().add(-14, 'day').format('YYYY-MM-DD HH:mm'),
       // search_date: dayjs.dayjs(date_now).format('YYYY-MM-DD'),
       search_date: result_1.time,
       // news: news
