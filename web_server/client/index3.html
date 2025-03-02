@@ -114,7 +114,7 @@
                 </span>
               </label>
             </div> -->
-            <button type="button" class="btn btn-outline-secondary active" id="search_firecracker">🔥</button>
+            <button type="button" class="btn btn-outline-secondary active" id="search_firecracker">🔥&#129512;</button>
             <input type="date" class="form-control rounded-start" placeholder="" id="search_date" >
             <button class="btn btn-outline-secondary" type="button" id="search">查詢</button>
           </div>
@@ -658,6 +658,9 @@
             const search_firecracker = document.querySelector('#search_firecracker').classList.contains('active')
             if (search_firecracker) {
               if (is_fire && v.stock[16] >= 6) {
+                document.querySelector('#table_tbody').append(dom)
+              }
+              if (is_fire_week && v.stock[16] >= 6) {
                 document.querySelector('#table_tbody').append(dom)
               }
             } else {
