@@ -114,6 +114,7 @@
                 </span>
               </label>
             </div> -->
+            <button type="button" class="btn btn-outline-secondary active" id="search_firecracker">🔥</button>
             <input type="date" class="form-control rounded-start" placeholder="" id="search_date" disabled >
             <button class="btn btn-outline-secondary disabled" type="button" id="search">查詢</button>
           </div>
@@ -654,7 +655,15 @@
             //   show_chartjs(v.stock[0])
             // })
             
-            document.querySelector('#table_tbody').append(dom)
+            //取得search_firecracker是否active
+            const search_firecracker = document.querySelector('#search_firecracker').classList.contains('active')
+            if (search_firecracker) {
+              if (is_fire && v.stock[16] >= 6) {
+                document.querySelector('#table_tbody').append(dom)
+              }
+            } else {
+              document.querySelector('#table_tbody').append(dom)
+            }
           }
           // console.log(ai_news.join("\n\n"))
         }
@@ -673,6 +682,12 @@
         }
         const result = await new_promise()
         show_data(result)
+        
+        //綁定search_firecracker click
+        document.querySelector('#search_firecracker').addEventListener('click', () => {
+          document.querySelector('#search_firecracker').classList.toggle('active')
+          show_data(result)
+        })
       }
       get_datas()
 
