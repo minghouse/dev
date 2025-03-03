@@ -223,18 +223,18 @@ const getDatas8 = async (search_date, search_date2) => {
         const new_right_data = get_change_rate(right_data, left_data)
         //由大到小排序?[4]
         new_right_data.sort(function(a,b){
-            if (isNaN(a[4])) a[4] = 0
-            if (isNaN(b[4])) b[4] = 0
-            return b[4]-a[4];
+            if (isNaN(a[4])) a[5] = 0
+            if (isNaN(b[4])) b[5] = 0
+            return b[5]-a[5];
         });
 
         //prev_search_date到search_date的漲幅
         const new_prev_data = get_change_rate(left_data, prev_data)
         //由大到小排序?[4]
         new_prev_data.sort(function(a,b){
-            if (isNaN(a[4])) a[4] = 0
-            if (isNaN(b[4])) b[4] = 0
-            return b[4]-a[4];
+            if (isNaN(a[4])) a[5] = 0
+            if (isNaN(b[4])) b[5] = 0
+            return b[5]-a[5];
         });
 
         //計算每一隻股票的名次變化

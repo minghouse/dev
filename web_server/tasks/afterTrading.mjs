@@ -63,7 +63,10 @@ const get_after_trading = async (date_now) => {
 
         const result_20 = result.concat(j2).map(v => {
             return [
-                v[0], v[1], v[8], v[2]
+                v[0], // 證券代號
+                v[1], // 證券名稱
+                v[8], // 收盤價
+                v[2] // 成交量
             ]
         })
         return result_20

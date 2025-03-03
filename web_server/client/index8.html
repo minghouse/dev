@@ -129,7 +129,7 @@
               <th scope="col" style="">名稱</th>
               <th scope="col" style="">起始價</th>
               <th scope="col" style="">收盤價</th>
-              <th scope="col" style="search_date">漲幅</th>
+              <th scope="col" style="search_date">成交量/漲幅</th>
               <th scope="col" width="120">新聞</th>
             </tr>
           </thead>
@@ -347,12 +347,12 @@
             <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
             `
             //
-            td[1].textContent = `${v.stock[3]}`
+            td[1].textContent = `${v.stock[4]}`
             td[2].innerHTML = `${v.stock[2]}<br>
-              <span class="${v.stock[5] > 0 ? 'text-danger' : v.stock[5] < 0 ? 'text-success' : ''}">
-                ${v.stock[5] >0 ? '<i class="fa-solid fa-arrow-up"></i>' : v.stock[5] < 0 ? '<i class="fa-solid fa-arrow-down"></i>' : ''}
-                ${Math.abs(v.stock[5])||''}`
-            td[3].textContent = `${v.stock[4]}%`
+              <span class="${v.stock[6] > 0 ? 'text-danger' : v.stock[6] < 0 ? 'text-success' : ''}">
+                ${v.stock[6] >0 ? '<i class="fa-solid fa-arrow-up"></i>' : v.stock[6] < 0 ? '<i class="fa-solid fa-arrow-down"></i>' : ''}
+                ${Math.abs(v.stock[6])||''}`
+            td[3].innerHTML = `${v.stock[3]}<br>${v.stock[5]}%`
 
             
             //顯示排名&是否熱門
