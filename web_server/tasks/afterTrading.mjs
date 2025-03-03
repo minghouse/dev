@@ -34,10 +34,10 @@ const get_after_trading = async (date_now) => {
         });
         const j1 = await response2.json();
         
-        if (!j1.aaData || j1.aaData.length == 0) {
+        if (!j1.tables[0].data || j1.tables[0].data.length == 0) {
             return []
         }
-        const j2 = (j1.aaData || []).map(v => {
+        const j2 = (j1.tables[0].data || []).map(v=> {
             const changeSign = v[3] > 0 ? '+' : v[3] < 0 ? '-' : '';
             const absoluteChange = Math.abs(parseFloat(v[3]));
 
