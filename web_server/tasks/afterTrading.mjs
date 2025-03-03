@@ -13,11 +13,11 @@ const get_after_trading = async (date_now) => {
             }
         });
         const j = await response.json();
-        if (!j.data9) {
+        if (!j.tables) {
             return []
         }
 
-        result = j.data9
+        result = ((j.tables || [])[8] || {}).data || []
         //櫃買收盤價
         const date_now2 = encodeURIComponent(`${date_now_twse.substring(0, 4)-1911}/${date_now_twse.substring(4, 6)}/${date_now_twse.substring(6, 8)}`)
         var options = {
