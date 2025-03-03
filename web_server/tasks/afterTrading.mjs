@@ -63,7 +63,7 @@ const get_after_trading = async (date_now) => {
 
         const result_20 = result.concat(j2).map(v => {
             return [
-                v[0], v[1], v[8]
+                v[0], v[1], v[8], v[2]
             ]
         })
         return result_20
