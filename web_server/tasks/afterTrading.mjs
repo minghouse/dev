@@ -3,7 +3,6 @@ import dayjs from 'dayjs';
 
 
 const get_after_trading = async (date_now) => {
-    let result
     try {
         const date_now_twse = date_now.replace(/-/g, '')
         const response = await fetch(`https://www.twse.com.tw/exchangeReport/MI_INDEX?response=json&date=${date_now_twse}&type=ALLBUT0999`, {
@@ -17,7 +16,7 @@ const get_after_trading = async (date_now) => {
             return []
         }
 
-        result = ((j.tables || [])[8] || {}).data || []
+        const result = ((j.tables || [])[8] || {}).data || []
         //櫃買收盤價
         const date_now2 = encodeURIComponent(`${date_now_twse.substring(0, 4)-1911}/${date_now_twse.substring(4, 6)}/${date_now_twse.substring(6, 8)}`)
         var options = {
