@@ -21,7 +21,6 @@ jobs:
           username: ${{ secrets.GCP_VM_USER }}
           key: ${{ secrets.GCP_SSH_KEY }}
           script: |
-            cd /path/to/your/app
+            cd ~/ai_news/sources
             git pull origin master
-            docker compose down
-            docker compose up -d --build
+            sudo docker restart ai_news
