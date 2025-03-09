@@ -22,6 +22,8 @@ jobs:
           key: ${{ secrets.GCP_SSH_KEY }}
           script: |
             cd ~/ai_news/sources
+            git reset --hard HEAD
+            git clean -df
             git pull origin master
             npm install
             sudo docker restart ai_news
