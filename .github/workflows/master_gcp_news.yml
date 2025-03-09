@@ -12,7 +12,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: gcp  # 指定環境
+    environment: gcp_news  # 指定環境
     steps:
       - name: Deploy to GCP VM
         uses: appleboy/ssh-action@v0.1.10
