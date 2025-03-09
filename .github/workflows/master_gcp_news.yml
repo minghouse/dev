@@ -23,4 +23,5 @@ jobs:
           script: |
             cd ~/ai_news/sources
             git pull origin master
+            npm install
             sudo docker restart ai_news
