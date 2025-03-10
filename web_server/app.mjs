@@ -35,6 +35,9 @@ app.use(cors())
 app.use(bodyParser.json());
 app.use(compression()); // Use compression middleware for gzip compression
 
+//client開頭的路由就顯示client裡面對應路由的檔案資料
+// app.use('/client', express.static(path.join(__dirname, 'client')));
+
 app.get('/', (req, res) => {
     res.send('Hello World')
 });
@@ -81,6 +84,7 @@ app.post('/gcp_mysql/insert', (req, res) => {
 app.get('/afterTrading', (req, res) => {
     afterTrading(req, res)
 });
+
 
 const port = process.env.PORT || 3000;
 
