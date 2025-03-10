@@ -43,6 +43,7 @@
         font-size:70%;
       }
     </style>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>
     <div class="container-fluid px-1">
@@ -283,7 +284,10 @@
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
     <script type="module">
+      import { checkLogin } from "./js/modules/auth.js";
       import getDatas8 from './js/getDatas8.js';
+
+      await checkLogin(); // 檢查登入狀態
 
       //初始化
       const table_tr = document.querySelector('#table_tr').cloneNode(true)
