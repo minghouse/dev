@@ -14,6 +14,8 @@ import turnover_rate from './tasks/google/turnover_rate.mjs';
 import azure_mysql from './tasks/azure_mysql.mjs';
 import gcp_mysql from './tasks/gcp_mysql.mjs';
 import afterTrading from './tasks/afterTrading.mjs';
+//瀏覽器解析body的套件
+import browser from './tasks/browser.mjs';
 
 import bodyParser from 'body-parser';
 import compression from 'compression'; // Import the compression module
@@ -83,6 +85,9 @@ app.post('/gcp_mysql/insert', (req, res) => {
 });
 app.get('/afterTrading', (req, res) => {
     afterTrading(req, res)
+});
+app.post('/browser', (req, res) => {
+    browser(req, res)
 });
 
 
