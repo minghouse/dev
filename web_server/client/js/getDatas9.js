@@ -68,12 +68,12 @@ const getDatas9 = async (search_date) => {
         "經濟日報",
         // "中國時報",
         "yahoo財經",
-        "IEK",
+        "工商時報",
         "時報新聞",
         "AI整理-經濟日報",
         // "AI整理-中國時報",
         "AI整理-yahoo財經",
-        "AI整理-IEK",
+        "AI整理-工商時報",
         "AI整理-時報新聞",
         "AI每周整理",
         "每日漲幅排名"
@@ -83,7 +83,7 @@ const getDatas9 = async (search_date) => {
         const ai_start = (()=>{
             if (v == 'AI每周整理') {
                 return ai_sn[v] - 20 < 2 ? 2 : ai_sn[v] - 20
-            } else if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-IEK", "AI整理-時報新聞" ].includes(v)) {
+            } else if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞" ].includes(v)) {
                 return ai_sn[v] - 1000 < 2 ? 2 : ai_sn[v] - 1000
             } else if (v == '每日漲幅排名') {
                 return 2
@@ -93,7 +93,7 @@ const getDatas9 = async (search_date) => {
         const ai_end = (()=>{
             if (v == 'AI每周整理') {
                 return 20
-            } else if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-IEK", "AI整理-時報新聞" ].includes(v)) {
+            } else if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞" ].includes(v)) {
                 return ai_sn[v]
             } else if (v == '每日漲幅排名') {
                 return 140

@@ -38,7 +38,7 @@ const getDatas = async () => {
         "AI整理-yahoo財經",
         // "AI整理-工商時報",
         "AI整理-時報新聞",
-        "AI整理-IEK",
+        "AI整理-工商時報",
     ]
     const sheetData_promise = []
     for (const v of sheetData_name) {
