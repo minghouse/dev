@@ -86,7 +86,7 @@ app.post('/gcp_mysql/insert', (req, res) => {
 app.get('/afterTrading', (req, res) => {
     afterTrading(req, res)
 });
-app.post('/browser', (req, res) => {
+app.get('/browser', (req, res) => {
     browser(req, res)
 });
 
