@@ -126,7 +126,7 @@
             <tr>
               <th scope="col" width="10">#</th>
               <th scope="col" style="min-width:80px">名稱</th>
-              <th scope="col" width="100">成交值</th>
+              <th scope="col" width="100">成交量(張)</th>
               <th scope="col" style="min-width:80px">收盤價
                 <a href="javascript:void(0);" class="text-decoration-none my-f-70" id="show_text_end_price">❔</a></th>
               <th scope="col" width="120">新聞
@@ -494,7 +494,10 @@
             <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
             `
             //轉為億，小數點後兩位，四捨五入
-            td[1].textContent = `${(v.stock[4].replace(/,/g, '')/100000000).toFixed(2)}億`
+            // td[1].textContent = `${(v.stock[4].replace(/,/g, '')/100000000).toFixed(2)}億`
+            // td[1].textContent = `${(v.stock[2].replace(/,/g, '')/1000).toFixed(0)}`
+            //數字加上千分位
+            td[1].textContent = `${(v.stock[2].replace(/,/g, '')/1000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`
 
             td[2].querySelector('span').textContent = `${v.stock[8].replace(/,/g, '')}`
 
