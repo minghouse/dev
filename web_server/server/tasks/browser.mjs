@@ -11,8 +11,8 @@ const browser = async (req, res) => {
     console.log(url, selector)
         
     // 启动浏览器
-    // const browser = await chromium.launch({ headless: false });
-    const browser = await chromium.launch();
+    const browser = await chromium.launch({ headless: false });
+    // const browser = await chromium.launch();
 
     // 创建一个新的浏览器上下文并设置 User-Agent
     const context = await browser.newContext({
