@@ -22,15 +22,15 @@ const select = async (req, res) => {
     // 配置參數
     //select {*} from {*} {*}
     const params = {
-        select: req.query.select,
-        from: req.query.from,
-        where: req.query.where
+        select: req.body.select,
+        from: req.body.from,
+        where: req.body.where
     }
 
     res.setHeader('Access-Control-Allow-Origin', '*')
 
     //檢查參數
-    const auth = req.query.auth
+    const auth = req.body.auth
     if (auth != process.env.BROWSER_AUTH) {
         res.end('auth error')
         return
@@ -83,14 +83,14 @@ const insert = async (req, res) => {
     // 配置參數
     //insert into {*} values {*}
     const params = {
-        into: req.query.into,
-        values: req.query.values
+        into: req.body.into,
+        values: req.body.values
     }
 
     res.setHeader('Access-Control-Allow-Origin', '*')
     
     //檢查參數
-    const auth = req.query.auth
+    const auth = req.body.auth
     if (auth != process.env.BROWSER_AUTH) {
         res.end('auth error')
         return

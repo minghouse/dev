@@ -94,11 +94,11 @@ app.post('/azure_mysql/select', (req, res) => {
 app.post('/azure_mysql/insert', (req, res) => {
     azure_mysql.insert(req, res)
 });
-app.get('/gcp_mysql/select', (req, res) => {
+app.post('/gcp_mysql/select', (req, res) => {
     console.log(`/gcp_mysql/select, IP: ${req.ip}`)
     gcp_mysql.select(req, res)
 });
-app.get('/gcp_mysql/insert', (req, res) => {
+app.post('/gcp_mysql/insert', (req, res) => {
     //印出訪問的IP
     console.log(`/gcp_mysql/insert, IP: ${req.ip}`)
     gcp_mysql.insert(req, res)
