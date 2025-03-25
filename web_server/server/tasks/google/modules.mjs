@@ -9,7 +9,8 @@ async function getCryptoKey(privateKey) {
     const pemKey = privateKey
         .replace(/-----BEGIN PRIVATE KEY-----/, '')
         .replace(/-----END PRIVATE KEY-----/, '')
-        .replace(/\n/g, '')
+        // .replace(/\n/g, '')
+        .replace(/(\r\n|\n|\r)/g, '')
         .replace(/\\n/g, '');
     const binaryKey = Uint8Array.from(atob(pemKey), c => c.charCodeAt(0));
 
@@ -104,9 +105,24 @@ async function accessGoogleSheets(SPREADSHEET_ID, RANGE) {
     }
 }
 
+async function verifyGoogleToken(token) {
+    try {
+        const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`);
+        if (!response.ok) {
+            throw new Error('Invalid token');
+        }
+        const tokenInfo = await response.json();
+        return tokenInfo; // 返回 token 的詳細資訊
+    } catch (error) {
+        console.error('Error verifying Google token:', error);
+        throw error;
+    }
+}
+
 const out = {
     getAccessToken,
-    accessGoogleSheets
+    accessGoogleSheets,
+    verifyGoogleToken 
 }
 
 export default out

@@ -1,6 +1,9 @@
 // auth.js
 import { getCookie, setCookie } from "./cookieHelper.js";
+// settings.js
+import { settings } from "./settings.js";
 
+const api_domain = settings.api_domain;
 const CLIENT_ID = "209706996464-ojc2aahdsu7ek2df0494avch7gjqbhnh.apps.googleusercontent.com";
 
 // 檢查是否已登入
@@ -22,11 +25,17 @@ function showGoogleLogin() {
                     data-client_id="${CLIENT_ID}"
                     data-callback="handleCredentialResponse">
                 </div>
-                <div class="g_id_signin" data-type="standard"></div>
+                <div class="d-flex justify-content-center g_id_signin" data-type="standard" ></div>
             </div>
         </div>
     `;
     document.body.appendChild(modal);
+    // <script src="https://accounts.google.com/gsi/client" async defer></script>
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
 }
 
 // Google 回調函數 (在 window 註冊)
@@ -34,7 +43,7 @@ window.handleCredentialResponse = (response) => {
     console.log("Google JWT Token: ", response.credential);
 
     // 傳送 Token 到後端驗證
-    fetch("/api/auth/google-login", {
+    fetch(`${api_domain}/api/google_login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: response.credential })

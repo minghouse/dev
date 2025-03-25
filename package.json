@@ -4,7 +4,7 @@
   "description": "Your app description",
   "main": "web_server/app.mjs",
   "scripts": {
-    "start": "node web_server/app.mjs"
+    "start": "node web_server/server/app.mjs"
   },
   "type": "module",
   "dependencies": {
@@ -13,6 +13,8 @@
     "cors": "^2.8.5",
     "dayjs": "^1.10.4",
     "express": "^4.17.1",
+    "express-session": "^1.17.3",
+    "session-file-store": "^1.5.0",
     "mysql2": "^3.10.0",
     "playwright": "^1.51.0"
   },

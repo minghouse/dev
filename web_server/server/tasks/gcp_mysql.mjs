@@ -1,15 +1,4 @@
-import mysql from 'mysql2/promise';
-
-//資料庫連線資訊
-const mysqlConfig = {
-    host: process.env.MYSQL_AINEWS_HOST,
-    user: process.env.MYSQL_AINEWS_ACC,
-    password: process.env.MYSQL_AINEWS_PWD,
-    database: 'ai_news',
-    // compress: true  // 启用压缩
-};
-
-const pool = mysql.createPool(mysqlConfig);
+import pool from '../modules/mysql.mjs';
 
 /**
  * @example
@@ -33,12 +22,20 @@ const select = async (req, res) => {
     // 配置參數
     //select {*} from {*} {*}
     const params = {
-        select: req.body.select,
-        from: req.body.from,
-        where: req.body.where
+        select: req.query.select,
+        from: req.query.from,
+        where: req.query.where
     }
 
     res.setHeader('Access-Control-Allow-Origin', '*')
+
+    //檢查參數
+    const auth = req.query.auth
+    if (auth != process.env.BROWSER_AUTH) {
+        res.end('auth error')
+        return
+    }
+
     //檢查參數
     if (!params.select || !params.from) {
         res.status(400).send('select, from is required')
@@ -52,7 +49,6 @@ const select = async (req, res) => {
     try {
         //連線資料庫
         const connection = await pool.getConnection();
-        const [rows_0] = await connection.execute(`SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))`);
         const [rows] = await connection.execute(`SELECT ${params.select} FROM ${params.from} ${params.where}`);
         // connection.end();
         connection.release();
@@ -87,12 +83,18 @@ const insert = async (req, res) => {
     // 配置參數
     //insert into {*} values {*}
     const params = {
-        into: req.body.into,
-        values: req.body.values
+        into: req.query.into,
+        values: req.query.values
     }
 
     res.setHeader('Access-Control-Allow-Origin', '*')
+    
     //檢查參數
+    const auth = req.query.auth
+    if (auth != process.env.BROWSER_AUTH) {
+        res.end('auth error')
+        return
+    }
     if (!params.into || !params.values) {
         res.status(400).send('into, values is required')
         return
@@ -106,7 +108,8 @@ const insert = async (req, res) => {
         //連線資料庫
         const connection = await mysql.createConnection(mysqlConfig);
         const [rows] = await connection.execute(`INSERT IGNORE INTO ${params.into} VALUES ${params.values}`);
-        connection.end();
+        // connection.end();
+        connection.release();
 
         const result = rows
         //允許跨域請求

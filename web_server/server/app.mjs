@@ -4,6 +4,11 @@ import path from "path";
 import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
+import bodyParser from 'body-parser';
+import compression from 'compression'; // Import the compression module
+import session from 'express-session'; // Import express-session
+import FileStore from 'session-file-store'; // Import session-file-store for session storage
+
 import google_sheet_search from './tasks/google/sheet_search.mjs';
 import google_sheet_insert from './tasks/google/sheet_insert.mjs';
 import getDatas from './tasks/google/getDatas.mjs';
@@ -14,20 +19,22 @@ import turnover_rate from './tasks/google/turnover_rate.mjs';
 import azure_mysql from './tasks/azure_mysql.mjs';
 import gcp_mysql from './tasks/gcp_mysql.mjs';
 import afterTrading from './tasks/afterTrading.mjs';
+//google登入
+import google_login from './tasks/api/google_login.mjs';
 //瀏覽器解析body的套件
 import browser from './tasks/browser.mjs';
-
-import bodyParser from 'body-parser';
-import compression from 'compression'; // Import the compression module
 
 const __filename = fileURLToPath(import.meta.url); // 獲取檔案的完整路徑
 const __dirname = path.dirname(__filename);       // 獲取檔案所在的目錄
 const sslOptions = {
     key: fs.readFileSync(`${__dirname}/privatekey.pem`),
     cert: fs.readFileSync(`${__dirname}/certificate.pem`),
-    passphrase: "54321633",
+    passphrase: process.env.EXPRESS_SESSION_SECRET,
     //allowHTTP1: true
 };
+
+// Initialize FileStore for session storage
+const fileStore = FileStore(session);
 
 /**
  * http server
@@ -37,8 +44,21 @@ app.use(cors())
 app.use(bodyParser.json());
 app.use(compression()); // Use compression middleware for gzip compression
 
+// Configure session middleware
+app.use(session({
+    store: new fileStore({ path: `${__dirname}/../../../sessions` }), // Store sessions in the "sessions" directory
+    secret: 'your-secret-key', // Replace with a secure secret key
+    resave: false, // Prevent resaving session if not modified
+    saveUninitialized: false, // Do not save uninitialized sessions
+    cookie: {
+        secure: false, // Set to true if using HTTPS
+        httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
+        maxAge: 3600000 // Session expiration time in milliseconds (e.g., 1 hour)
+    }
+}));
+
 //client開頭的路由就顯示client裡面對應路由的檔案資料
-// app.use('/client', express.static(path.join(__dirname, 'client')));
+app.use('/client', express.static(path.join(__dirname, 'client')));
 
 app.get('/', (req, res) => {
     res.send('Hello World')
@@ -74,18 +94,25 @@ app.post('/azure_mysql/select', (req, res) => {
 app.post('/azure_mysql/insert', (req, res) => {
     azure_mysql.insert(req, res)
 });
-app.post('/gcp_mysql/select', (req, res) => {
+app.get('/gcp_mysql/select', (req, res) => {
     console.log(`/gcp_mysql/select, IP: ${req.ip}`)
     gcp_mysql.select(req, res)
 });
-app.post('/gcp_mysql/insert', (req, res) => {
+app.get('/gcp_mysql/insert', (req, res) => {
     //印出訪問的IP
     console.log(`/gcp_mysql/insert, IP: ${req.ip}`)
     gcp_mysql.insert(req, res)
 });
+
 app.get('/afterTrading', (req, res) => {
     afterTrading(req, res)
 });
+
+//google登入
+app.post('/api/google_login', (req, res) => {
+    google_login(req, res)
+});
+//瀏覽器解析body的套件
 app.get('/browser', (req, res) => {
     browser(req, res)
 });

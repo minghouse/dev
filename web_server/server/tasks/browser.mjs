@@ -4,10 +4,10 @@ const browser = async (req, res) => {
     const url = req.query.url
     const selector = req.query.selector || 'body'
     const auth = req.query.auth
-    // if (auth != process.env.BROWSER_AUTH) {
-    //     res.end('auth error')
-    //     return
-    // }
+    if (auth != process.env.BROWSER_AUTH) {
+        res.end('auth error')
+        return
+    }
         
     // 启动浏览器
     // const browser = await chromium.launch({ headless: false });
