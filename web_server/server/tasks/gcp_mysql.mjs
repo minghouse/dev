@@ -54,7 +54,7 @@ const select = async (req, res) => {
         connection.release();
         const result = rows
         //允許跨域請求
-        res.end(result)
+        res.json(result)
     } catch (e) {
         console.error(e)
         res.status(500).send('Internal Server Error')
@@ -113,7 +113,7 @@ const insert = async (req, res) => {
 
         const result = rows
         //允許跨域請求
-        res.end(result)
+        res.json(result)
     } catch (e) {
         console.error(e)
         res.status(500).send('Internal Server Error')
