@@ -31,6 +31,7 @@
         height: 38px;
       }
     </style>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>
     <div class="container-fluid px-1">
@@ -211,8 +212,11 @@
       }
     </script> -->
     <script type="module">
+    import { checkLogin } from "./js/modules/auth.js";
     import stock_list from './js/stock_list.js';
     import getDatas from './js/getDatas.js';
+
+    await checkLogin(); // 檢查登入狀態
 
     //Menu控制
     const dom_dialog_Loading = new bootstrap.Modal('#dialog_Loading', {

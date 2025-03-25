@@ -106,7 +106,7 @@ const insert = async (req, res) => {
 
     try {
         //連線資料庫
-        const connection = await mysql.createConnection(mysqlConfig);
+        const connection = await pool.getConnection();
         const [rows] = await connection.execute(`INSERT IGNORE INTO ${params.into} VALUES ${params.values}`);
         // connection.end();
         connection.release();
