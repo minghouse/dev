@@ -8,6 +8,7 @@ const browser = async (req, res) => {
         res.end('auth error')
         return
     }
+    console.log(url, selector)
         
     // 启动浏览器
     // const browser = await chromium.launch({ headless: false });
