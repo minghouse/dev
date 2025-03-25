@@ -113,8 +113,12 @@ app.post('/api/google_login', (req, res) => {
     google_login(req, res)
 });
 //瀏覽器解析body的套件
-app.get('/browser', (req, res) => {
-    browser(req, res)
+app.get('/browser', async (req, res) => {
+    try {
+        await browser(req, res)   
+    } catch (error) {
+        console.log(error)
+    }
 });
 
 

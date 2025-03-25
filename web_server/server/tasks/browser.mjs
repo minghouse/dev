@@ -18,7 +18,9 @@ const browser = async (req, res) => {
     const context = await browser.newContext({
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         extraHTTPHeaders: {
-            'Accept-Encoding': 'gzip, deflate, br'
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Referer': url,
+            'DNT': '1',
         }
     });
 
@@ -28,14 +30,19 @@ const browser = async (req, res) => {
 
     // 訪問目標網站
     const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
+    // await page.goto(url, { waitUntil: 'networkidle' });  // 確保所有請求完
 
     //取得body的內容
     // const html = await page.content()
     // const body = await page.innerText('body')
     // const body = await response.text();  // 若報錯再解 gzip
     const element = await page.$(selector);  // 使用選擇器來獲取元素
-    const body = await element.innerText();    // 取得元素的文字內容
+    // const body = await element.innerText();    // 取得元素的文字內容
     // console.log(body)
+    const body = await page.evaluate(selector => {
+        const element = document.querySelector(selector);
+        return element ? element.innerText : null;
+    }, selector);
 
     // 關閉瀏覽器
     await browser.close();
