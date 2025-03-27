@@ -12,11 +12,18 @@ const browser = async (req, res) => {
         
     // 启动浏览器
     // const browser = await chromium.launch({ headless: false });
-    const browser = await chromium.launch();
+    const browser = await chromium.launch({
+        headless: false, // 先开启可视化模式调试
+        args: [
+            '--disable-blink-features=AutomationControlled',
+            '--no-sandbox'
+        ]
+    });
 
     // 创建一个新的浏览器上下文并设置 User-Agent
     const context = await browser.newContext({
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        viewport: { width: 1280, height: 800 },
         extraHTTPHeaders: {
             'Accept-Encoding': 'gzip, deflate, br',
             'Referer': url,
@@ -29,20 +36,30 @@ const browser = async (req, res) => {
 
 
     // 訪問目標網站
-    const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
+    const response = await page.goto(url, {
+        timeout: 30000, // 60秒
+        // waitUntil: 'networkidle'
+        waitUntil: 'domcontentloaded'
+    });
     // await page.goto(url, { waitUntil: 'networkidle' });  // 確保所有請求完
+    
+    // 等待元素出現，最多等 10 秒（10000 毫秒）
+    // await page.waitForSelector(selector, { state: 'attached', timeout: 10000 });
 
     //取得body的內容
     // const html = await page.content()
     // const body = await page.innerText('body')
     // const body = await response.text();  // 若報錯再解 gzip
-    const element = await page.$(selector);  // 使用選擇器來獲取元素
+    // const element = await page.$(selector);  // 使用選擇器來獲取元素
     // const body = await element.innerText();    // 取得元素的文字內容
     // console.log(body)
-    const body = await page.evaluate(selector => {
+    
+    // 直接獲取內容，不做額外的等待
+    const body = await page.evaluate(async (selector) => {
         const element = document.querySelector(selector);
-        return element ? element.innerText : null;
+        return element ? element.innerText : document.querySelector('body').innerText;
     }, selector);
+    console.log(body)
 
     // 關閉瀏覽器
     await browser.close();
