@@ -13,7 +13,7 @@ const browser = async (req, res) => {
     // 启动浏览器
     // const browser = await chromium.launch({ headless: false });
     const browser = await chromium.launch({
-        headless: false, // 先开启可视化模式调试
+        // headless: false, // 先开启可视化模式调试
         args: [
             '--disable-blink-features=AutomationControlled',
             '--no-sandbox'
