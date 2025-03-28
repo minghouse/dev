@@ -3,6 +3,7 @@
  */
 const login_status = async (req, res) => {
 
+    res.setHeader('Access-Control-Allow-Origin', '*')
     res.status(200).json({
         code: 200,
         data: {

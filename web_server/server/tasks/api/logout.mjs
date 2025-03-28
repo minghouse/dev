@@ -7,6 +7,7 @@ const logout = async (req, res) => {
 
     req.session.is_login = null
     
+    res.setHeader('Access-Control-Allow-Origin', '*')
     res.status(200).json({
         code: 200,
         message: 'Logout successful'
