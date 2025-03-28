@@ -12,7 +12,7 @@
     </style>
   </head>
   <body>
-    <div class="container-fluid px-1">
+    <div class="container-fluid px-1 d-none" id="container">
       <nav class="navbar mt-2 rounded" style="background-color: #e3f2fd;">
           <div class="container-fluid">
           <a class="navbar-brand fw-bold" href="#">每周新聞分析</a>
@@ -98,56 +98,65 @@
       }
     </script> -->
     <script type="module">
+      import { checkLogin } from "./js/modules/auth.js";
       import getDatas6 from './js/getDatas6.js';
 
-      //Menu控制
-      // const dom_dialog_Loading = new bootstrap.Modal('#dialog_Loading', {
-      //   keyboard: false
-      // })
-      // function loadNewPage(result, userObject) {
-      //   var newURL = result + userObject;
-      //   window.open(newURL,"_top"); 
-      // }
-      // document.querySelectorAll('nav li a').forEach(v=> {
-      //   v.addEventListener('click', function() {
-      //     const newURL = v.getAttribute('data-href');
-      //     dom_dialog_Loading.show()
-      //     if (window.scriptURL) {
-      //       loadNewPage(window.scriptURL, newURL)
-      //       return 
-      //     }
-      //     google.script.run.withSuccessHandler(loadNewPage).withUserObject(newURL).getScriptURL();
-      //   })
-      // })
+      const show_dom = async () => {
+        document.querySelector('#container').classList.remove('d-none')
+        //Menu控制
+        // const dom_dialog_Loading = new bootstrap.Modal('#dialog_Loading', {
+        //   keyboard: false
+        // })
+        // function loadNewPage(result, userObject) {
+        //   var newURL = result + userObject;
+        //   window.open(newURL,"_top"); 
+        // }
+        // document.querySelectorAll('nav li a').forEach(v=> {
+        //   v.addEventListener('click', function() {
+        //     const newURL = v.getAttribute('data-href');
+        //     dom_dialog_Loading.show()
+        //     if (window.scriptURL) {
+        //       loadNewPage(window.scriptURL, newURL)
+        //       return 
+        //     }
+        //     google.script.run.withSuccessHandler(loadNewPage).withUserObject(newURL).getScriptURL();
+        //   })
+        // })
 
-      const show_data = (data) => {
-        const news_div = document.querySelector('#news_div')
-        const news = document.querySelector('#news').cloneNode(true)
-        document.querySelector('#news').remove()
+        const show_data = (data) => {
+          const news_div = document.querySelector('#news_div')
+          const news = document.querySelector('#news').cloneNode(true)
+          document.querySelector('#news').remove()
 
-        for (const k in data) {
-          // if (k==0) continue
-          const v = data[k]
-          const dom = news.cloneNode(true)
-          dom.querySelector('.card-subtitle #news_time').textContent = `${v[0]}`
-          const text = v[2].split("\n")
-          dom.querySelector('.card-title').textContent = text[0]
-          // dom.querySelector('.card-title').remove()
-          // const text2 = text.slice(1, text.length - 1).map(v2=> `<li>${v2.replace(/^[0-9]+\./, '')}</li>`)
-          // dom.querySelector('.card-text').innerHTML = `<ol class="m-0 ps-4">${text2.join("")}</ol>`
-          dom.querySelector('.card-text').innerHTML = `${text.slice(1, text.length - 1).join('<br>')}`
-          dom.querySelector('.card-subtitle #news_link').innerHTML = ''
+          for (const k in data) {
+            // if (k==0) continue
+            const v = data[k]
+            const dom = news.cloneNode(true)
+            dom.querySelector('.card-subtitle #news_time').textContent = `${v[0]}`
+            const text = v[2].split("\n")
+            dom.querySelector('.card-title').textContent = text[0]
+            // dom.querySelector('.card-title').remove()
+            // const text2 = text.slice(1, text.length - 1).map(v2=> `<li>${v2.replace(/^[0-9]+\./, '')}</li>`)
+            // dom.querySelector('.card-text').innerHTML = `<ol class="m-0 ps-4">${text2.join("")}</ol>`
+            dom.querySelector('.card-text').innerHTML = `${text.slice(1, text.length - 1).join('<br>')}`
+            dom.querySelector('.card-subtitle #news_link').innerHTML = ''
 
-          news_div.append(dom)
+            news_div.append(dom)
+          }
+        }
+
+        try {
+          show_data(await getDatas6())
+        } catch (error) {
+          google.script.run.withSuccessHandler(function(data) {
+            show_data(data)
+          }).getDatas6();
         }
       }
 
-      try {
-        show_data(await getDatas6())
-      } catch (error) {
-        google.script.run.withSuccessHandler(function(data) {
-          show_data(data)
-        }).getDatas6();
+      const is_login = await checkLogin(); // 檢查登入狀態
+      if (is_login) { 
+        show_dom()
       }
 
     </script>

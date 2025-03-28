@@ -103,7 +103,7 @@
     </style>
   </head>
   <body>
-    <div class="container-fluid px-1">
+    <div class="container-fluid px-1 d-none" id="container">
       <nav class="navbar mt-1 rounded" style="background-color: #e3f2fd;">
           <div class="container-fluid">
           <span class="navbar-brand fw-bold">我的關注</span>
@@ -376,176 +376,185 @@
       }
     </script> -->
     <script type="module">
+      import { checkLogin } from "./js/modules/auth.js";
 
-      /////////////////////////////////
+      const show_dom = async () => {
+        document.querySelector('#container').classList.remove('d-none')
+        /////////////////////////////////
 
-      //Menu控制
-      const dom_dialog_Loading = new bootstrap.Modal('#dialog_Loading', {
-        keyboard: false
-      })
-      // function loadNewPage(result, userObject) {
-      //   var newURL = result + userObject;
-      //   window.open(newURL,"_top"); 
-      // }
-      // document.querySelectorAll('nav li a').forEach(v=> {
-      //   v.addEventListener('click', function() {
-      //     const newURL = v.getAttribute('data-href');
-      //     dom_dialog_Loading.show()
-      //     if (window.scriptURL) {
-      //       loadNewPage(window.scriptURL, newURL)
-      //       return 
-      //     }
-      //     google.script.run.withSuccessHandler(loadNewPage).withUserObject(newURL).getScriptURL();
-      //   })
-      // })
-
-      //初始化
-      const table_tr = document.querySelector('#table_tr').cloneNode(true)
-      const table_tr2 = document.querySelectorAll('#table_tr')[1].cloneNode(true)
-      const favourite_news_tr = document.querySelector('#favourite_news_tr').cloneNode(true)
-
-      //系統訊息彈窗
-      const dom_dialog_alert = new bootstrap.Modal('#dialog_alert', {
-        keyboard: false
-      })
-
-      //我的關注彈窗
-      const dom_dialog_favourite = new bootstrap.Modal('#dialog_favourite', {
-        keyboard: false
-      })
-
-      //加入我的最愛彈窗
-      const favouriteModal = new bootstrap.Modal('#favouriteModal', {
-        keyboard: false
-      })
-
-      //讀取我的最愛資料
-      const form_data = {
-          select: 'stock, stock_name, ai_news, news_url, news_source, news_date, create_date, count(*) as count, note',
-          from: `
-            (
-            SELECT a.stock, a.stock_name, ai_news, news_url, news_source, news_date, a.create_date, note
-            FROM (SELECT * FROM news_favourite ORDER BY create_date) as a left join news_favourite_note as b on a.stock = b.stock
-            ORDER BY create_date DESC
-            ) AS c
-          `,
-          where: `GROUP BY stock ORDER BY create_date DESC`
-      }
-      const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/select', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(form_data)
-      })
-      const favourite_data = await res.json()
-
-      //顯示我的最愛
-      const table_tbody = document.querySelector('#table_tbody')
-      table_tbody.innerHTML = ''
-      let i = 1
-      for (const v of favourite_data) {
-          const dom = table_tr.cloneNode(true)
-          // dom.querySelector('th').textContent = i
-          dom.querySelector('td').innerHTML = `${v.stock_name}(${v.stock})
-          <a href="https://www.fugle.tw/ai/${v.stock}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
-          `
-          //渲染count
-          dom.querySelector('#b_news_favourite .badge').textContent = v.count
-          if (v.count == 1) {
-            dom.querySelector('#b_news_favourite .badge').classList.add('d-none')
-            dom.querySelector('#b_news_favourite').classList.add('d-none')
-          }
-          table_tbody.append(dom)
-          const dom2 = table_tr2.cloneNode(true)
-          dom2.classList.remove('d-none')
-          //顯示v.ai_news v.news_url v.news_source v.news_date v.note
-          dom2.querySelector('#news_time').textContent = dayjs(v.news_date).format('YYYY-MM-DD HH:mm:ss')
-          dom2.querySelector('#news_link a').textContent = v.news_source
-          dom2.querySelector('#news_link a').href = v.news_url
-          dom2.querySelectorAll('.card-text')[0].innerHTML = `<ol class="ps-3 mb-1">${v.ai_news.map(v2=> `<li>${v2}</li>`).join('')}</ol>`
-          dom2.querySelectorAll('.card-text')[1].innerHTML = v.note.replace(/\n/g, '<br>')
-          table_tbody.append(dom2)
-
-          //綁定b_news_favourite事件
-          dom.querySelector('#b_news_favourite').addEventListener('click', async () => {
-            //show modal
-            dom_dialog_Loading.show()
-
-            //讀取指定stock的關注
-            const form_data2 = {
-              select: '*',
-              from: `news_favourite`,
-              where: `where stock = '${v.stock}' order by create_date desc`
-            }
-            const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/select', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(form_data2)
-            })
-            const favourite_data2 = await res.json()
-            
-            //hide modal
-            dom_dialog_Loading.hide()
-
-            // console.log(favourite_data2)
-            //顯示modal
-            const favourite_news = document.querySelector('#favourite_news')
-            favourite_news.innerHTML = ''
-            for (const v2 of favourite_data2) {
-              const dom = favourite_news_tr.cloneNode(true)
-              //顯示v.ai_news v.news_url v.news_source v.news_date v.note
-              dom.querySelector('#news_time').textContent = dayjs(v2.news_date).format('YYYY-MM-DD HH:mm:ss')
-              dom.querySelector('#news_link a').textContent = v2.news_source
-              dom.querySelector('#news_link a').href = v2.news_url
-              dom.querySelector('.card-text').innerHTML = `<ol class="ps-3 mb-1">${v2.ai_news.map(v3=> `<li>${v3}</li>`).join('')}</ol>`
-              favourite_news.append(dom)
-            }
-            const dom_title = document.querySelector('#dialog_favourite .modal-title')
-            dom_title.textContent = `${v.stock_name}(${v.stock})`
-
-            dom_dialog_favourite.show()
-          })
-
-          //綁定b_news_note事件
-          dom2.querySelector('#b_news_note').addEventListener('click', async () => {
-            stock = v.stock
-            // console.log(favourite_data2)
-            //顯示modal
-            const favourite_note = document.querySelector('#favourite_note')
-            favourite_note.innerHTML = v.note
-
-            favouriteModal.show()
-          })
-          i++
-      }
-
-      //綁定favourite_submit
-      let stock = ''
-      document.querySelector('#favourite_submit').addEventListener('click', async () => {
-        
-        //更新note
-        const form_data3 = {
-          into: 'news_favourite_note',
-          values: `('${stock}', '${dayjs().format('YYYY-MM-DD HH:mm:ss')}', '', '${document.querySelector('#favourite_note').value}') ON DUPLICATE KEY UPDATE note = '${document.querySelector('#favourite_note').value}'`
-        }
-        const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/insert', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(form_data3)
+        //Menu控制
+        const dom_dialog_Loading = new bootstrap.Modal('#dialog_Loading', {
+          keyboard: false
         })
-        const data = await res.json()
+        // function loadNewPage(result, userObject) {
+        //   var newURL = result + userObject;
+        //   window.open(newURL,"_top"); 
+        // }
+        // document.querySelectorAll('nav li a').forEach(v=> {
+        //   v.addEventListener('click', function() {
+        //     const newURL = v.getAttribute('data-href');
+        //     dom_dialog_Loading.show()
+        //     if (window.scriptURL) {
+        //       loadNewPage(window.scriptURL, newURL)
+        //       return 
+        //     }
+        //     google.script.run.withSuccessHandler(loadNewPage).withUserObject(newURL).getScriptURL();
+        //   })
+        // })
 
-        favouriteModal.hide()
+        //初始化
+        const table_tr = document.querySelector('#table_tr').cloneNode(true)
+        const table_tr2 = document.querySelectorAll('#table_tr')[1].cloneNode(true)
+        const favourite_news_tr = document.querySelector('#favourite_news_tr').cloneNode(true)
 
-        //更新成功
-        dom_dialog_alert.show()
-        document.querySelector('#dialog_alert .modal-body').textContent = '更新成功'
-      })
+        //系統訊息彈窗
+        const dom_dialog_alert = new bootstrap.Modal('#dialog_alert', {
+          keyboard: false
+        })
+
+        //我的關注彈窗
+        const dom_dialog_favourite = new bootstrap.Modal('#dialog_favourite', {
+          keyboard: false
+        })
+
+        //加入我的最愛彈窗
+        const favouriteModal = new bootstrap.Modal('#favouriteModal', {
+          keyboard: false
+        })
+
+        //讀取我的最愛資料
+        const form_data = {
+            select: 'stock, stock_name, ai_news, news_url, news_source, news_date, create_date, count(*) as count, note',
+            from: `
+              (
+              SELECT a.stock, a.stock_name, ai_news, news_url, news_source, news_date, a.create_date, note
+              FROM (SELECT * FROM news_favourite ORDER BY create_date) as a left join news_favourite_note as b on a.stock = b.stock
+              ORDER BY create_date DESC
+              ) AS c
+            `,
+            where: `GROUP BY stock ORDER BY create_date DESC`
+        }
+        const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/select', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(form_data)
+        })
+        const favourite_data = await res.json()
+
+        //顯示我的最愛
+        const table_tbody = document.querySelector('#table_tbody')
+        table_tbody.innerHTML = ''
+        let i = 1
+        for (const v of favourite_data) {
+            const dom = table_tr.cloneNode(true)
+            // dom.querySelector('th').textContent = i
+            dom.querySelector('td').innerHTML = `${v.stock_name}(${v.stock})
+            <a href="https://www.fugle.tw/ai/${v.stock}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+            `
+            //渲染count
+            dom.querySelector('#b_news_favourite .badge').textContent = v.count
+            if (v.count == 1) {
+              dom.querySelector('#b_news_favourite .badge').classList.add('d-none')
+              dom.querySelector('#b_news_favourite').classList.add('d-none')
+            }
+            table_tbody.append(dom)
+            const dom2 = table_tr2.cloneNode(true)
+            dom2.classList.remove('d-none')
+            //顯示v.ai_news v.news_url v.news_source v.news_date v.note
+            dom2.querySelector('#news_time').textContent = dayjs(v.news_date).format('YYYY-MM-DD HH:mm:ss')
+            dom2.querySelector('#news_link a').textContent = v.news_source
+            dom2.querySelector('#news_link a').href = v.news_url
+            dom2.querySelectorAll('.card-text')[0].innerHTML = `<ol class="ps-3 mb-1">${v.ai_news.map(v2=> `<li>${v2}</li>`).join('')}</ol>`
+            dom2.querySelectorAll('.card-text')[1].innerHTML = v.note.replace(/\n/g, '<br>')
+            table_tbody.append(dom2)
+
+            //綁定b_news_favourite事件
+            dom.querySelector('#b_news_favourite').addEventListener('click', async () => {
+              //show modal
+              dom_dialog_Loading.show()
+
+              //讀取指定stock的關注
+              const form_data2 = {
+                select: '*',
+                from: `news_favourite`,
+                where: `where stock = '${v.stock}' order by create_date desc`
+              }
+              const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/select', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(form_data2)
+              })
+              const favourite_data2 = await res.json()
+              
+              //hide modal
+              dom_dialog_Loading.hide()
+
+              // console.log(favourite_data2)
+              //顯示modal
+              const favourite_news = document.querySelector('#favourite_news')
+              favourite_news.innerHTML = ''
+              for (const v2 of favourite_data2) {
+                const dom = favourite_news_tr.cloneNode(true)
+                //顯示v.ai_news v.news_url v.news_source v.news_date v.note
+                dom.querySelector('#news_time').textContent = dayjs(v2.news_date).format('YYYY-MM-DD HH:mm:ss')
+                dom.querySelector('#news_link a').textContent = v2.news_source
+                dom.querySelector('#news_link a').href = v2.news_url
+                dom.querySelector('.card-text').innerHTML = `<ol class="ps-3 mb-1">${v2.ai_news.map(v3=> `<li>${v3}</li>`).join('')}</ol>`
+                favourite_news.append(dom)
+              }
+              const dom_title = document.querySelector('#dialog_favourite .modal-title')
+              dom_title.textContent = `${v.stock_name}(${v.stock})`
+
+              dom_dialog_favourite.show()
+            })
+
+            //綁定b_news_note事件
+            dom2.querySelector('#b_news_note').addEventListener('click', async () => {
+              stock = v.stock
+              // console.log(favourite_data2)
+              //顯示modal
+              const favourite_note = document.querySelector('#favourite_note')
+              favourite_note.innerHTML = v.note
+
+              favouriteModal.show()
+            })
+            i++
+        }
+
+        //綁定favourite_submit
+        let stock = ''
+        document.querySelector('#favourite_submit').addEventListener('click', async () => {
+          
+          //更新note
+          const form_data3 = {
+            into: 'news_favourite_note',
+            values: `('${stock}', '${dayjs().format('YYYY-MM-DD HH:mm:ss')}', '', '${document.querySelector('#favourite_note').value}') ON DUPLICATE KEY UPDATE note = '${document.querySelector('#favourite_note').value}'`
+          }
+          const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/insert', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(form_data3)
+          })
+          const data = await res.json()
+
+          favouriteModal.hide()
+
+          //更新成功
+          dom_dialog_alert.show()
+          document.querySelector('#dialog_alert .modal-body').textContent = '更新成功'
+        })
+      }
+
+      const is_login = await checkLogin(); // 檢查登入狀態
+      if (is_login) { 
+        show_dom()
+      }
     </script>
   </body>
 </html>

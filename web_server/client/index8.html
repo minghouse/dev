@@ -45,7 +45,7 @@
     </style>
   </head>
   <body>
-    <div class="container-fluid px-1">
+    <div class="container-fluid px-1 d-none" id="container">
       <nav class="navbar mt-1 rounded" style="background-color: #e3f2fd;">
           <div class="container-fluid">
           <a class="navbar-brand fw-bold" href="#">區間漲幅排行</a>
@@ -287,216 +287,223 @@
       import { checkLogin } from "./js/modules/auth.js";
       import getDatas8 from './js/getDatas8.js';
 
-      await checkLogin(); // 檢查登入狀態
+      const show_dom = async () => {
+        document.querySelector('#container').classList.remove('d-none')
 
-      //初始化
-      const table_tr = document.querySelector('#table_tr').cloneNode(true)
-      const dom_news = document.querySelector('#dialog_news')
-      const dom_dialog_news = new bootstrap.Modal(dom_news, {
-        keyboard: false
-      })
-      const dom_news2 = document.querySelector('#dialog_news2')
-      const dom_dialog_news2 = new bootstrap.Modal(dom_news2, {
-        keyboard: false
-      })
-      const dom_news_card = dom_news.querySelector('.card').cloneNode(true)
-      dom_news.querySelector('.card').remove()
+        //初始化
+        const table_tr = document.querySelector('#table_tr').cloneNode(true)
+        const dom_news = document.querySelector('#dialog_news')
+        const dom_dialog_news = new bootstrap.Modal(dom_news, {
+          keyboard: false
+        })
+        const dom_news2 = document.querySelector('#dialog_news2')
+        const dom_dialog_news2 = new bootstrap.Modal(dom_news2, {
+          keyboard: false
+        })
+        const dom_news_card = dom_news.querySelector('.card').cloneNode(true)
+        dom_news.querySelector('.card').remove()
 
-      const dom_news_card2 = dom_news2.querySelector('.card').cloneNode(true)
-      dom_news2.querySelector('.card').remove()
+        const dom_news_card2 = dom_news2.querySelector('.card').cloneNode(true)
+        dom_news2.querySelector('.card').remove()
 
-      //系統訊息彈窗
-      const dom_dialog_alert = new bootstrap.Modal('#dialog_alert', {
-        keyboard: false
-      })
+        //系統訊息彈窗
+        const dom_dialog_alert = new bootstrap.Modal('#dialog_alert', {
+          keyboard: false
+        })
 
-      //讀取資料
-      const get_datas = async ()=>{
-        const search_date = document.querySelector('#search_date').value
-        const search_date2 = document.querySelector('#search_date2').value
-        const show_data = (data) => {
-          document.querySelector('#search_date').value = data.search_date
-          document.querySelector('#search_date2').value = data.search_date2
+        //讀取資料
+        const get_datas = async ()=>{
+          const search_date = document.querySelector('#search_date').value
+          const search_date2 = document.querySelector('#search_date2').value
+          const show_data = (data) => {
+            document.querySelector('#search_date').value = data.search_date
+            document.querySelector('#search_date2').value = data.search_date2
 
-          if (data.error_msg) {
-            document.querySelector('#dialog_alert .modal-body').textContent = data.error_msg
-            dom_dialog_alert.show()
-            return
+            if (data.error_msg) {
+              document.querySelector('#dialog_alert .modal-body').textContent = data.error_msg
+              dom_dialog_alert.show()
+              return
+            }
+            
+            document.querySelectorAll('#table_tr').forEach(v => v.remove())
+
+            // document.querySelector('#search_date').value = data.search_date
+
+            //漲平跌家數統計
+            // document.querySelector('#price1_badge').textContent = data.news.filter(v => /\+/.test(v[9])).length
+            // document.querySelector('#price2_badge').textContent = data.news.filter(v => !/[\+\-]/.test(v[9])).length
+            // document.querySelector('#price3_badge').textContent = data.news.filter(v => /\-/.test(v[9])).length
+
+            const ai_news = []
+            let kk = 0
+            for (const k in data.news) {
+              // if (k==0) continue
+              const v = {
+                stock: data.news[k]
+              }
+              v.news = data.news_1.filter(v2=> (new RegExp(v.stock[1])).test(v2[5]))
+              v.news_ai = data.news_2.filter(v2=> (new RegExp(v.stock[1])).test(v2[2].split("\n")[0]))
+              
+              const dom = table_tr.cloneNode(true)
+              // dom.querySelector('.card-title').textContent = v[1]
+              const td = dom.querySelectorAll('td')
+              // td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}`
+              td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}
+              <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+              `
+              //
+              td[1].textContent = `${v.stock[4]}`
+              td[2].innerHTML = `${v.stock[2]}<br>
+                <span class="${v.stock[6] > 0 ? 'text-danger' : v.stock[6] < 0 ? 'text-success' : ''}">
+                  ${v.stock[6] >0 ? '<i class="fa-solid fa-arrow-up"></i>' : v.stock[6] < 0 ? '<i class="fa-solid fa-arrow-down"></i>' : ''}
+                  ${Math.abs(v.stock[6])||''}`
+              td[3].innerHTML = `${v.stock[3]}<br>${v.stock[5]}%`
+
+              
+              //顯示排名&是否熱門
+              const is_fire = v.news.filter(v2 => v2[1] >= data.now).findIndex(v=> /熱門/.test(v[3])) >= 0 ? true : false
+              const is_fire_week = v.news.filter(v2 => v2[1] >= data.now_week).findIndex(v=> /熱門族群/.test(v[3])) >= 0 ? true : false
+              dom.querySelector('th').innerHTML = `${++kk}${is_fire ? `<br><a href="javascript:void(0)" class="text-decoration-none" id="fire">🔥</a>` : ''}`
+              dom.querySelector('th').innerHTML += `${is_fire_week ? `<br><a href="javascript:void(0)" class="text-decoration-none" id="fire_week">&#129512;</a>` : ''}`
+              if (dom.querySelector('th #fire')) {
+                dom.querySelector('th #fire').addEventListener('click', () => {
+                    //取得熱門新聞
+                    const news = v.news.filter(v2 => v2[1] >= data.now && /熱門/.test(v2[3]))
+                    dom_news.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
+                    dom_news.querySelector('.modal-body').innerHTML = ''
+                    for (const v2 of news) {
+                      const dom_news_card_clone = dom_news_card.cloneNode(true)
+                      dom_news_card_clone.querySelector('.card-title').textContent = v2[3]
+                      dom_news_card_clone.querySelector('#news_time').textContent = v2[1]
+                      //渲染內容
+                      const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
+                      dom_news_card_clone.querySelector('.card-text').innerHTML = v2[5].replace(reg, `<span class="bg-warning">$1</span>`)
+
+                      dom_news_card_clone.querySelector('.card-link').href = v2[2]
+                      dom_news_card_clone.querySelector('.card-link').textContent = v2[6]
+                      dom_news.querySelector('.modal-body').append(dom_news_card_clone)
+                    }
+                    dom_dialog_news.show()
+                })
+              }
+              if (dom.querySelector('th #fire_week')) {
+                dom.querySelector('th #fire_week').addEventListener('click', () => {
+                    //取得熱門新聞
+                    const news = v.news.filter(v2 => v2[1] >= data.now_week && /熱門族群/.test(v2[3]))
+                    dom_news.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
+                    dom_news.querySelector('.modal-body').innerHTML = ''
+                    for (const v2 of news) {
+                      const dom_news_card_clone = dom_news_card.cloneNode(true)
+                      dom_news_card_clone.querySelector('.card-title').textContent = v2[3]
+                      dom_news_card_clone.querySelector('#news_time').textContent = v2[1]
+                      //渲染內容
+                      const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
+                      dom_news_card_clone.querySelector('.card-text').innerHTML = v2[5].replace(reg, `<span class="bg-warning">$1</span>`)
+
+                      dom_news_card_clone.querySelector('.card-link').href = v2[2]
+                      dom_news_card_clone.querySelector('.card-link').textContent = v2[6]
+                      dom_news.querySelector('.modal-body').append(dom_news_card_clone)
+                    }
+                    dom_dialog_news.show()
+                })
+              }
+
+              //新聞按鈕
+              td[4].querySelector('#b_news span').textContent = `${v.news.filter(v2 => v2[1] >= data.now).length}/${v.news.length}`
+              td[4].querySelector('#b_news').addEventListener('click', function() {
+                dom_news.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
+                dom_news.querySelector('.modal-body').innerHTML = ''
+                for (const v2 of v.news) {
+                    const dom_news_card_clone = dom_news_card.cloneNode(true)
+                    dom_news_card_clone.querySelector('.card-title').textContent = v2[3]
+                    dom_news_card_clone.querySelector('#news_time').textContent = v2[1]
+                    //渲染內容
+                    const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
+                    dom_news_card_clone.querySelector('.card-text').innerHTML = v2[5].replace(reg, `<span class="bg-warning">$1</span>`)
+
+                    dom_news_card_clone.querySelector('.card-link').href = v2[2]
+                    dom_news_card_clone.querySelector('.card-link').textContent = v2[6]
+                    dom_news.querySelector('.modal-body').append(dom_news_card_clone)
+                }
+                dom_dialog_news.show()
+              })
+
+              //分析按鈕
+              td[4].querySelector('#b_news_ai span').textContent = `${v.news_ai.filter(v2 => {
+                if (v2[0] >= data.now) {
+                  const text = v2[2].split("\n")
+                  ai_news.push(text.slice(0, text.length - 1).join("\n"))
+                  return true
+                }
+                return false
+              }).length}/${v.news_ai.length}`
+              
+              td[4].querySelector('#b_news_ai').addEventListener('click', function() {
+                dom_news2.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
+                dom_news2.querySelector('.modal-body').innerHTML = ''
+                for (const v2 of v.news_ai) {
+                    const dom_news_card_clone = dom_news_card2.cloneNode(true)
+                    dom_news_card_clone.querySelector('.card-title').remove()
+                    dom_news_card_clone.querySelector('.card-subtitle #news_time').textContent = `${v2[0]}`
+
+                    //渲染內容
+                    const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
+                    const text = v2[2].split("\n")
+                    // dom_news_card_clone.querySelector('.card-title').textContent = text[0]
+                    const text2 = text.slice(1, text.length - 1).map(v3=> `<li>${v3.replace(/^[0-9]+\./, '')}</li>`)
+                    dom_news_card_clone.querySelector('.card-text').innerHTML = `<ol class="m-0 ps-4">${text2.join("").replace(reg, `<span class="bg-warning">$1</span>`)}</ol>`
+
+                    dom_news_card_clone.querySelector('.card-subtitle #news_link').innerHTML = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `<a href="$1" target="_blank">${v2[1]}</a>\n`).replace(/\n/g, '<br>')
+
+                    if (v2[1] == 'AI每周整理') {
+                      dom_news_card_clone.querySelector('.card-text').innerHTML = text.slice(1, text.length - 1).join("<br>")
+                      dom_news_card_clone.querySelector('.card-subtitle #news_link').innerHTML = v2[1]
+                    }
+
+                    dom_news2.querySelector('.modal-body').append(dom_news_card_clone)
+                }
+                dom_dialog_news2.show()
+              })
+
+              document.querySelector('#table_tbody').append(dom)
+            }
+            // console.log(ai_news.join("\n\n"))
           }
           
-          document.querySelectorAll('#table_tr').forEach(v => v.remove())
-
-          // document.querySelector('#search_date').value = data.search_date
-
-          //漲平跌家數統計
-          // document.querySelector('#price1_badge').textContent = data.news.filter(v => /\+/.test(v[9])).length
-          // document.querySelector('#price2_badge').textContent = data.news.filter(v => !/[\+\-]/.test(v[9])).length
-          // document.querySelector('#price3_badge').textContent = data.news.filter(v => /\-/.test(v[9])).length
-
-          const ai_news = []
-          let kk = 0
-          for (const k in data.news) {
-            // if (k==0) continue
-            const v = {
-              stock: data.news[k]
-            }
-            v.news = data.news_1.filter(v2=> (new RegExp(v.stock[1])).test(v2[5]))
-            v.news_ai = data.news_2.filter(v2=> (new RegExp(v.stock[1])).test(v2[2].split("\n")[0]))
-            
-            const dom = table_tr.cloneNode(true)
-            // dom.querySelector('.card-title').textContent = v[1]
-            const td = dom.querySelectorAll('td')
-            // td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}`
-            td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}
-            <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
-            `
-            //
-            td[1].textContent = `${v.stock[4]}`
-            td[2].innerHTML = `${v.stock[2]}<br>
-              <span class="${v.stock[6] > 0 ? 'text-danger' : v.stock[6] < 0 ? 'text-success' : ''}">
-                ${v.stock[6] >0 ? '<i class="fa-solid fa-arrow-up"></i>' : v.stock[6] < 0 ? '<i class="fa-solid fa-arrow-down"></i>' : ''}
-                ${Math.abs(v.stock[6])||''}`
-            td[3].innerHTML = `${v.stock[3]}<br>${v.stock[5]}%`
-
-            
-            //顯示排名&是否熱門
-            const is_fire = v.news.filter(v2 => v2[1] >= data.now).findIndex(v=> /熱門/.test(v[3])) >= 0 ? true : false
-            const is_fire_week = v.news.filter(v2 => v2[1] >= data.now_week).findIndex(v=> /熱門族群/.test(v[3])) >= 0 ? true : false
-            dom.querySelector('th').innerHTML = `${++kk}${is_fire ? `<br><a href="javascript:void(0)" class="text-decoration-none" id="fire">🔥</a>` : ''}`
-            dom.querySelector('th').innerHTML += `${is_fire_week ? `<br><a href="javascript:void(0)" class="text-decoration-none" id="fire_week">&#129512;</a>` : ''}`
-            if (dom.querySelector('th #fire')) {
-              dom.querySelector('th #fire').addEventListener('click', () => {
-                  //取得熱門新聞
-                  const news = v.news.filter(v2 => v2[1] >= data.now && /熱門/.test(v2[3]))
-                  dom_news.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
-                  dom_news.querySelector('.modal-body').innerHTML = ''
-                  for (const v2 of news) {
-                    const dom_news_card_clone = dom_news_card.cloneNode(true)
-                    dom_news_card_clone.querySelector('.card-title').textContent = v2[3]
-                    dom_news_card_clone.querySelector('#news_time').textContent = v2[1]
-                    //渲染內容
-                    const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
-                    dom_news_card_clone.querySelector('.card-text').innerHTML = v2[5].replace(reg, `<span class="bg-warning">$1</span>`)
-
-                    dom_news_card_clone.querySelector('.card-link').href = v2[2]
-                    dom_news_card_clone.querySelector('.card-link').textContent = v2[6]
-                    dom_news.querySelector('.modal-body').append(dom_news_card_clone)
-                  }
-                  dom_dialog_news.show()
-              })
-            }
-            if (dom.querySelector('th #fire_week')) {
-              dom.querySelector('th #fire_week').addEventListener('click', () => {
-                  //取得熱門新聞
-                  const news = v.news.filter(v2 => v2[1] >= data.now_week && /熱門族群/.test(v2[3]))
-                  dom_news.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
-                  dom_news.querySelector('.modal-body').innerHTML = ''
-                  for (const v2 of news) {
-                    const dom_news_card_clone = dom_news_card.cloneNode(true)
-                    dom_news_card_clone.querySelector('.card-title').textContent = v2[3]
-                    dom_news_card_clone.querySelector('#news_time').textContent = v2[1]
-                    //渲染內容
-                    const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
-                    dom_news_card_clone.querySelector('.card-text').innerHTML = v2[5].replace(reg, `<span class="bg-warning">$1</span>`)
-
-                    dom_news_card_clone.querySelector('.card-link').href = v2[2]
-                    dom_news_card_clone.querySelector('.card-link').textContent = v2[6]
-                    dom_news.querySelector('.modal-body').append(dom_news_card_clone)
-                  }
-                  dom_dialog_news.show()
-              })
-            }
-
-            //新聞按鈕
-            td[4].querySelector('#b_news span').textContent = `${v.news.filter(v2 => v2[1] >= data.now).length}/${v.news.length}`
-            td[4].querySelector('#b_news').addEventListener('click', function() {
-              dom_news.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
-              dom_news.querySelector('.modal-body').innerHTML = ''
-              for (const v2 of v.news) {
-                  const dom_news_card_clone = dom_news_card.cloneNode(true)
-                  dom_news_card_clone.querySelector('.card-title').textContent = v2[3]
-                  dom_news_card_clone.querySelector('#news_time').textContent = v2[1]
-                  //渲染內容
-                  const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
-                  dom_news_card_clone.querySelector('.card-text').innerHTML = v2[5].replace(reg, `<span class="bg-warning">$1</span>`)
-
-                  dom_news_card_clone.querySelector('.card-link').href = v2[2]
-                  dom_news_card_clone.querySelector('.card-link').textContent = v2[6]
-                  dom_news.querySelector('.modal-body').append(dom_news_card_clone)
+          const new_promise = () => {
+            return new Promise(async (resolve, reject) => {
+              try {
+                resolve(await getDatas8(search_date, search_date2))
+              } catch (error) {
+                console.error(error)
+                document.querySelector('#dialog_alert .modal-body').textContent = error
+                dom_dialog_alert.show()
               }
-              dom_dialog_news.show()
             })
-
-            //分析按鈕
-            td[4].querySelector('#b_news_ai span').textContent = `${v.news_ai.filter(v2 => {
-              if (v2[0] >= data.now) {
-                const text = v2[2].split("\n")
-                ai_news.push(text.slice(0, text.length - 1).join("\n"))
-                return true
-              }
-              return false
-            }).length}/${v.news_ai.length}`
-            
-            td[4].querySelector('#b_news_ai').addEventListener('click', function() {
-              dom_news2.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
-              dom_news2.querySelector('.modal-body').innerHTML = ''
-              for (const v2 of v.news_ai) {
-                  const dom_news_card_clone = dom_news_card2.cloneNode(true)
-                  dom_news_card_clone.querySelector('.card-title').remove()
-                  dom_news_card_clone.querySelector('.card-subtitle #news_time').textContent = `${v2[0]}`
-
-                  //渲染內容
-                  const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
-                  const text = v2[2].split("\n")
-                  // dom_news_card_clone.querySelector('.card-title').textContent = text[0]
-                  const text2 = text.slice(1, text.length - 1).map(v3=> `<li>${v3.replace(/^[0-9]+\./, '')}</li>`)
-                  dom_news_card_clone.querySelector('.card-text').innerHTML = `<ol class="m-0 ps-4">${text2.join("").replace(reg, `<span class="bg-warning">$1</span>`)}</ol>`
-
-                  dom_news_card_clone.querySelector('.card-subtitle #news_link').innerHTML = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `<a href="$1" target="_blank">${v2[1]}</a>\n`).replace(/\n/g, '<br>')
-
-                  if (v2[1] == 'AI每周整理') {
-                    dom_news_card_clone.querySelector('.card-text').innerHTML = text.slice(1, text.length - 1).join("<br>")
-                    dom_news_card_clone.querySelector('.card-subtitle #news_link').innerHTML = v2[1]
-                  }
-
-                  dom_news2.querySelector('.modal-body').append(dom_news_card_clone)
-              }
-              dom_dialog_news2.show()
-            })
-
-            document.querySelector('#table_tbody').append(dom)
           }
-          // console.log(ai_news.join("\n\n"))
+          const result = await new_promise()
+          show_data(result)
         }
-        
-        const new_promise = () => {
-          return new Promise(async (resolve, reject) => {
-            try {
-              resolve(await getDatas8(search_date, search_date2))
-            } catch (error) {
-              console.error(error)
-              document.querySelector('#dialog_alert .modal-body').textContent = error
-              dom_dialog_alert.show()
-            }
-          })
-        }
-        const result = await new_promise()
-        show_data(result)
-      }
-      // get_datas()
+        // get_datas()
 
-      //預設前一天
-      document.querySelector('#search_date2').value = dayjs().format('YYYY-MM-DD')
-      document.querySelector('#search_date').value = dayjs().subtract(1, 'day').format('YYYY-MM-DD')
+        //預設前一天
+        document.querySelector('#search_date2').value = dayjs().format('YYYY-MM-DD')
+        document.querySelector('#search_date').value = dayjs().subtract(1, 'day').format('YYYY-MM-DD')
 
-      //綁定查詢事件
-      document.querySelectorAll('#table_tr').forEach(v => v.remove())
-      document.querySelector('#search').addEventListener('click', () => {
+        //綁定查詢事件
         document.querySelectorAll('#table_tr').forEach(v => v.remove())
-        const dom = table_tr.cloneNode(true)
-        document.querySelector('#table_tbody').append(dom)
-        get_datas()
-      })
+        document.querySelector('#search').addEventListener('click', () => {
+          document.querySelectorAll('#table_tr').forEach(v => v.remove())
+          const dom = table_tr.cloneNode(true)
+          document.querySelector('#table_tbody').append(dom)
+          get_datas()
+        })
+      }
+
+      const is_login = await checkLogin(); // 檢查登入狀態
+      if (is_login) { 
+        show_dom()
+      }
 
     </script>
   </body>

@@ -21,6 +21,10 @@ import gcp_mysql from './tasks/gcp_mysql.mjs';
 import afterTrading from './tasks/afterTrading.mjs';
 //google登入
 import google_login from './tasks/api/google_login.mjs';
+//登入狀態
+import login_status from './tasks/api/login_status.mjs';
+//登出
+import logout from './tasks/api/logout.mjs';
 //瀏覽器解析body的套件
 import browser from './tasks/browser.mjs';
 
@@ -58,7 +62,7 @@ app.use(session({
 }));
 
 //client開頭的路由就顯示client裡面對應路由的檔案資料
-app.use('/client', express.static(path.join(__dirname, 'client')));
+app.use('/client', express.static(path.join(__dirname, '../', 'client')));
 
 app.get('/', (req, res) => {
     res.send('Hello World')
@@ -111,7 +115,15 @@ app.get('/afterTrading', (req, res) => {
 //google登入
 app.post('/api/google_login', (req, res) => {
     google_login(req, res)
-});
+})
+//登入狀態
+app.get('/api/login_status', (req, res) => {
+    login_status(req, res)
+})
+//登出
+app.get('/api/logout', (req, res) => {
+    logout(req, res)
+})
 //瀏覽器解析body的套件
 app.get('/browser', async (req, res) => {
     try {

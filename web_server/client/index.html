@@ -33,7 +33,7 @@
     </style>
   </head>
   <body>
-    <div class="container-fluid px-1">
+    <div class="container-fluid px-1 d-none" id="container">
       <nav class="navbar mt-2 rounded" style="background-color: #e3f2fd;">
           <div class="container-fluid justify-content-start">
           <a class="navbar-brand fw-bold me-auto" href="#">每日新聞</a>
@@ -211,251 +211,260 @@
       }
     </script> -->
     <script type="module">
-    import stock_list from './js/stock_list.js';
-    import getDatas from './js/getDatas.js';
+      import { checkLogin } from "./js/modules/auth.js";
+      import stock_list from './js/stock_list.js';
+      import getDatas from './js/getDatas.js';
 
-    //Menu控制
-    const dom_dialog_Loading = new bootstrap.Modal('#dialog_Loading', {
-        keyboard: false
-    })
-    // function loadNewPage(result, userObject) {
-    //     var newURL = result + userObject;
-    //     window.open(newURL,"_top"); 
-    // }
-    // document.querySelectorAll('nav li a').forEach(v=> {
-    //     v.addEventListener('click', function() {
-    //         const newURL = v.getAttribute('data-href');
-    //         dom_dialog_Loading.show()
-    //         if (window.scriptURL) {
-    //         loadNewPage(window.scriptURL, newURL)
-    //         return 
-    //         }
-    //         google.script.run.withSuccessHandler(loadNewPage).withUserObject(newURL).getScriptURL();
-    //     })
-    // })
+      const show_dom = async () => {
+        document.querySelector('#container').classList.remove('d-none')
+        //Menu控制
+        const dom_dialog_Loading = new bootstrap.Modal('#dialog_Loading', {
+            keyboard: false
+        })
+        // function loadNewPage(result, userObject) {
+        //     var newURL = result + userObject;
+        //     window.open(newURL,"_top"); 
+        // }
+        // document.querySelectorAll('nav li a').forEach(v=> {
+        //     v.addEventListener('click', function() {
+        //         const newURL = v.getAttribute('data-href');
+        //         dom_dialog_Loading.show()
+        //         if (window.scriptURL) {
+        //         loadNewPage(window.scriptURL, newURL)
+        //         return 
+        //         }
+        //         google.script.run.withSuccessHandler(loadNewPage).withUserObject(newURL).getScriptURL();
+        //     })
+        // })
 
-    //系統訊息彈窗
-    const dom_dialog_recommendation = new bootstrap.Modal('#dialog_recommendation', {
-      keyboard: false
-    })
+        //系統訊息彈窗
+        const dom_dialog_recommendation = new bootstrap.Modal('#dialog_recommendation', {
+          keyboard: false
+        })
 
-    //渲染股票清單
-    for (const v of favourite.get_stock_list()) {
-      const dom = document.createElement('option')
-      dom.value = `${v[0]}`
-      dom.textContent = `${v[1]} ${v[0]}`
-      document.querySelector('#favourite_stock').append(dom)
-    }
-    $('#favourite_stock').select2({
-      // 启用标签功能，允许用户输入新的选项
-      tags: false,
-      // 允许清除选择
-      allowClear: false,
-      // 禁用多选功能，仅允许单选
-      multiple: false,
-      // 自定义提示文本
-      placeholder: '請選擇',
-      // 自定义 "没有匹配项" 的提示文本
-      // noResults: function() {
-      //   return '未找到匹配项，请输入新的选项';
-      // }
-      // dropdownParent: $("#buy_category .modal-content")
-      dropdownParent: $('#favouriteModal')
-    });
-
-    //--------------------------------------------------------------------------------
-    //搜尋
-    const dom_button_search = document.querySelector('#button-search')
-    dom_button_search.addEventListener('click', async function() {
-      //檢查搜尋條件開頭是否為!
-      const is_not = document.querySelector('#text-search').value.startsWith('!')
-      // console.log(is_not)
-      const text_search = (document.querySelector('#text-search').value || '').replace('!', '').split(' ')
-      if (text_search == '') {
-        show_data(JSON.parse(JSON.stringify(news_data)))
-        return
-      }
-      // dom_dialog_Loading.show()
-      dom_button_search.disabled = true
-      dom_button_search.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'
-      await new Promise(resolve=> setTimeout(resolve, 50))
-
-      show_data(JSON.parse(JSON.stringify(news_data)))
-      const news_div = document.querySelectorAll('#news')
-      for (const v of news_div) {
-        v.style.display = 'none'
-        for (const v2 of text_search) {
-          if (!is_not && v2=='AI推薦' && v.querySelector('.card-subtitle #recommendation') && 
-            !v.querySelector('.card-title').innerHTML.includes('熱門族群') &&
-            !v.querySelector('.card-title').innerHTML.includes('潛力股') &&
-            !v.querySelector('.card-title').innerHTML.includes('焦點股') 
-          ) {
-            v.style.display = ''
-          } else if (!is_not && v.querySelector('.card-title').innerHTML.includes(v2)) {
-            v.style.display = ''
-            //將出現的關鍵字標示黃底
-            v.querySelector('.card-title').innerHTML = v.querySelector('.card-title').innerHTML.replace(new RegExp(v2, 'g'), `<span class="bg-warning">${v2}</span>`)
-            v.querySelector('.card-text').innerHTML = v.querySelector('.card-text').innerHTML.replace(new RegExp(v2, 'g'), `<span class="bg-warning">${v2}</span>`)
-          } else if (is_not && !v.querySelector('.card-title').innerHTML.includes(v2) && !v.querySelector('.card-subtitle #recommendation')) {
-            v.style.display = ''
-          } else {
-            
-          }
+        //渲染股票清單
+        for (const v of favourite.get_stock_list()) {
+          const dom = document.createElement('option')
+          dom.value = `${v[0]}`
+          dom.textContent = `${v[1]} ${v[0]}`
+          document.querySelector('#favourite_stock').append(dom)
         }
-      }
-      for (const v of news_div) {
-        if (v.style.display == 'none') {
-          v.remove()
-        }
-      }
-      // dom_dialog_Loading.hide()
-      dom_button_search.disabled = false
-      dom_button_search.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i>'
-    })
+        $('#favourite_stock').select2({
+          // 启用标签功能，允许用户输入新的选项
+          tags: false,
+          // 允许清除选择
+          allowClear: false,
+          // 禁用多选功能，仅允许单选
+          multiple: false,
+          // 自定义提示文本
+          placeholder: '請選擇',
+          // 自定义 "没有匹配项" 的提示文本
+          // noResults: function() {
+          //   return '未找到匹配项，请输入新的选项';
+          // }
+          // dropdownParent: $("#buy_category .modal-content")
+          dropdownParent: $('#favouriteModal')
+        });
 
-    //全部
-    const dom_button_all = document.querySelector('#button-all')
-    dom_button_all.addEventListener('click', async function() {
-      //remove active
-      document.querySelectorAll('.btn-outline-secondary').forEach(v=> v.classList.remove('active'))
-      dom_button_all.classList.add('active')
-
-      //帶入搜尋條件：全部
-      document.querySelector('#text-search').value = '!熱門族群 潛力股 焦點股'
-      dom_button_search.click()
-    })
-
-    //熱門
-    const dom_button_hot = document.querySelector('#button-hot')
-    dom_button_hot.addEventListener('click', async function() {
-      //remove active
-      document.querySelectorAll('.btn-outline-secondary').forEach(v=> v.classList.remove('active'))
-      dom_button_hot.classList.add('active')
-
-      //帶入搜尋條件：熱門族群 潛力股 焦點股
-      document.querySelector('#text-search').value = '熱門族群 潛力股 焦點股 登峰 創新高 創天價 閃大燈 漲停'
-      dom_button_search.click()
-    })
-
-    //推薦
-    const dom_button_recommendation = document.querySelector('#button-recommendation')
-    dom_button_recommendation.addEventListener('click', async function() {
-      //remove active
-      document.querySelectorAll('.btn-outline-secondary').forEach(v=> v.classList.remove('active'))
-      dom_button_recommendation.classList.add('active')
-
-      //帶入搜尋條件：推薦
-      document.querySelector('#text-search').value = 'AI推薦'
-      dom_button_search.click()
-    })
-    
-    //----------------
-    //顯示新聞
-    const news_div = document.querySelector('#news_div')
-    const news = document.querySelector('#news').cloneNode(true)
-    
-    const show_data = (group_data) => {
-      document.querySelectorAll('#news').forEach(v=> v.remove())
-
-      for (const k in group_data) {
-          // if (k==0) continue
-          const v = group_data[k][1][0]
-          const dom = news.cloneNode(true)
-          dom.querySelector('.card-subtitle #news_time').textContent = `${v[0]}`
-          const text = v[2].split("\n")
-          // dom.querySelector('.card-title').textContent = text[0]
-          const stock = text[0].match(/[0-9]+/g)
-          //過濾觀光餐旅
-          if (stock_list.findIndex(v2=> v2[0] == stock && v2[4] == '觀光餐旅' ) >= 0) {
-            continue
+        //--------------------------------------------------------------------------------
+        //搜尋
+        const dom_button_search = document.querySelector('#button-search')
+        dom_button_search.addEventListener('click', async function() {
+          //檢查搜尋條件開頭是否為!
+          const is_not = document.querySelector('#text-search').value.startsWith('!')
+          // console.log(is_not)
+          const text_search = (document.querySelector('#text-search').value || '').replace('!', '').split(' ')
+          if (text_search == '') {
+            show_data(JSON.parse(JSON.stringify(news_data)))
+            return
           }
-          
-          dom.querySelector('.card-title').innerHTML = `
-            <div class="fw-bold">${v[3]||''}</div>
-            <a href="javascript:void(0)" class="text-decoration-none ms-auto"><i class="fa-solid fa-caret-down"></i></a>
-          `
-          //綁定點擊事件
-          dom.querySelector('.card-title').addEventListener('click', function() {
-            if (dom.querySelector('.card-text').classList.contains('d-none')) {
-              dom.querySelector('.card-text').classList.remove('d-none')
-              this.querySelector('i').classList.remove('fa-caret-down')
-              this.querySelector('i').classList.add('fa-caret-up')
-            } else {
-              dom.querySelector('.card-text').classList.add('d-none')
-              this.querySelector('i').classList.remove('fa-caret-up')
-              this.querySelector('i').classList.add('fa-caret-down')
+          // dom_dialog_Loading.show()
+          dom_button_search.disabled = true
+          dom_button_search.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'
+          await new Promise(resolve=> setTimeout(resolve, 50))
+
+          show_data(JSON.parse(JSON.stringify(news_data)))
+          const news_div = document.querySelectorAll('#news')
+          for (const v of news_div) {
+            v.style.display = 'none'
+            for (const v2 of text_search) {
+              if (!is_not && v2=='AI推薦' && v.querySelector('.card-subtitle #recommendation') && 
+                !v.querySelector('.card-title').innerHTML.includes('熱門族群') &&
+                !v.querySelector('.card-title').innerHTML.includes('潛力股') &&
+                !v.querySelector('.card-title').innerHTML.includes('焦點股') 
+              ) {
+                v.style.display = ''
+              } else if (!is_not && v.querySelector('.card-title').innerHTML.includes(v2)) {
+                v.style.display = ''
+                //將出現的關鍵字標示黃底
+                v.querySelector('.card-title').innerHTML = v.querySelector('.card-title').innerHTML.replace(new RegExp(v2, 'g'), `<span class="bg-warning">${v2}</span>`)
+                v.querySelector('.card-text').innerHTML = v.querySelector('.card-text').innerHTML.replace(new RegExp(v2, 'g'), `<span class="bg-warning">${v2}</span>`)
+              } else if (is_not && !v.querySelector('.card-title').innerHTML.includes(v2) && !v.querySelector('.card-subtitle #recommendation')) {
+                v.style.display = ''
+              } else {
+                
+              }
             }
-          })
-
-          //if v[4] is not empty
-          if (v[4]) {
-            //使用a fontawesome ai icon
-            dom.querySelector('.card-subtitle #news_time').innerHTML = `<a href="javascript:void(0)" class="text-decoration-none" id="recommendation"><i class="fa-regular fa-face-smile-beam"></i></a> ${dom.querySelector('.card-subtitle #news_time').innerHTML}`
-            dom.querySelector('.card-subtitle #recommendation').addEventListener('click', function() {
-              document.querySelector('#dialog_recommendation .modal-body').innerHTML = `${v[4]?`<b>主題</b>: ${v[4]}<br>`:''}${v[5]?`<b>標籤</b>: ${v[5]}<br>`:''}${v[8]?`<b>推薦原因</b>: ${v[8].replace(/\n/g,'<br>')}<br>`:''}`
-              dom_dialog_recommendation.show()
-            })
           }
+          for (const v of news_div) {
+            if (v.style.display == 'none') {
+              v.remove()
+            }
+          }
+          // dom_dialog_Loading.hide()
+          dom_button_search.disabled = false
+          dom_button_search.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i>'
+        })
 
-          for (const k2 in group_data[k][1]) {
-            const v2 = group_data[k][1][k2]
-            let fugle = ''
-            const text = v2[2].split("\n")
-            const stock = text[0].match(/[0-9]+/g)
-            if (stock) {
-              fugle = `
-                <a href="https://www.fugle.tw/ai/${stock}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
-                <a href="https://wwwuat.moneydj.com/kmdj/wiki/wikisubjectlist.aspx?op=3&b=${text[0].split('（')[0]}&c=" class="text-decoration-none" id="show_chartjs" target="_blank">介</a>
+        //全部
+        const dom_button_all = document.querySelector('#button-all')
+        dom_button_all.addEventListener('click', async function() {
+          //remove active
+          document.querySelectorAll('.btn-outline-secondary').forEach(v=> v.classList.remove('active'))
+          dom_button_all.classList.add('active')
+
+          //帶入搜尋條件：全部
+          document.querySelector('#text-search').value = '!熱門族群 潛力股 焦點股'
+          dom_button_search.click()
+        })
+
+        //熱門
+        const dom_button_hot = document.querySelector('#button-hot')
+        dom_button_hot.addEventListener('click', async function() {
+          //remove active
+          document.querySelectorAll('.btn-outline-secondary').forEach(v=> v.classList.remove('active'))
+          dom_button_hot.classList.add('active')
+
+          //帶入搜尋條件：熱門族群 潛力股 焦點股
+          document.querySelector('#text-search').value = '熱門族群 潛力股 焦點股 登峰 創新高 創天價 閃大燈 漲停'
+          dom_button_search.click()
+        })
+
+        //推薦
+        const dom_button_recommendation = document.querySelector('#button-recommendation')
+        dom_button_recommendation.addEventListener('click', async function() {
+          //remove active
+          document.querySelectorAll('.btn-outline-secondary').forEach(v=> v.classList.remove('active'))
+          dom_button_recommendation.classList.add('active')
+
+          //帶入搜尋條件：推薦
+          document.querySelector('#text-search').value = 'AI推薦'
+          dom_button_search.click()
+        })
+        
+        //----------------
+        //顯示新聞
+        const news_div = document.querySelector('#news_div')
+        const news = document.querySelector('#news').cloneNode(true)
+        
+        const show_data = (group_data) => {
+          document.querySelectorAll('#news').forEach(v=> v.remove())
+
+          for (const k in group_data) {
+              // if (k==0) continue
+              const v = group_data[k][1][0]
+              const dom = news.cloneNode(true)
+              dom.querySelector('.card-subtitle #news_time').textContent = `${v[0]}`
+              const text = v[2].split("\n")
+              // dom.querySelector('.card-title').textContent = text[0]
+              const stock = text[0].match(/[0-9]+/g)
+              //過濾觀光餐旅
+              if (stock_list.findIndex(v2=> v2[0] == stock && v2[4] == '觀光餐旅' ) >= 0) {
+                continue
+              }
+              
+              dom.querySelector('.card-title').innerHTML = `
+                <div class="fw-bold">${v[3]||''}</div>
+                <a href="javascript:void(0)" class="text-decoration-none ms-auto"><i class="fa-solid fa-caret-down"></i></a>
               `
-            }
-            
-            // dom.querySelector('.card-title').remove()
-            const text2 = text.slice(1, text.length - 1).map(v3=> `<li>${v3.replace(/^[0-9]+\./, '')}</li>`)
-            dom.querySelector('.card-text').innerHTML += `${k2>0?'<br>':''}<div>${text[0]}${fugle}</div><ol class="m-0 ps-4">${text2.join("")}</ol>`
+              //綁定點擊事件
+              dom.querySelector('.card-title').addEventListener('click', function() {
+                if (dom.querySelector('.card-text').classList.contains('d-none')) {
+                  dom.querySelector('.card-text').classList.remove('d-none')
+                  this.querySelector('i').classList.remove('fa-caret-down')
+                  this.querySelector('i').classList.add('fa-caret-up')
+                } else {
+                  dom.querySelector('.card-text').classList.add('d-none')
+                  this.querySelector('i').classList.remove('fa-caret-up')
+                  this.querySelector('i').classList.add('fa-caret-down')
+                }
+              })
+
+              //if v[4] is not empty
+              if (v[4]) {
+                //使用a fontawesome ai icon
+                dom.querySelector('.card-subtitle #news_time').innerHTML = `<a href="javascript:void(0)" class="text-decoration-none" id="recommendation"><i class="fa-regular fa-face-smile-beam"></i></a> ${dom.querySelector('.card-subtitle #news_time').innerHTML}`
+                dom.querySelector('.card-subtitle #recommendation').addEventListener('click', function() {
+                  document.querySelector('#dialog_recommendation .modal-body').innerHTML = `${v[4]?`<b>主題</b>: ${v[4]}<br>`:''}${v[5]?`<b>標籤</b>: ${v[5]}<br>`:''}${v[8]?`<b>推薦原因</b>: ${v[8].replace(/\n/g,'<br>')}<br>`:''}`
+                  dom_dialog_recommendation.show()
+                })
+              }
+
+              for (const k2 in group_data[k][1]) {
+                const v2 = group_data[k][1][k2]
+                let fugle = ''
+                const text = v2[2].split("\n")
+                const stock = text[0].match(/[0-9]+/g)
+                if (stock) {
+                  fugle = `
+                    <a href="https://www.fugle.tw/ai/${stock}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+                    <a href="https://wwwuat.moneydj.com/kmdj/wiki/wikisubjectlist.aspx?op=3&b=${text[0].split('（')[0]}&c=" class="text-decoration-none" id="show_chartjs" target="_blank">介</a>
+                  `
+                }
+                
+                // dom.querySelector('.card-title').remove()
+                const text2 = text.slice(1, text.length - 1).map(v3=> `<li>${v3.replace(/^[0-9]+\./, '')}</li>`)
+                dom.querySelector('.card-text').innerHTML += `${k2>0?'<br>':''}<div>${text[0]}${fugle}</div><ol class="m-0 ps-4">${text2.join("")}</ol>`
+              }
+
+              const news_url = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `$1`).replace(/\n/g, '')
+              dom.querySelector('.card-subtitle #news_link').innerHTML = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `<a href="javascript:void(0);" onclick="favourite.insert(this)" class="text-warning pe-2"><i class="fa-regular fa-star"></i></a> <a href="$1" target="_blank">${v[1]}</a>\n`).replace(/\n/g, '<br>')
+
+              //檢查是否已加入我的最愛
+              const favourite_data = favourite.get_favourite_data().find(v2=> v2.news_url == news_url)
+              const favourite_dom = dom.querySelector('.card-subtitle #news_link .fa-star')
+              if (favourite_data && favourite_dom) {
+                favourite_dom.classList.add('fa-solid')
+              }
+              news_div.append(dom)
           }
-
-          const news_url = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `$1`).replace(/\n/g, '')
-          dom.querySelector('.card-subtitle #news_link').innerHTML = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `<a href="javascript:void(0);" onclick="favourite.insert(this)" class="text-warning pe-2"><i class="fa-regular fa-star"></i></a> <a href="$1" target="_blank">${v[1]}</a>\n`).replace(/\n/g, '<br>')
-
-          //檢查是否已加入我的最愛
-          const favourite_data = favourite.get_favourite_data().find(v2=> v2.news_url == news_url)
-          const favourite_dom = dom.querySelector('.card-subtitle #news_link .fa-star')
-          if (favourite_data && favourite_dom) {
-            favourite_dom.classList.add('fa-solid')
-          }
-          news_div.append(dom)
-      }
-    }
-
-    let news_data = []
-    try {
-        // const res = await fetch('https://dev-cpzu.onrender.com/google/getDatas')
-        // const data = await res.json()
-        // show_data(data)
-        // show_data(await getDatas())
-        //pormise all
-        const data = await Promise.all([getDatas(), favourite.init()])
-
-        //按data裡面的v[0] group
-        const group_data = []
-        for (const v of data[0]) {
-          const gstring = v[2].split('新聞出處：')[1]
-          if (group_data.findIndex(v2=> v2[0] == gstring) < 0) {
-            group_data.push([gstring, []])
-          }
-          group_data.find(v2=> v2[0] == gstring)[1].push(v)
         }
-        news_data = group_data
-        // show_data(JSON.parse(JSON.stringify(group_data)))
-        //trigger hot click
-        document.querySelector('#button-hot').click()
-    } catch (error) {
-        console.log(error)
-        // google.script.run.withSuccessHandler(function(data) {
-        //     news_data = data
-        //     // show_data(data)
-        // }).getDatas();
-    }
+
+        let news_data = []
+        try {
+            // const res = await fetch('https://dev-cpzu.onrender.com/google/getDatas')
+            // const data = await res.json()
+            // show_data(data)
+            // show_data(await getDatas())
+            //pormise all
+            const data = await Promise.all([getDatas(), favourite.init()])
+
+            //按data裡面的v[0] group
+            const group_data = []
+            for (const v of data[0]) {
+              const gstring = v[2].split('新聞出處：')[1]
+              if (group_data.findIndex(v2=> v2[0] == gstring) < 0) {
+                group_data.push([gstring, []])
+              }
+              group_data.find(v2=> v2[0] == gstring)[1].push(v)
+            }
+            news_data = group_data
+            // show_data(JSON.parse(JSON.stringify(group_data)))
+            //trigger hot click
+            document.querySelector('#button-hot').click()
+        } catch (error) {
+            console.log(error)
+            // google.script.run.withSuccessHandler(function(data) {
+            //     news_data = data
+            //     // show_data(data)
+            // }).getDatas();
+        }
+      }
+
+      const is_login = await checkLogin(); // 檢查登入狀態
+      if (is_login) { 
+        show_dom()
+      }
 
     </script>
   </body>
