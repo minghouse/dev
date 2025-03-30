@@ -18,6 +18,7 @@ const google_login = async (req, res) => {
     const now_time = dayjs(now).tz('Asia/Taipei').format('HH:mm:ss')
     
     res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader("Access-Control-Allow-Credentials", "true");
     if (!token) {
         res.status(400).json({ error: 'Token is required' });
         return;
