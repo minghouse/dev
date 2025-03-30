@@ -14,7 +14,14 @@ const logout = async (req, res) => {
 
     req.session.is_login = null
     
-    res.setHeader('Access-Control-Allow-Origin', '*')
+    if (fs.existsSync(`${__dirname}/../../../../../../ssl/privkey1.pem`)) {
+        res.setHeader('Access-Control-Allow-Origin', 'https://minghouse.github.io/')
+    } else {
+        res.setHeader('Access-Control-Allow-Origin', '*')
+    }
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     res.status(200).json({
         code: 200,
         message: 'Logout successful'
