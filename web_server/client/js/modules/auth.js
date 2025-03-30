@@ -53,11 +53,12 @@ function showGoogleLogin() {
 
 // Google 回調函數 (在 window 註冊)
 window.handleCredentialResponse = (response) => {
-    console.log("Google JWT Token: ", response.credential);
+    // console.log("Google JWT Token: ", response.credential);
 
     // 傳送 Token 到後端驗證
     fetch(`${api_domain}/api/google_login`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: response.credential })
     })
