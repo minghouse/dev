@@ -30,9 +30,21 @@ import browser from './tasks/browser.mjs';
 
 const __filename = fileURLToPath(import.meta.url); // 獲取檔案的完整路徑
 const __dirname = path.dirname(__filename);       // 獲取檔案所在的目錄
+const privatekey = (() => {
+    if (fs.existsSync(`${__dirname}/../../ssl/privkey.pem`)) {
+        return fs.readFileSync(`${__dirname}/../../ssl/privkey.pem`);
+    }
+    return fs.readFileSync(`${__dirname}/privatekey.pem`);
+})()
+const certificate = (() => {
+    if (fs.existsSync(`${__dirname}/../../ssl/fullchain.pem`)) {
+        return fs.readFileSync(`${__dirname}/../../ssl/fullchain.pem`);
+    }
+    return fs.readFileSync(`${__dirname}/certificate.pem`);
+})()
 const sslOptions = {
-    key: fs.readFileSync(`${__dirname}/privatekey.pem`),
-    cert: fs.readFileSync(`${__dirname}/certificate.pem`),
+    key: privatekey,
+    cert: certificate,
     passphrase: process.env.EXPRESS_SESSION_SECRET,
     //allowHTTP1: true
 };
