@@ -2,6 +2,8 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
+import fs from "fs";
+import path from "path";
 
 import modules from '../google/modules.mjs';
 import pool from '../../modules/mysql.mjs';
@@ -9,6 +11,8 @@ import pool from '../../modules/mysql.mjs';
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
+const __filename = fileURLToPath(import.meta.url); // 獲取檔案的完整路徑
+const __dirname = path.dirname(__filename);       // 獲取檔案所在的目錄
 const google_login = async (req, res) => {
     // const url = req.query.url
     // const selector = req.query.selector || 'body'

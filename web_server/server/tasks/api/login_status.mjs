@@ -1,3 +1,9 @@
+import fs from "fs";
+import path from "path";
+
+const __filename = fileURLToPath(import.meta.url); // 獲取檔案的完整路徑
+const __dirname = path.dirname(__filename);       // 獲取檔案所在的目錄
+
 /**
  * 使用者是否登入 
  */
