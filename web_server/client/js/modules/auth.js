@@ -11,6 +11,7 @@ async function checkLogin() {
     //fetch api_domain + "/api/login_status"
     const result = await fetch(`${api_domain}/api/login_status`, {
         method: "GET",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
     })
     const data = await result.json();
