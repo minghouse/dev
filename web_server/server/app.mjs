@@ -30,7 +30,7 @@ import browser from './tasks/browser.mjs';
 
 const __filename = fileURLToPath(import.meta.url); // 獲取檔案的完整路徑
 const __dirname = path.dirname(__filename);       // 獲取檔案所在的目錄
-console.log(fs.existsSync(`${__dirname}/../../../../ssl/privkey.pem`))
+console.log(`${__dirname}/../../../../ssl/privkey.pem`)
 const privatekey = (() => {
     if (fs.existsSync(`${__dirname}/../../../../ssl/privkey.pem`)) {
         return fs.readFileSync(`${__dirname}/../../../../ssl/privkey.pem`);
