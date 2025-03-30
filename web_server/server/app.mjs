@@ -65,12 +65,11 @@ app.use(session({
     store: new fileStore({ path: `${__dirname}/../../../sessions` }), // Store sessions in the "sessions" directory
     secret: 'your-secret-key', // Replace with a secure secret key
     resave: false, // Prevent resaving session if not modified
-    saveUninitialized: true, // Do not save uninitialized sessions
+    saveUninitialized: false, // Do not save uninitialized sessions
     cookie: {
         secure: false, // Set to true if using HTTPS
         httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
-        maxAge: 3600000, // Session expiration time in milliseconds (e.g., 1 hour)
-        sameSite: "None"
+        maxAge: 3600000 // Session expiration time in milliseconds (e.g., 1 hour)
     }
 }));
 

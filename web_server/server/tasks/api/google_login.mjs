@@ -22,14 +22,7 @@ const google_login = async (req, res) => {
     const now_date = dayjs(now).tz('Asia/Taipei').format('YYYY-MM-DD')
     const now_time = dayjs(now).tz('Asia/Taipei').format('HH:mm:ss')
     
-    if (fs.existsSync(`${__dirname}/../../../../../../ssl/privkey1.pem`)) {
-        res.setHeader('Access-Control-Allow-Origin', 'https://minghouse.github.io/')
-    } else {
-        res.setHeader('Access-Control-Allow-Origin', '*')
-    }
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    // res.setHeader('Access-Control-Allow-Origin', '*')
     if (!token) {
         res.status(400).json({ error: 'Token is required' });
         return;

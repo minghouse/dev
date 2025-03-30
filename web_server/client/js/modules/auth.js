@@ -11,7 +11,6 @@ async function checkLogin() {
     //fetch api_domain + "/api/login_status"
     const result = await fetch(`${api_domain}/api/login_status`, {
         method: "GET",
-        credentials: "include",
         headers: { "Content-Type": "application/json" },
     })
     const data = await result.json();
@@ -59,7 +58,6 @@ window.handleCredentialResponse = (response) => {
     // 傳送 Token 到後端驗證
     fetch(`${api_domain}/api/google_login`, {
         method: "POST",
-        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: response.credential })
     })
