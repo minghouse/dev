@@ -129,7 +129,7 @@
               <th scope="col" style="">名稱</th>
               <th scope="col" style="">起始價</th>
               <th scope="col" style="">收盤價</th>
-              <th scope="col" style="search_date">成交量/漲幅</th>
+              <th scope="col" style="search_date">成交量(張)/漲幅</th>
               <th scope="col" width="120">新聞</th>
             </tr>
           </thead>
@@ -349,7 +349,8 @@
               const td = dom.querySelectorAll('td')
               // td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}`
               td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}
-              <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+              <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+              <a href="https://www.google.com/search?q=${encodeURIComponent(v.stock[1])}&tbm=nws&tbs=sbd:1" class="text-decoration-none" target="_blank">G</a>
               `
               //
               td[1].textContent = `${v.stock[4]}`
@@ -357,7 +358,11 @@
                 <span class="${v.stock[6] > 0 ? 'text-danger' : v.stock[6] < 0 ? 'text-success' : ''}">
                   ${v.stock[6] >0 ? '<i class="fa-solid fa-arrow-up"></i>' : v.stock[6] < 0 ? '<i class="fa-solid fa-arrow-down"></i>' : ''}
                   ${Math.abs(v.stock[6])||''}`
-              td[3].innerHTML = `${v.stock[3]}<br>${v.stock[5]}%`
+              // td[3].innerHTML = `${v.stock[3]}<br>${v.stock[5]}%`
+              
+              //v.stock[3] /1000 然後取整數
+              const price = Math.round(v.stock[3].replace(/,/g, '') / 1000).toLocaleString('en-US')
+              td[3].innerHTML = `${price}<br>${v.stock[5]}%`
 
               
               //顯示排名&是否熱門

@@ -452,6 +452,7 @@
             // dom.querySelector('th').textContent = i
             dom.querySelector('td').innerHTML = `${v.stock_name}(${v.stock})
             <a href="https://www.fugle.tw/ai/${v.stock}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+              <a href="https://www.google.com/search?q=${encodeURIComponent(v.stock[1])}&tbm=nws&tbs=sbd:1" class="text-decoration-none" target="_blank">G</a>
             `
             //渲染count
             dom.querySelector('#b_news_favourite .badge').textContent = v.count

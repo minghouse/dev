@@ -495,6 +495,7 @@
               // td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}`
               td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}
               <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+              <a href="https://www.google.com/search?q=${encodeURIComponent(v.stock[1])}&tbm=nws&tbs=sbd:1" class="text-decoration-none" target="_blank">G</a>
               `
               //轉為億，小數點後兩位，四捨五入
               // td[1].textContent = `${(v.stock[4].replace(/,/g, '')/100000000).toFixed(2)}億`
@@ -630,6 +631,7 @@
               td[3].querySelector('#b_news_ai').addEventListener('click', function() {
                 dom_news2.querySelector('.modal-title').innerHTML = `${v.stock[1]}(${v.stock[0]})
                 <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+                <a href="https://www.google.com/search?q=${encodeURIComponent(v.stock[1])}&tbm=nws&tbs=sbd:1" class="text-decoration-none" target="_blank">G</a>
                 `
                 dom_news2.querySelector('.modal-body').innerHTML = ''
                 for (const v2 of v.news_ai) {
