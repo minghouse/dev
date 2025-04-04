@@ -32,7 +32,7 @@ const google_login = async (req, res) => {
         // 驗證 Google Auth Token
         const tokenInfo = await modules.verifyGoogleToken(token);
         const user = {
-            id: tokenInfo.sub, // 使用者的唯一 ID
+            id: `google_${tokenInfo.sub}`, // 使用者的唯一 ID
             email: tokenInfo.email,
             name: tokenInfo.name,
             picture: tokenInfo.picture,
