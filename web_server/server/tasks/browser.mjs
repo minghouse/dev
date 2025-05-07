@@ -16,7 +16,11 @@ const browser = async (req, res) => {
         // headless: false, // 先开启可视化模式调试
         args: [
             '--disable-blink-features=AutomationControlled',
-            '--no-sandbox'
+            '--no-sandbox',
+            '--disable-dev-shm-usage',
+            '--single-process',
+            '--disable-gpu',
+            '--js-flags=--max-old-space-size=256', // 限制 JS VM 記憶體
         ]
     });
 
@@ -36,11 +40,23 @@ const browser = async (req, res) => {
 
 
     // 訪問目標網站
-    const response = await page.goto(url, {
-        timeout: 30000, // 60秒
-        // waitUntil: 'networkidle'
+    // const response = await page.goto(url, {
+    //     timeout: 30000, // 60秒
+    //     // waitUntil: 'networkidle'
+    //     waitUntil: 'domcontentloaded'
+    // });
+        
+    const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('External timeout')), 35000)
+    );
+
+    const response = await Promise.race([
+        page.goto(url, {
+        timeout: 30000,
         waitUntil: 'domcontentloaded'
-    });
+        }),
+        timeoutPromise
+    ]);
     // await page.goto(url, { waitUntil: 'networkidle' });  // 確保所有請求完
     
     // 等待元素出現，最多等 10 秒（10000 毫秒）
@@ -56,8 +72,14 @@ const browser = async (req, res) => {
     
     // 直接獲取內容，不做額外的等待
     const body = await page.evaluate(async (selector) => {
-        const element = document.querySelector(selector);
-        return element ? element.innerText : document.querySelector('body').innerText;
+        try {
+            const element = document.querySelector(selector);
+            if (element) return element.innerText;
+            const body = document.querySelector('body');
+            return body ? body.innerText : '';
+        } catch (err) {
+            return '[EVALUATE ERROR]';
+        }
     }, selector);
     console.log(body)
 
