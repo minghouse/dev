@@ -22,15 +22,15 @@ const select = async (req, res) => {
     // 配置參數
     //select {*} from {*} {*}
     const params = {
-        select: req.body.select,
-        from: req.body.from,
-        where: req.body.where
+        select: req.body.select || req.query.select,
+        from: req.body.from || req.query.from,
+        where: req.body.where || req.query.where
     }
 
     res.setHeader('Access-Control-Allow-Origin', '*')
 
     //檢查參數
-    const auth = req.body.auth
+    const auth = req.body.auth || req.query.auth
     if (auth != process.env.BROWSER_AUTH) {
         res.end('auth error')
         return

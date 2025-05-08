@@ -8,8 +8,11 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/css/select2.min.css" rel="stylesheet" />
     <style>
-      #news_div {
+      /* #news_div {
         font-size: 120%;
+      } */
+      .nav-link.active {
+        background-color: #e3f2fd;
       }
     </style>
     <style>
@@ -35,60 +38,69 @@
   <body>
     <div class="container-fluid px-1 d-none" id="container">
       <nav class="navbar mt-2 rounded" style="background-color: #e3f2fd;">
-          <div class="container-fluid justify-content-start">
-          <a class="navbar-brand fw-bold me-auto" href="#">每日新聞</a>
-          <!-- <div class="input-group mb-3">
-            <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="button-addon2">
-            <button class="btn btn-outline-secondary" type="button" id="button-addon2">Button</button>
-          </div> -->
-          <div class="input-group me-2" style="width: 250px">
-            <button class="btn btn-outline-secondary active" type="button" id="button-hot">
-              熱
+          <div class="container-fluid justify-content-start p-0">
+            <button class="navbar-toggler fs-6 px-2 py-1 mx-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu">
+              <span class="navbar-toggler-icon"></span>
             </button>
-            <button class="btn btn-outline-secondary" type="button" id="button-recommendation">
-              推
-            </button>
-            <button class="btn btn-outline-secondary" type="button" id="button-all">
-              其
-            </button>
-            <input type="text" class="form-control" placeholder="要查詢的內容" id="text-search">
-            <button class="btn btn-outline-secondary" type="button" id="button-search">
-              <i class="fa-solid fa-magnifying-glass"></i>
-            </button>
-          </div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarText">
-            <ul class="navbar-nav me-auto mt-2 mb-lg-0">
-              <li class="nav-item border-top">
-                <a class="nav-link active" href="index.html" data-href="?page=1">每日新聞分析</a>
-              </li>
-              <li class="nav-item border-top">
-                <a class="nav-link" href="index6.html" data-href="?page=6">每周新聞分析</a>
-              </li>
-              <li class="nav-item border-top">
-                <a class="nav-link" href="index2.html" data-href="?page=2">每日成交值排行</a>
-              </li>
-              <li class="nav-item border-top">
-                <a class="nav-link" href="index3.html" data-href="?page=3">每日漲幅排行</a>
-              </li>
-              <li class="nav-item border-top">
-                <a class="nav-link" href="index5.html" data-href="?page=5">自選股</a>
-              </li>
-              <li class="nav-item border-top">
-                <a class="nav-link" href="index7.html" data-href="?page=7">我的關注</a>
-              </li>
-              <li class="nav-item border-top">
-                <a class="nav-link" href="index8.html" data-href="?page=7">區間漲幅排行</a>
-              </li>
-              <li class="nav-item border-top">
-                <a class="nav-link" href="index9.html" data-href="?page=9">週轉率排行</a>
-              </li>
-            </ul>
-          </div>
+            <a class="navbar-brand fw-bold me-auto" href="#">每日新聞</a>
+          
+            <!-- Offcanvas 選單 -->
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasMenu">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title fw-bold">選單</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                        <a class="nav-link active" href="index.html" data-href="?page=1">每日新聞分析</a>
+                        </li>
+                        <li class="nav-item">
+                        <a class="nav-link" href="index6.html" data-href="?page=6">每周新聞分析</a>
+                        </li>
+                        <li class="nav-item">
+                        <a class="nav-link" href="index2.html" data-href="?page=2">每日成交值排行</a>
+                        </li>
+                        <li class="nav-item">
+                        <a class="nav-link" href="index3.html" data-href="?page=3">每日漲幅排行</a>
+                        </li>
+                        <li class="nav-item">
+                        <a class="nav-link" href="index5.html" data-href="?page=5">自選股</a>
+                        </li>
+                        <li class="nav-item">
+                        <a class="nav-link" href="index7.html" data-href="?page=7">我的關注</a>
+                        </li>
+                        <li class="nav-item">
+                        <a class="nav-link" href="index8.html" data-href="?page=7">區間漲幅排行</a>
+                        </li>
+                        <li class="nav-item">
+                        <a class="nav-link" href="index9.html" data-href="?page=9">週轉率排行</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
       </nav>
+      
+        <div class="mt-2 d-flex">
+            <div class=" me-auto">
+            </div>
+            <div class="input-group me-2" style="width: 350px">
+                <button class="btn btn-outline-secondary active" type="button" id="button-hot">
+                  熱
+                </button>
+                <button class="btn btn-outline-secondary" type="button" id="button-recommendation">
+                  推
+                </button>
+                <button class="btn btn-outline-secondary" type="button" id="button-all">
+                  其
+                </button>
+                <input type="text" class="form-control" placeholder="要查詢的內容" id="text-search">
+                <button class="btn btn-outline-secondary" type="button" id="button-search">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+              </div>    
+        </div>
       <div class="mt-2 table-responsive" id="news_div">
         <div class="card mb-2" id="news">
           <div class="card-body">
