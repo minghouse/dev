@@ -381,8 +381,14 @@
               //顯示排名&是否熱門
               const is_fire = v.news.filter(v2 => v2[1] >= data.now).findIndex(v=> /熱門/.test(v[3])) >= 0 ? true : false
               const is_fire_week = v.news.filter(v2 => v2[1] >= data.now_week).findIndex(v=> /熱門族群/.test(v[3])) >= 0 ? true : false
+              //股價歷史新高
+              const is_high = v.news.filter(v2 => v2[1] >= data.now_week).findIndex(v=> /股價/.test(v[3]) && /(新高|創高)/.test(v[3])) >= 0 ? true : false
+              //營收新高/爆發/激增
+              const is_high2 = v.news.filter(v2 => v2[1] >= data.now_week).findIndex(v=> /營收/.test(v[3]) && /(新高|爆發|激增|創高)/.test(v[3])) >= 0 ? true : false
               dom.querySelector('th').innerHTML = `${++kk}${is_fire ? `<br><a href="javascript:void(0)" class="text-decoration-none" id="fire">🔥</a>` : ''}`
               dom.querySelector('th').innerHTML += `${is_fire_week ? `<br><a href="javascript:void(0)" class="text-decoration-none" id="fire_week">&#129512;</a>` : ''}`
+              dom.querySelector('th').innerHTML += `${is_high ? `<br><a href="javascript:void(0)" class="text-decoration-none" id="high" title="股價(新高|創高)">↗️</a>` : ''}`
+              dom.querySelector('th').innerHTML += `${is_high2 ? `<br><a href="javascript:void(0)" class="text-decoration-none" id="high2" title="營收(新高|爆發|激增|創高)">⬆️</a>` : ''}`
               if (dom.querySelector('th #fire')) {
                 dom.querySelector('th #fire').addEventListener('click', () => {
                     //取得熱門新聞
@@ -404,27 +410,37 @@
                     dom_dialog_news.show()
                 })
               }
-              if (dom.querySelector('th #fire_week')) {
-                dom.querySelector('th #fire_week').addEventListener('click', () => {
-                    //取得熱門新聞
-                    const news = v.news.filter(v2 => v2[1] >= data.now_week && /熱門族群/.test(v2[3]))
-                    dom_news.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
-                    dom_news.querySelector('.modal-body').innerHTML = ''
-                    for (const v2 of news) {
-                      const dom_news_card_clone = dom_news_card.cloneNode(true)
-                      dom_news_card_clone.querySelector('.card-title').textContent = v2[3]
-                      dom_news_card_clone.querySelector('#news_time').textContent = v2[1]
-                      //渲染內容
-                      const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
-                      dom_news_card_clone.querySelector('.card-text').innerHTML = v2[5].replace(reg, `<span class="bg-warning">$1</span>`)
+              const show_news = () => {
+                  //取得熱門新聞
+                  const news = v.news.filter(v2 => v2[1] >= data.now_week && (
+                    /熱門族群/.test(v2[3]) || (/股價/.test(v2[3]) && /(新高|創高)/.test(v2[3])) || (/營收/.test(v2[3]) && /(新高|爆發|激增|創高)/.test(v2[3]))
+                  ))
+                  dom_news.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
+                  dom_news.querySelector('.modal-body').innerHTML = ''
+                  for (const v2 of news) {
+                    const dom_news_card_clone = dom_news_card.cloneNode(true)
+                    dom_news_card_clone.querySelector('.card-title').textContent = v2[3]
+                    dom_news_card_clone.querySelector('#news_time').textContent = v2[1]
+                    //渲染內容
+                    const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
+                    dom_news_card_clone.querySelector('.card-text').innerHTML = v2[5].replace(reg, `<span class="bg-warning">$1</span>`)
 
-                      dom_news_card_clone.querySelector('.card-link').href = v2[2]
-                      dom_news_card_clone.querySelector('.card-link').textContent = v2[6]
-                      dom_news.querySelector('.modal-body').append(dom_news_card_clone)
-                    }
-                    dom_dialog_news.show()
-                })
+                    dom_news_card_clone.querySelector('.card-link').href = v2[2]
+                    dom_news_card_clone.querySelector('.card-link').textContent = v2[6]
+                    dom_news.querySelector('.modal-body').append(dom_news_card_clone)
+                  }
+                  dom_dialog_news.show()
               }
+              if (dom.querySelector('th #fire_week')) {
+                dom.querySelector('th #fire_week').addEventListener('click', show_news)
+              }
+              if (dom.querySelector('th #high')) {
+                dom.querySelector('th #high').addEventListener('click', show_news)
+              }
+              if (dom.querySelector('th #high2')) {
+                dom.querySelector('th #high2').addEventListener('click', show_news)
+              }
+              
 
               //新聞按鈕
               td[4].querySelector('#b_news span').textContent = `${v.news.filter(v2 => v2[1] >= data.now).length}/${v.news.length}`
