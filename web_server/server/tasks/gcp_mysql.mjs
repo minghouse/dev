@@ -54,6 +54,10 @@ const select = async (req, res) => {
         connection.release();
         const result = rows
         //允許跨域請求
+        if (req.query.auth) {
+            res.end(result)
+            return
+        }
         res.json(result)
     } catch (e) {
         console.error(e)
