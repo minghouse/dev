@@ -31,7 +31,7 @@ const select = async (req, res) => {
 
     if (req.query.where) {
         //base64 decode
-        req.query.where = Buffer.from(req.query.where, 'base64').toString('utf-8')
+        params.where = Buffer.from(req.query.where, 'base64').toString('utf-8')
     }
 
     //檢查參數
