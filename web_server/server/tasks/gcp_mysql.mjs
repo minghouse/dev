@@ -29,13 +29,14 @@ const select = async (req, res) => {
 
     res.setHeader('Access-Control-Allow-Origin', '*')
 
+    let auth = req.body.auth || req.query.auth
+
+    //檢查參數
     if (req.query.where) {
         //base64 decode
         params.where = Buffer.from(req.query.where, 'base64').toString('utf-8')
+        auth = Buffer.from(req.query.auth, 'base64').toString('utf-8')
     }
-
-    //檢查參數
-    const auth = req.body.auth || req.query.auth
     if (auth != process.env.BROWSER_AUTH) {
         res.end('auth error')
         return
