@@ -76,8 +76,13 @@ app.use(session({
 //client開頭的路由就顯示client裡面對應路由的檔案資料
 app.use('/client', express.static(path.join(__dirname, '../', 'client')));
 
+//顯示訪問的資料
+app.use((req, res, next) => {
+    console.log(`/${req.path}, IP: ${req.ip}, ${req.method}, ${JSON.stringify(req.query)}, ${JSON.stringify(req.body)}, ${JSON.stringify(req.params)}, ${JSON.stringify(req.headers)}`)
+    next();
+})
+
 app.get('/', (req, res) => {
-    console.log(`/ , IP: ${req.ip}, ${req.method}, ${JSON.stringify(req.query)}, ${JSON.stringify(req.body)}, ${JSON.stringify(req.params)}, ${JSON.stringify(req.headers)}`)
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
