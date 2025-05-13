@@ -77,7 +77,7 @@ app.use(session({
 app.use('/client', express.static(path.join(__dirname, '../', 'client')));
 
 app.get('/', (req, res) => {
-    console.log(`/ , IP: ${req.ip}, ${req.method}, ${req.query}, ${req.body}, ${req.params}, ${JSON.stringify(req.headers)}`)
+    console.log(`/ , IP: ${req.ip}, ${req.method}, ${JSON.stringify(req.query)}, ${JSON.stringify(req.body)}, ${JSON.stringify(req.params)}, ${JSON.stringify(req.headers)}`)
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
