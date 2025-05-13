@@ -77,7 +77,10 @@ app.use(session({
 app.use('/client', express.static(path.join(__dirname, '../', 'client')));
 
 app.get('/', (req, res) => {
-    res.send('Hello World')
+    res.send('test index')
+});
+app.get('/google0d32d87e788bdd51.html', (req, res) => {
+    res.send('google-site-verification: google0d32d87e788bdd51.html')
 });
 
 app.get('/google/sheet_search', (req, res) => {
