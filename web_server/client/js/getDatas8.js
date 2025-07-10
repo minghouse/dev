@@ -154,7 +154,7 @@ const getDatas8 = async (search_date, search_date2) => {
     //         //取得當日的成交金額排序前20
     //         const yahoo_turnover = await (async () => {
     //             // const response = await fetch(`https://dev-cpzu.onrender.com/google/rank_changeup`);
-    //             const response = await fetch(`https://node-dev.azurewebsites.net/google/rank_changeup`);
+    //             const response = await fetch(`https://newsdev.duckdns.org/google/rank_changeup`);
     //             const result = await response.json() || {}
     //             return result
     //         })()
@@ -190,15 +190,15 @@ const getDatas8 = async (search_date, search_date2) => {
     //     return JSON.parse(result[1] || '[]')
     // })()
 
-    //fetch https://node-dev.azurewebsites.net/afterTrading search_date & search_date2
+    //fetch https://newsdev.duckdns.org/afterTrading search_date & search_date2
     const result = await (async ()=>{
         search_date = await work_date(search_date)
         search_date2 = await work_date(search_date2)
         const prev_search_date = await work_date(dayjs(search_date).add(-1, 'day').format('YYYY-MM-DD'))
 
-        const r1 = fetch(`https://node-dev.azurewebsites.net/afterTrading?date=${search_date}`)
-        const r2 = fetch(`https://node-dev.azurewebsites.net/afterTrading?date=${search_date2}`)
-        const r3 = fetch(`https://node-dev.azurewebsites.net/afterTrading?date=${prev_search_date}`)
+        const r1 = fetch(`https://newsdev.duckdns.org/afterTrading?date=${search_date}`)
+        const r2 = fetch(`https://newsdev.duckdns.org/afterTrading?date=${search_date2}`)
+        const r3 = fetch(`https://newsdev.duckdns.org/afterTrading?date=${prev_search_date}`)
         const [response, response2, response3] = await Promise.all([r1, r2, r3])
         const left_data = await response.json() || []
         const right_data = await response2.json() || []

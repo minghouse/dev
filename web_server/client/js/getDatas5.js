@@ -110,7 +110,7 @@ const getDatas5 = async (search_date) => {
                             }
                             // const res = await fetch('http://127.0.0.1:3000/azure_mysql/select', {
                             // const res = await fetch('https://dev-cpzu.onrender.com/azure_mysql/select', {
-                            const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/select', {
+                            const res = await fetch('https://newsdev.duckdns.org/gcp_mysql/select', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'

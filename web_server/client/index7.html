@@ -447,7 +447,7 @@
             `,
             where: `GROUP BY stock ORDER BY create_date DESC`
         }
-        const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/select', {
+        const res = await fetch('https://newsdev.duckdns.org/gcp_mysql/select', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -495,7 +495,7 @@
                 from: `news_favourite`,
                 where: `where stock = '${v.stock}' order by create_date desc`
               }
-              const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/select', {
+              const res = await fetch('https://newsdev.duckdns.org/gcp_mysql/select', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json'
@@ -548,7 +548,7 @@
             into: 'news_favourite_note',
             values: `('${stock}', '${dayjs().format('YYYY-MM-DD HH:mm:ss')}', '', '${document.querySelector('#favourite_note').value}') ON DUPLICATE KEY UPDATE note = '${document.querySelector('#favourite_note').value}'`
           }
-          const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/insert', {
+          const res = await fetch('https://newsdev.duckdns.org/gcp_mysql/insert', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'

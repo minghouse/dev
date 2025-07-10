@@ -157,7 +157,7 @@ const getDatas9 = async (search_date) => {
     const result_1 = await (async () => {
         //取得當日的週轉率排行
         const yahoo_turnover3 = await (async () => {
-            const response = await fetch(`https://node-dev.azurewebsites.net/google/turnover_rate`);
+            const response = await fetch(`https://newsdev.duckdns.org/google/turnover_rate`);
             const result = await response.json() || {}
             return result
         })()

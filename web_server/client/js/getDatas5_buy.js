@@ -30,7 +30,7 @@ const getDatas5_buy = async (form_data) => {
     ]
 
     // const response = await fetch(`https://dev-cpzu.onrender.com/google/sheet_insert?range=${encodeURIComponent("自選股")}&datas=${encodeURIComponent(JSON.stringify([data]))}`, {
-    const response = await fetch(`https://node-dev.azurewebsites.net/google/sheet_insert?range=${encodeURIComponent("自選股")}&datas=${encodeURIComponent(JSON.stringify([data]))}`, {
+    const response = await fetch(`https://newsdev.duckdns.org/google/sheet_insert?range=${encodeURIComponent("自選股")}&datas=${encodeURIComponent(JSON.stringify([data]))}`, {
         method: 'GET',
         headers: {
             // 'Content-Type': 'application/json',

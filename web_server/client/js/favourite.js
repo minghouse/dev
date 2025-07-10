@@ -31,7 +31,7 @@ document.querySelector('#favourite_submit').addEventListener('click', async () =
         into: 'news_favourite_note (stock, create_date, stock_name, note)',
         values: `('${stock}', '${create_date}', '${select_favourite.stock_name}', '${note}') ON DUPLICATE KEY UPDATE note = '${note}'`
     }
-    const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/insert', {
+    const res = await fetch('https://newsdev.duckdns.org/gcp_mysql/insert', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -45,7 +45,7 @@ document.querySelector('#favourite_submit').addEventListener('click', async () =
         into: 'news_favourite (create_date, stock, stock_name, ai_news, news_url, news_source, news_date)',
         values: `('${create_date}', '${stock}', '${select_favourite.stock_name}', '${select_favourite.ai_news}', '${select_favourite.news_url}', '${select_favourite.news_source}', '${select_favourite.news_date}')`
     }
-    const res2 = await fetch('https://node-dev.azurewebsites.net/azure_mysql/insert', {
+    const res2 = await fetch('https://newsdev.duckdns.org/gcp_mysql/insert', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -95,7 +95,7 @@ const init = async () => {
         where: `where a.create_date >= '${date}'`
     }
     
-    const res = await fetch('https://node-dev.azurewebsites.net/azure_mysql/select', {
+    const res = await fetch('https://newsdev.duckdns.org/gcp_mysql/select', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
