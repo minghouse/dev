@@ -37,7 +37,7 @@ const select = async (req, res) => {
         params.where = Buffer.from(req.query.where, 'base64').toString('utf-8')
         auth = Buffer.from(req.query.source, 'base64').toString('utf-8')
     }
-    if (auth != process.env.BROWSER_AUTH) {
+    if (auth != process.env.BROWSER_AUTH && !req.session.is_login) {
         res.end('auth error')
         return
     }
