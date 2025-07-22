@@ -86,8 +86,8 @@ const browser = async (req, res) => {
         }, selector);
         console.log(body)
 
-        // 關閉瀏覽器
-        await browser.close();
+        // // 關閉瀏覽器
+        // await browser.close();
 
         res.setHeader('Access-Control-Allow-Origin', '*')
         res.end(body)
