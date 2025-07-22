@@ -14,6 +14,10 @@ const browser = async (req, res) => {
     // const browser = await chromium.launch({ headless: false });
     
     let browserInstance
+    let controller = new AbortController();
+    const abortTimeout = setTimeout(() => {
+        controller.abort();
+    }, 35000); // 35秒強制中止
     try {
         browserInstance = await chromium.launch({
             // headless: false, // 先开启可视化模式调试
@@ -49,16 +53,16 @@ const browser = async (req, res) => {
         //     waitUntil: 'domcontentloaded'
         // });
             
-        const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('External timeout')), 35000)
-        );
+        // const timeoutPromise = new Promise((_, reject) =>
+        //     setTimeout(() => reject(new Error('External timeout')), 35000)
+        // );
 
         const response = await Promise.race([
             page.goto(url, {
-            timeout: 30000,
-            waitUntil: 'domcontentloaded'
-            }),
-            timeoutPromise
+                timeout: 30000,
+                waitUntil: 'domcontentloaded',
+                signal: controller.signal,
+            })
         ]);
         // await page.goto(url, { waitUntil: 'networkidle' });  // 確保所有請求完
         
@@ -89,6 +93,7 @@ const browser = async (req, res) => {
         // // 關閉瀏覽器
         // await browser.close();
 
+        clearTimeout(abortTimeout); // 清除 timeout
         res.setHeader('Access-Control-Allow-Origin', '*')
         res.end(body)
     } catch (err) {
@@ -97,7 +102,9 @@ const browser = async (req, res) => {
     } finally {
         if (browserInstance) {
             try {
+                console.log('[INFO] closing browser...');
                 await browserInstance.close();
+                console.log('[INFO] browser closed.');
             } catch (e) {
                 console.warn('[Browser Close Failed]', e);
             }
