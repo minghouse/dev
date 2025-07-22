@@ -20,6 +20,12 @@ const browser = (req, res) => {
         BROWSER_AUTH,
     ]);
 
+    const TIMEOUT_MS = 35000;
+    const timeout = setTimeout(() => {
+        console.warn('[Child Process] Timeout, killing...');
+        child.kill('SIGKILL');
+    }, TIMEOUT_MS);
+
     let output = '';
     let errorOutput = '';
 
@@ -32,6 +38,7 @@ const browser = (req, res) => {
     });
 
     child.on('close', (code) => {
+        clearTimeout(timeout);
         if (code === 0) {
             res.setHeader('Access-Control-Allow-Origin', '*');
             res.end(output);

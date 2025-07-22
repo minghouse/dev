@@ -14,7 +14,7 @@ async function main() {
                 '--disable-blink-features=AutomationControlled',
                 '--no-sandbox',
                 '--disable-dev-shm-usage',
-                '--single-process',
+                // '--single-process',
                 '--disable-gpu',
                 '--js-flags=--max-old-space-size=256',
             ],
