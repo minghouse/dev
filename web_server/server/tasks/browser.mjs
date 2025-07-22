@@ -1,4 +1,15 @@
 import { chromium } from 'playwright';
+import { exec } from 'child_process';
+
+function killOrphanHeadlessShell() {
+    exec("pkill -f headless_shell", (error, stdout, stderr) => {
+        if (error) {
+            console.warn('[KILL ERROR]', error.message);
+        } else {
+            console.log('[KILL] headless_shell cleaned');
+        }
+    });
+}
 
 const browser = async (req, res) => {
     const url = req.query.url
@@ -109,6 +120,7 @@ const browser = async (req, res) => {
                 console.warn('[Browser Close Failed]', e);
             }
         }
+        killOrphanHeadlessShell();
     }
 }
 
