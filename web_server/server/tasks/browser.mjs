@@ -18,7 +18,7 @@ const browser = (req, res) => {
         selector,
         auth,
         BROWSER_AUTH,
-    ]);
+    ], { detached: true });
 
     const TIMEOUT_MS = 35000;
     const timeout = setTimeout(() => {
