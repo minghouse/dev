@@ -35,8 +35,9 @@ const browser = async (req, res) => {
             args: [
                 '--disable-blink-features=AutomationControlled',
                 '--no-sandbox',
+                '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--single-process',
+                // '--single-process',
                 '--disable-gpu',
                 '--js-flags=--max-old-space-size=256', // 限制 JS VM 記憶體
             ]
