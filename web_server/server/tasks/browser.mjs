@@ -1,15 +1,4 @@
 import { chromium } from 'playwright';
-import { exec } from 'child_process';
-
-function killOrphanHeadlessShell() {
-    exec("pkill -f headless_shell", (error, stdout, stderr) => {
-        if (error) {
-            console.warn('[KILL ERROR]', error.message);
-        } else {
-            console.log('[KILL] headless_shell cleaned');
-        }
-    });
-}
 
 const browser = async (req, res) => {
     const url = req.query.url
@@ -25,19 +14,14 @@ const browser = async (req, res) => {
     // const browser = await chromium.launch({ headless: false });
     
     let browserInstance
-    let controller = new AbortController();
-    const abortTimeout = setTimeout(() => {
-        controller.abort();
-    }, 35000); // 35秒強制中止
     try {
         browserInstance = await chromium.launch({
             // headless: false, // 先开启可视化模式调试
             args: [
                 '--disable-blink-features=AutomationControlled',
                 '--no-sandbox',
-                '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                // '--single-process',
+                '--single-process',
                 '--disable-gpu',
                 '--js-flags=--max-old-space-size=256', // 限制 JS VM 記憶體
             ]
@@ -65,16 +49,16 @@ const browser = async (req, res) => {
         //     waitUntil: 'domcontentloaded'
         // });
             
-        // const timeoutPromise = new Promise((_, reject) =>
-        //     setTimeout(() => reject(new Error('External timeout')), 35000)
-        // );
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('External timeout')), 35000)
+        );
 
         const response = await Promise.race([
             page.goto(url, {
-                timeout: 30000,
-                waitUntil: 'domcontentloaded',
-                signal: controller.signal,
-            })
+            timeout: 30000,
+            waitUntil: 'domcontentloaded'
+            }),
+            timeoutPromise
         ]);
         // await page.goto(url, { waitUntil: 'networkidle' });  // 確保所有請求完
         
@@ -105,7 +89,6 @@ const browser = async (req, res) => {
         // // 關閉瀏覽器
         // await browser.close();
 
-        clearTimeout(abortTimeout); // 清除 timeout
         res.setHeader('Access-Control-Allow-Origin', '*')
         res.end(body)
     } catch (err) {
@@ -114,14 +97,11 @@ const browser = async (req, res) => {
     } finally {
         if (browserInstance) {
             try {
-                console.log('[INFO] closing browser...');
                 await browserInstance.close();
-                console.log('[INFO] browser closed.');
             } catch (e) {
                 console.warn('[Browser Close Failed]', e);
             }
         }
-        killOrphanHeadlessShell();
     }
 }
 
