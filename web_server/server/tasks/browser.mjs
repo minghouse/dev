@@ -13,7 +13,7 @@ const browser = (req, res) => {
     }
 
     const child = spawn('node', [
-        path.resolve('./browser_child.mjs'),
+        path.resolve('./web_server/server/tasks/browser_child.mjs'),
         url,
         selector,
         auth,
