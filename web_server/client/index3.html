@@ -695,6 +695,7 @@
               try {
                 resolve(await getDatas3(search_date))
               } catch (error) {
+                console.error(error)
                 google.script.run.withSuccessHandler((data)=>{
                   resolve(data)
                 }).getDatas3(search_date);
