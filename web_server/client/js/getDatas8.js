@@ -127,7 +127,7 @@ const getDatas8 = async (search_date, search_date2) => {
                 if (v[0] < date_start) {
                     continue
                 }
-                const news = v[2].replace(/\n\n新聞出處：/,'\n新聞出處：').split("\n\n")
+                const news = (v[2]||'').replace(/\n\n新聞出處：/,'\n新聞出處：').split("\n\n")
                 for (const v2 of news) {
                     const v3 = v2.split("\n")
                     const check = v3.filter(v4=>/^[0-9]+\./.test(v4)).length
