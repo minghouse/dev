@@ -50,9 +50,10 @@ async function main() {
         const body = await page.evaluate((selector) => {
             try {
                 const element = document.querySelector(selector);
-                if (element) return element.innerText;
+                // if (element) return element.innerText;
+                if (element) return element.textContent || element.innerText;
                 const body = document.querySelector('body');
-                return body ? body.innerText : '';
+                return body ? (body.textContent || body.innerText) : '';
             } catch {
                 return '[EVALUATE ERROR]';
             }
