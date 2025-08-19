@@ -51,9 +51,9 @@ async function main() {
             try {
                 const element = document.querySelector(selector);
                 // if (element) return element.innerText;
-                if (element) return element.textContent || element.innerText;
+                if (element) return element.innerHTML
                 const body = document.querySelector('body');
-                return body ? (body.textContent || body.innerText) : '';
+                return body ? body.innerHTML : '';
             } catch {
                 return '[EVALUATE ERROR]';
             }
