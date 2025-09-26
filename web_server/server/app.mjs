@@ -31,14 +31,14 @@ import browser from './tasks/browser.mjs';
 const __filename = fileURLToPath(import.meta.url); // 獲取檔案的完整路徑
 const __dirname = path.dirname(__filename);       // 獲取檔案所在的目錄
 const privatekey = (() => {
-    if (fs.existsSync(`${__dirname}/../../../../ssl/privkey1.pem`)) {
-        return fs.readFileSync(`${__dirname}/../../../../ssl/privkey1.pem`);
+    if (fs.existsSync(`${__dirname}/../../../../ssl/live/newsdev.duckdns.org/privkey.pem`)) {
+        return fs.readFileSync(`${__dirname}/../../../../ssl/live/newsdev.duckdns.org/privkey.pem`);
     }
     return fs.readFileSync(`${__dirname}/privatekey.pem`);
 })()
 const certificate = (() => {
-    if (fs.existsSync(`${__dirname}/../../../../ssl/fullchain1.pem`)) {
-        return fs.readFileSync(`${__dirname}/../../../../ssl/fullchain1.pem`);
+    if (fs.existsSync(`${__dirname}/../../../../ssl/live/newsdev.duckdns.org/fullchain.pem`)) {
+        return fs.readFileSync(`${__dirname}/../../../../ssl/live/newsdev.duckdns.org/fullchain.pem`);
     }
     return fs.readFileSync(`${__dirname}/certificate.pem`);
 })()
