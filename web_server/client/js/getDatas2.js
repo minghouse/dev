@@ -250,7 +250,9 @@ const getDatas2 = async (search_date) => {
     //找到前一天的result，計算成交量是否出現量增K
     let date_now3 = date_now
     let result_yesterday = []
-    while (1) {
+    let result_yesterday_index = -1
+    while (result_yesterday_index < 10) {
+        result_yesterday_index++
         date_now3 = dayjs(date_now3).add(-1, 'day').format('YYYYMMDD')
         result_yesterday = (()=>{
             const result = turnover_data_all.find(v => v[0] == dayjs(date_now3).format('YYYY-MM-DD'))
@@ -260,11 +262,15 @@ const getDatas2 = async (search_date) => {
             return JSON.parse(result[1] || '[]')
         })();
         if (result_yesterday == 'AAA') {
-            break
+            continue
         }
         if (result_yesterday.length > 0) {
             break
         }
+    }
+    console.log(date_now3)
+    if (result_yesterday == 'AAA') {
+        result_yesterday = []
     }
     for (const v of result) {
         const v2 = result_yesterday.find(v3=>v3[1] == v[1])
