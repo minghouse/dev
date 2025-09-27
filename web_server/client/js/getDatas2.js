@@ -247,6 +247,56 @@ const getDatas2 = async (search_date) => {
         }
     }).filter(v => v)
 
+    //找到前一天的result，計算成交量是否出現量增K
+    let date_now3 = date_now
+    let result_yesterday = []
+    while (1) {
+        date_now3 = dayjs(date_now3).add(-1, 'day').format('YYYYMMDD')
+        result_yesterday = (()=>{
+            const result = turnover_data_all.find(v => v[0] == dayjs(date_now3).format('YYYY-MM-DD'))
+            if (!result) {
+                return 'AAA'
+            }
+            return JSON.parse(result[1] || '[]')
+        })();
+        if (result_yesterday == 'AAA') {
+            break
+        }
+        if (result_yesterday.length > 0) {
+            break
+        }
+    }
+    for (const v of result) {
+        const v2 = result_yesterday.find(v3=>v3[1] == v[1])
+        if (v2) {
+            //前日收盤價
+            const c = Number(v2[8].replace(/,/g,'')) - (v2[9]?(/\+/.test(v2[9])?v2[10]:0-v2[10]):0)
+            // 提取当前收盘价和最后揭示的买价或卖价（假设为前一日收盘价），计算漲跌價差（c1）
+            const c1 = Number(v2[8].replace(/,/g,'')) - c
+            // 计算漲幅百分比（c2）
+            const c2 = ((c1 / Number(c)) * 100).toFixed(2)
+            v2[16] = Number(c2) || 0
+
+            //今天的成交量 > 昨天的成交量 就是量增K
+            if (Number(v[2].replace(/,/g,'')) > Number(v2[2].replace(/,/g,''))) {
+                v[18] = true
+            } else {
+                v[18] = false
+            }
+
+            //昨天是否漲8%以上
+            if (v2[16] >= 8) {
+                v[19] = true
+            } else {
+                v[19] = false
+            }
+            
+        } else {
+            v[18] = false
+            v[19] = false
+        }
+    }
+
     //過濾新聞
     let values_news = []
     for (const k in values) {
