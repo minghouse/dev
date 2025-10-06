@@ -557,6 +557,14 @@
               const is_fire_week = v.news.filter(v2 => v2[1] >= data.now_week).findIndex(v=> /熱門族群/.test(v[3])) >= 0 ? true : false
               dom.querySelector('th').innerHTML = `${++kk}${is_fire ? `<br><a href="javascript:void(0)" class="text-decoration-none" id="fire">🔥</a>` : ''}`
               dom.querySelector('th').innerHTML += `${is_fire_week ? `<br><a href="javascript:void(0)" class="text-decoration-none" id="fire_week">&#129512;</a>` : ''}`
+              //v[18] = true = 量增 <i class="fa-solid fa-up-long"></i>
+              if (v.stock[18]) {
+                dom.querySelector('th').innerHTML += `<br><i class="fa-solid fa-up-long text-primary"></i>`
+              }
+              //v[19] = true = 股票上漲 <i class="fa-solid fa-arrow-trend-up"></i>
+              if (v.stock[19]) {
+                dom.querySelector('th').innerHTML += `<br><i class="fa-solid fa-arrow-trend-up text-danger"></i>`
+              }
               if (dom.querySelector('th #fire')) {
                 dom.querySelector('th #fire').addEventListener('click', () => {
                     //取得熱門新聞
