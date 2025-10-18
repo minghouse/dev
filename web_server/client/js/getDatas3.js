@@ -1,4 +1,5 @@
-import common from './modules.js';
+import sheet_search from './sheet_search.js';
+import stock_list from './stock_list.js';
 
 dayjs.extend(dayjs_plugin_utc)
 dayjs.extend(dayjs_plugin_timezone)
@@ -11,15 +12,6 @@ dayjs.extend(dayjs_plugin_timezone)
  */
 const getDatas3 = async (search_date) => { 
     // 配置參數
- 
-    const SPREADSHEET_ID = '1DYU3NZmGLrj0G2ruQOyLxhOqLgBkSQ_mQ4-KPlYG-yE';
-    // const RANGE = 'AI整理-中國時報!A2:F5';
-    // const RANGE = req.query.range
-
-    // const sheetData = await common.accessGoogleSheets(SPREADSHEET_ID, RANGE)
-
-    const accessToken = await common.getAccessToken();
-    // console.log('Access Token:', accessToken);
 
     const now = dayjs();
     const date_now = (()=>{
@@ -39,7 +31,7 @@ const getDatas3 = async (search_date) => {
     const date_start = dayjs(now).tz('Asia/Taipei').add(-24 * 14, 'hours').format('YYYY-MM-DD HH:mm');
 
     //AI整理-索引
-    const ai_sn_data = await common.accessGoogleSheets(SPREADSHEET_ID, 'AI整理-索引!A1:B20', accessToken)
+    const ai_sn_data = await sheet_search('AI整理-索引!A1:B20')
 
     //上面註解的getDatas方法是appscript，這裡改成nodejs
     const ai_sn = {}
@@ -61,7 +53,7 @@ const getDatas3 = async (search_date) => {
         "AI整理-工商時報",
         "AI整理-時報新聞",
         "AI每周整理",
-        "每日漲幅排名"
+        "每日收盤價"
     ]
     const sheetData_promise = []
     for (const v of sheetData_name) {
@@ -70,7 +62,7 @@ const getDatas3 = async (search_date) => {
                 return ai_sn[v] - 20 < 2 ? 2 : ai_sn[v] - 20
             } else if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞" ].includes(v)) {
                 return ai_sn[v] - 1000 < 2 ? 2 : ai_sn[v] - 1000
-            } else if (v == '每日漲幅排名') {
+            } else if (v == '每日收盤價') {
                 return 2
             }
             return 2
@@ -80,13 +72,17 @@ const getDatas3 = async (search_date) => {
                 return 20
             } else if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞" ].includes(v)) {
                 return ai_sn[v]
-            } else if (v == '每日漲幅排名') {
-                return 140
+            } else if (v == '每日收盤價') {
+                return 16
             }
             return 4000
         })()
-        
-        sheetData_promise.push(common.accessGoogleSheets(SPREADSHEET_ID, `${v}!A${ai_start}:F${ai_end}`, accessToken))
+
+        if (v == '每日收盤價') {
+            sheetData_promise.push(sheet_search(`${v}!A${ai_start}:J${ai_end}`, 'STOCK'))
+        } else {
+            sheetData_promise.push(sheet_search(`${v}!A${ai_start}:F${ai_end}`))
+        }
     }
     const sheetData = await Promise.all(sheetData_promise)
 
@@ -95,6 +91,7 @@ const getDatas3 = async (search_date) => {
     const getDatas6_datas = [] //AI每周整理
     const values2_datas_split = [] //AI整理-經濟日報, AI整理-中國時報, AI整理-yahoo財經, AI整理-工商時報, AI整理-時報新聞
     const turnover_data_all = [] //每日漲幅排名
+    const close_data_all = [] //每日收盤價
     for (const k in sheetData) {
         if (sheetData_name[k] == 'AI每周整理') {
             const getDatas6 = sheetData[k]
@@ -123,8 +120,63 @@ const getDatas3 = async (search_date) => {
                     }
                 }
             }
-        } else if (sheetData_name[k] == '每日漲幅排名') {
-            turnover_data_all.push(...sheetData[k].values)
+        } else if (sheetData_name[k] == '每日收盤價') {
+            // console.log(sheetData[k].values)
+            for (const v of sheetData[k].values) {
+                //證券代號
+                const stock = JSON.parse(v[1])
+                //證券名稱
+                const name = stock.map(v2=>stock_list.find(v3=>v3[0]==v2)?stock_list.find(v3=>v3[0]==v2)[1]:v2)
+                //成交股數
+                const volume = JSON.parse(v[2])
+                //成交金額
+                const turnover = JSON.parse(v[3])
+                //開盤價
+                const open = JSON.parse(v[4])
+                //最高價
+                const high = JSON.parse(v[5])
+                //最低價
+                const low = JSON.parse(v[6])
+                //收盤價
+                const close = JSON.parse(v[7])
+                //漲跌(+/-)
+                const change_sign = JSON.parse(v[8])
+                //漲跌價差
+                const change_value = JSON.parse(v[9])
+
+                const stock_data = []
+                for (let i=0; i<stock.length; i++) {
+                    stock_data.push([
+                        stock[i], //證券代號
+                        name[i], //股票名稱
+                        volume[i], //成交股數
+                        null, //成交筆數 (無對應值，用 null)
+                        turnover[i], //成交金額
+                        open[i], //開盤價
+                        high[i], //最高價
+                        low[i], //最低價
+                        close[i], //收盤價
+                        change_sign[i], //漲跌(+/-)
+                        change_value[i], //漲跌價差
+                    ])
+                }
+
+                close_data_all.push([v[0], stock_data])
+            }
+            //排序close_data_all計算turnover_data_all
+            for (const v of close_data_all) {
+                const date = v[0]
+                const stock_data = v[1]
+                //找到漲幅最高的前100
+                turnover_data_all.push([date, stock_data.filter(v=>!isNaN(Number(v[8].replace(/,/g, '')))).sort(function (a, b) {
+                    //計算漲跌幅百分比
+                    const a_previous_close = Number(a[8].replace(/,/g,'')) - (a[9] ? (/\+/.test(a[9]) ? a[10] : 0-a[10]) : 0);
+                    const b_previous_close = Number(b[8].replace(/,/g,'')) - (b[9] ? (/\+/.test(b[9]) ? b[10] : 0-b[10]) : 0);
+                    const a_percent = Number((((Number(a[8].replace(/,/g,'')) - a_previous_close) / a_previous_close) * 100).toFixed(2));
+                    const b_percent = Number((((Number(b[8].replace(/,/g,'')) - b_previous_close) / b_previous_close) * 100).toFixed(2));
+                    return a_percent < b_percent ? 1 : -1
+                }).slice(0, 100)])
+            }
         }
 
         values[sheetData_name[k]] = sheetData[k].values
@@ -176,7 +228,7 @@ const getDatas3 = async (search_date) => {
             return yahoo_turnover.data
         }
         const result = turnover_data_all.find(v => v[0] == dayjs(date_now).format('YYYY-MM-DD')) || []
-        return JSON.parse(result[1] || '[]')
+        return result[1]
     })()
 
     result.map(a=>{
@@ -192,9 +244,10 @@ const getDatas3 = async (search_date) => {
     })
 
     result.sort(function (a, b) {
-      const c1 = Number(a[8].replace(/,/g,'')) - /\+/.test(a[9])?a[10]:0-a[10]
-      const c2 = Number(b[8].replace(/,/g,'')) - /\+/.test(b[9])?b[10]:0-b[10]
-      return (Number(a[8].replace(/,/g,''))/c1*100).toFixed(2) >= (Number(b[8].replace(/,/g,''))/c2*100).toFixed(2) ? 1 : -1
+    //   const c1 = Number(a[8].replace(/,/g,'')) - /\+/.test(a[9])?a[10]:0-a[10]
+    //   const c2 = Number(b[8].replace(/,/g,'')) - /\+/.test(b[9])?b[10]:0-b[10]
+    //   return (Number(a[8].replace(/,/g,''))/c1*100).toFixed(2) >= (Number(b[8].replace(/,/g,''))/c2*100).toFixed(2) ? 1 : -1
+        return a[16] < b[16] ? 1 : -1
     })
     const result_20_name = result.map(v=>v[1]) //股票名稱
     
@@ -209,7 +262,7 @@ const getDatas3 = async (search_date) => {
             if (!result) {
                 return 'AAA'
             }
-            return JSON.parse(result[1] || '[]')
+            return result[1]
         })();
         if (result2 == 'AAA') {
             break
@@ -233,7 +286,7 @@ const getDatas3 = async (search_date) => {
     const turnover_data_all_stock = {}
     for (const v of turnover_data_all) {
         if (v[0] < dayjs(date_now).format('YYYY-MM-DD') && v[0] > turnover_data_all_2_14day) {
-            for (const v2 of JSON.parse(v[1] || '[]')) {
+            for (const v2 of v[1]) {
                 const v3 = turnover_data_all_stock[v2[1]] || {}
                 turnover_data_all_stock[v2[1]] = {
                     name: v2[1],
@@ -261,7 +314,7 @@ const getDatas3 = async (search_date) => {
             if (!result) {
                 return 'AAA'
             }
-            return JSON.parse(result[1] || '[]')
+            return result[1]
         })();
         if (result_yesterday == 'AAA') {
             continue

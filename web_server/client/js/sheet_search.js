@@ -1,4 +1,5 @@
 import common from './modules.js';
+import { GOOGLE } from "./modules/auth.js";
 
 /**
  * @example
@@ -6,10 +7,13 @@ import common from './modules.js';
  * const data = await res.json()
  * console.log(data)
  */
-const sheet_search = async (range) => { 
+const sheet_search = async (range, type='NEWS') => { 
     // 配置參數
  
-    const SPREADSHEET_ID = '1DYU3NZmGLrj0G2ruQOyLxhOqLgBkSQ_mQ4-KPlYG-yE';
+    const SPREADSHEET_ID = GOOGLE.SPREADSHEET_ID[type];
+    if (!SPREADSHEET_ID) {
+        throw new Error(`Invalid type: ${type}`);
+    }
     // const RANGE = 'AI整理-中國時報!A2:F5';
     // const RANGE = req.query.range
 

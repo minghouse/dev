@@ -5,6 +5,7 @@ import { settings } from "./settings.js";
 
 const api_domain = settings.api_domain;
 const CLIENT_ID = "209706996464-ojc2aahdsu7ek2df0494avch7gjqbhnh.apps.googleusercontent.com";
+let GOOGLE = {}
 
 // 檢查是否已登入
 async function checkLogin() {
@@ -17,7 +18,9 @@ async function checkLogin() {
     if (data.code === 200) {
         const is_login = data.data.is_login;
         if (is_login) {
-            
+            for (const key in data.data.GOOGLE) {
+                GOOGLE[key] = data.data.GOOGLE[key];
+            }
             return true
         }
         showGoogleLogin();
@@ -84,4 +87,4 @@ window.handleCredentialResponse = (response) => {
     .catch(error => console.error("錯誤:", error));
 };
 
-export { checkLogin };
+export { checkLogin, GOOGLE };

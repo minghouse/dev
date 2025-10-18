@@ -1,5 +1,5 @@
-const CLIENT_EMAIL = 'id-372@focal-time-390307.iam.gserviceaccount.com';
-const PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQChX5ehmnPhqJoX\nWg/k+J0Dl060ZSPBxD0osWlnsjb+lrQJ0giADh4UVkg+EFkeiezBWdl4Bbwud5cm\ncufwmCViDrE5Ai7qJBQtSyyeRLALrZM/lTx9Ia5jBqnSyr0QngBHzaM3mw3MMSud\ntU7+hV4DiGVDUQXl24e063i6B/8YYPxlGxDxIjKe6AirKmV9xAcQYVuBKmEtx9Bt\nEIZ3QSxXWXWzcOrNnNGXqjfjPr0f3GHtCnDFf1vv9O3GI7nL650rOfSMW7ozE+RE\nrHVGD2YkrW7vjgJLJZnaufnfrQLihDeXgoI8UZOg8VT5rhrl37aCckpVz0riyQQE\nzhyVLic7AgMBAAECggEABpd2BSbe9ufBK5UFMzAokb37fAjplf+jE+dzS8YO0wVq\n4z/OExUAi4oet1JJoaK2pgs6g9mQH0HJTcvBx6UfWcsJ2C9LpUrF/Dem4ewiWMfF\nTQKWjvHyQp9CDpczc9tQXZ57vUi7Ho0fn/iI+oKOHYzTvhUwLXxzJaO8sbSj6eXz\nlAKFWGhcOcqaluZfliDvA3RN12Fc0iDgIyeNheJ2IiYWosAHahPTRoJ75xUOR7Sr\nbebnb8NQ4KIKRnyudc0gfx/SXewcKVLHLzfq/oUIZC6zvWXmrK4130g/sg60FCAS\ntojlxjKpIDErR3/f6IG09FM1xKwhW2+88S3OKSQkIQKBgQDjQJsyaWVks9yNgFMv\nyKy1fFxHzAj6i/zzlRpE6n9u92N2j/zrBBOqQhsSm59zfeGNKv51uXuw18TqzzNS\nJv4N+Ybx1kidbX7igtkgttIoNya4exSThwl8HXOyKOdrcfo5ER72KFa3065bJc4B\nYgS8iysiVj/ProllDWnKSgHxkQKBgQC1yYvidTar3AwdNghplg6yy9ZJMc/PTJ2a\nwsMHjnrH7m11WhbvnZ5x/R/8Gt8iKRvn7MLjK+HyDnDz5n603d3xeifrHYAGvE/R\ndvAYLO35Ps1j6s1jbRkZSxTXgucMgaRnRtUgGnDuFMOl5Y1XWdCzMnT0LanfRh9D\nEw2NlslmCwKBgQCaMBGc6Knk46w3TeQjPbMBCDnMdQF6jVS5KGdEbx67eZrArP1b\nr85v7J5Vx8UuJTDOCWfRFGJ6IEv5TVBy4wXpEW6f01Y9ijdXFJShf6mjo5ff/5J8\nbljfH1SKgvpRimnOInGxbrk3zKY2LbZSdeDk1EAV8hMlpDSQncMzf3dGIQKBgDKZ\nkShNvBQGQhD3c0wAisLV3iWticyH5O6o+6Rk0mRIR4t8shmsY+gSrw57ZFSb4Lqj\nunOFSXUY8/PP2sD5aMfIWsglA/fb/tOtKZNxHiRciMshFl5whaX2sixysWFXzK06\nmCRBd+GtQfAxfzArPd5DUy6Mb1ZIrHb9HK6mpBSVAoGAFC/Wl65zVJ1dS9Y8/M07\nEW5nncjwYH721G9f60xBQOuGLmJMCtv9cZIpRadAHmCPjPOUUAoxbYlsTbCVXvyc\nSBpPjz2GZqnxl2rNQLY2J2BSa6Vy6qq9MwRl2luyfY8qmNNwvvl9/GoDHAzLY9kF\nbLE/gbADPXCCTmVRCnuts/A=\n-----END PRIVATE KEY-----\n";
+
+import { GOOGLE } from "./modules/auth.js";
 
 // const SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
 const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
@@ -43,7 +43,7 @@ async function createJWT() {
     };
 
     const payload = {
-        iss: CLIENT_EMAIL,
+        iss: GOOGLE.CLIENT_EMAIL,
         scope: SCOPES,
         aud: 'https://oauth2.googleapis.com/token',
         exp: exp,
@@ -54,7 +54,7 @@ async function createJWT() {
     const encodedPayload = base64urlEncode(JSON.stringify(payload));
     const unsignedToken = `${encodedHeader}.${encodedPayload}`;
 
-    const key = await getCryptoKey(PRIVATE_KEY);
+    const key = await getCryptoKey(GOOGLE.PRIVATE_KEY);
     const signature = await crypto.subtle.sign(
         'RSASSA-PKCS1-v1_5',
         key,
