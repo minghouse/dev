@@ -225,6 +225,7 @@ const getDatas3 = async (search_date) => {
             if (yahoo_turnover.time.replace(/-/g, '') != date_now) {
                 return []
             }
+            turnover_data_all.unshift([dayjs(date_now).format('YYYY-MM-DD'), yahoo_turnover.data])
             return yahoo_turnover.data
         }
         const result = turnover_data_all.find(v => v[0] == dayjs(date_now).format('YYYY-MM-DD')) || []
@@ -252,33 +253,21 @@ const getDatas3 = async (search_date) => {
     const result_20_name = result.map(v=>v[1]) //股票名稱
     
     //計算連續幾日在排行榜中並且上漲的統計
-    let result_20_name_list = result.map(v=>v[1])
-    let date_now2 = date_now
+    let now2 = 0
     while (1) {
         //找到前一天的turnover_data_all中有result_20_name_list的股票，然後把對應的result中的股票[17]+1
-        date_now2 = dayjs(date_now2).add(-1, 'day').format('YYYYMMDD')
-        const result2 = (()=>{
-            const result = turnover_data_all.find(v => v[0] == dayjs(date_now2).format('YYYY-MM-DD'))
-            if (!result) {
-                return 'AAA'
-            }
-            return result[1]
-        })();
-        if (result2 == 'AAA') {
+        now2++
+        if (!turnover_data_all[now2]) {
             break
         }
-        if (result2.length == 0) {
-            continue
-        }
-        const result3 = result2.filter(v=>result_20_name_list.includes(v[1]) && /\+/.test(v[9]))
-        if (result3.length == 0) {
-            break
-        }
+        const result3 = turnover_data_all[now2][1]
         for (const v of result3) {
-            const index = result.findIndex(v2=> v2[1] == v[1])
+            const index = result.findIndex(v2=> v2[0] == v[0])
+            if (index == -1) {
+                continue
+            }
             result[index][17] = (result[index][17]||0) + 1
         }
-        result_20_name_list = result3.map(v=>v[1])
     }
 
     //找到14天以來首次出現在成交值的股票 & 累積出現的次數 & 最低收盤價
@@ -310,7 +299,7 @@ const getDatas3 = async (search_date) => {
         result_yesterday_index++
         date_now3 = dayjs(date_now3).add(-1, 'day').format('YYYYMMDD')
         result_yesterday = (()=>{
-            const result = turnover_data_all.find(v => v[0] == dayjs(date_now3).format('YYYY-MM-DD'))
+            const result = close_data_all.find(v => v[0] == dayjs(date_now3).format('YYYY-MM-DD'))
             if (!result) {
                 return 'AAA'
             }
