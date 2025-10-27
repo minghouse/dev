@@ -309,7 +309,7 @@ const getDatas2 = async (search_date) => {
         result_yesterday = []
     }
     for (const v of result) {
-        const v2 = result_yesterday.find(v3=>v3[1] == v[1])
+        const v2 = result_yesterday.find(v3=>v3[0] == v[0])
         if (v2) {
             //前日收盤價
             const c = Number(v2[8].replace(/,/g,'')) - (v2[9]?(/\+/.test(v2[9])?v2[10]:0-v2[10]):0)
