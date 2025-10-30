@@ -18,7 +18,7 @@ const getDatas = async (req, res) => {
     const yahoo_turnover = await (async () => {
         const response = await fetch(`https://tw.stock.yahoo.com/rank/change-up`);
         const result = (await response.text() || '').match(/"list":(.+),"listMeta":{"rankTime":"(.+)","rankTimeRange/)
-        const data = JSON.parse(result[1] || '[]')
+        const data = JSON.parse((result[1] || '[]').split(',"listMeta":')[0])
         const time = (result[2]||'').split('T')[0]
         return {
             data: data,
