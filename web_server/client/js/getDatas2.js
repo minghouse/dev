@@ -116,7 +116,7 @@ const getDatas2 = async (search_date) => {
                     const v3 = v2.split("\n")
                     const check = v3.filter(v4=>/^[0-9]+\./.test(v4)).length
                     if (/：$/.test(v3[0]) && /^新聞出處/.test(v3[v3.length - 1]) && check == v3.length - 2 && v3.length > 2) {
-                        values2_datas_split.push([v[0], v[1], v2])
+                        values2_datas_split.push([v[0], v[1], v2, v[5]])
                     }
                 }
             }

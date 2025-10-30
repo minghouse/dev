@@ -561,6 +561,29 @@
               if (v.stock[19]) {
                 dom.querySelector('th').innerHTML += `<br><i class="fa-solid fa-arrow-trend-up text-danger"></i>`
               }
+              //顯示是否有AI推薦(最近1天內)
+              const ai_recommend = v.news_ai.filter(v2=> v2[3] && dayjs(v2[0]).format('YYYY-MM-DD') <= data.search_date && dayjs(v2[0]).format('YYYY-MM-DD') >= dayjs(data.search_date).subtract(1, 'day').format('YYYY-MM-DD'))
+              if (ai_recommend.length > 0) {
+                dom.querySelector('th').innerHTML += `<br><a href="javascript:void(0)" class="text-decoration-none" id="ai_recommend"><i class="fa-solid fa-robot text-success"></i></a>`
+                dom.querySelector('th #ai_recommend').addEventListener('click', () => {
+                  //取得AI推薦新聞
+                  dom_news2.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]}) - AI推薦`
+                  dom_news2.querySelector('.modal-body').innerHTML = ''
+                  for (const v2 of ai_recommend) {
+                    const dom_news_card_clone2 = dom_news_card2.cloneNode(true)
+                    dom_news_card_clone2.querySelector('.card-title').textContent = ``
+                    dom_news_card_clone2.querySelector('#news_time').textContent = v2[0]
+                    //渲染內容
+                    const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
+                    dom_news_card_clone2.querySelector('.card-text').innerHTML = v2[3]
+
+                    // dom_news_card_clone2.querySelector('.card-link').href = '#'
+                    // dom_news_card_clone2.querySelector('.card-link').textContent = v2[6]
+                    dom_news2.querySelector('.modal-body').append(dom_news_card_clone2)
+                  }
+                  dom_dialog_news2.show()
+                })
+              }
               if (dom.querySelector('th #fire')) {
                 dom.querySelector('th #fire').addEventListener('click', () => {
                     //取得熱門新聞
@@ -664,10 +687,10 @@
 
                     dom_news_card_clone.querySelector('.card-subtitle #news_link').innerHTML = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `<a href="$1" target="_blank">${v2[1]}</a>\n`).replace(/\n/g, '<br>')
 
-                    if (v2[1] == 'AI每周整理') {
-                      dom_news_card_clone.querySelector('.card-text').innerHTML = text.slice(1, text.length - 1).join("<br>")
-                      dom_news_card_clone.querySelector('.card-subtitle #news_link').innerHTML = v2[1]
-                    }
+                    // if (v2[1] == 'AI每周整理') {
+                    //   dom_news_card_clone.querySelector('.card-text').innerHTML = text.slice(1, text.length - 1).join("<br>")
+                    //   dom_news_card_clone.querySelector('.card-subtitle #news_link').innerHTML = v2[1]
+                    // }
 
                     dom_news2.querySelector('.modal-body').append(dom_news_card_clone)
                 }
