@@ -73,7 +73,7 @@ const getDatas2 = async (search_date) => {
             } else if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞" ].includes(v)) {
                 return ai_sn[v]
             } else if (v == '每日收盤價') {
-                return 16
+                return 50
             }
             return 4000
         })()
