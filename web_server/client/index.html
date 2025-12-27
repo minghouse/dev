@@ -170,7 +170,7 @@
     </div>
 
     <!-- 加入我的最愛 -->
-    <div class="modal fade" id="favouriteModal" data-bs-backdrop="static">
+    <!-- <div class="modal fade" id="favouriteModal" data-bs-backdrop="static">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
@@ -201,7 +201,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
@@ -209,7 +209,7 @@
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/select2.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="js/favourite.js" type="module"></script>
+    <!-- <script src="js/favourite.js" type="module"></script> -->
     <!-- <script type="module">
       import sheet_search from 'https://minghouse.github.io/dev/web_server/client/sheet_search.js';
       try {
@@ -231,7 +231,7 @@
         document.querySelector('#container').classList.remove('d-none')
         //Menu控制
         const dom_dialog_Loading = new bootstrap.Modal('#dialog_Loading', {
-            keyboard: false
+            keyboard: true
         })
         // function loadNewPage(result, userObject) {
         //     var newURL = result + userObject;
@@ -251,32 +251,32 @@
 
         //系統訊息彈窗
         const dom_dialog_recommendation = new bootstrap.Modal('#dialog_recommendation', {
-          keyboard: false
+          keyboard: true
         })
 
-        //渲染股票清單
-        for (const v of favourite.get_stock_list()) {
-          const dom = document.createElement('option')
-          dom.value = `${v[0]}`
-          dom.textContent = `${v[1]} ${v[0]}`
-          document.querySelector('#favourite_stock').append(dom)
-        }
-        $('#favourite_stock').select2({
-          // 启用标签功能，允许用户输入新的选项
-          tags: false,
-          // 允许清除选择
-          allowClear: false,
-          // 禁用多选功能，仅允许单选
-          multiple: false,
-          // 自定义提示文本
-          placeholder: '請選擇',
-          // 自定义 "没有匹配项" 的提示文本
-          // noResults: function() {
-          //   return '未找到匹配项，请输入新的选项';
-          // }
-          // dropdownParent: $("#buy_category .modal-content")
-          dropdownParent: $('#favouriteModal')
-        });
+        // //渲染股票清單
+        // for (const v of favourite.get_stock_list()) {
+        //   const dom = document.createElement('option')
+        //   dom.value = `${v[0]}`
+        //   dom.textContent = `${v[1]} ${v[0]}`
+        //   document.querySelector('#favourite_stock').append(dom)
+        // }
+        // $('#favourite_stock').select2({
+        //   // 启用标签功能，允许用户输入新的选项
+        //   tags: false,
+        //   // 允许清除选择
+        //   allowClear: false,
+        //   // 禁用多选功能，仅允许单选
+        //   multiple: false,
+        //   // 自定义提示文本
+        //   placeholder: '請選擇',
+        //   // 自定义 "没有匹配项" 的提示文本
+        //   // noResults: function() {
+        //   //   return '未找到匹配项，请输入新的选项';
+        //   // }
+        //   // dropdownParent: $("#buy_category .modal-content")
+        //   dropdownParent: $('#favouriteModal')
+        // });
 
         //--------------------------------------------------------------------------------
         //搜尋
@@ -374,16 +374,18 @@
 
           for (const k in group_data) {
               // if (k==0) continue
-              const v = group_data[k][1][0]
+              
+              //v: category	time	url	title	content AI_datas AI_recommend
+              const v = group_data[k]
               const dom = news.cloneNode(true)
-              dom.querySelector('.card-subtitle #news_time').textContent = `${v[0]}`
-              const text = v[2].split("\n")
+              dom.querySelector('.card-subtitle #news_time').textContent = `${v[1]}`
+              // const text = v[5].split("\n")
               // dom.querySelector('.card-title').textContent = text[0]
-              const stock = text[0].match(/[0-9]+/g)
+              // const stock = text[0].match(/[0-9]+/g)
               //過濾觀光餐旅
-              if (stock_list.findIndex(v2=> v2[0] == stock && v2[4] == '觀光餐旅' ) >= 0) {
-                continue
-              }
+              // if (stock_list.findIndex(v2=> v2[0] == stock && v2[4] == '觀光餐旅' ) >= 0) {
+              //   continue
+              // }
               
               dom.querySelector('.card-title').innerHTML = `
                 <div class="fw-bold">${v[3]||''}</div>
@@ -402,20 +404,25 @@
                 }
               })
 
-              //if v[4] is not empty
-              if (v[4]) {
+              //if v[6] is not empty
+              if (v[6]) {
                 //使用a fontawesome ai icon
                 dom.querySelector('.card-subtitle #news_time').innerHTML = `<a href="javascript:void(0)" class="text-decoration-none" id="recommendation"><i class="fa-regular fa-face-smile-beam"></i></a> ${dom.querySelector('.card-subtitle #news_time').innerHTML}`
                 dom.querySelector('.card-subtitle #recommendation').addEventListener('click', function() {
-                  document.querySelector('#dialog_recommendation .modal-body').innerHTML = `${v[4]}`
+                  document.querySelector('#dialog_recommendation .modal-body').innerHTML = `${v[6]}`
                   dom_dialog_recommendation.show()
                 })
               }
 
-              for (const k2 in group_data[k][1]) {
-                const v2 = group_data[k][1][k2]
+              if (v[5].length == 0) {
+                dom.querySelector('.card-text').innerHTML = `${v[4]}<br>${v[5]}<br>`
+              }
+
+              //處理內容
+              for (const k2 in v[5]) {
+                const v2 = v[5][k2]
                 let fugle = ''
-                const text = v2[2].split("\n")
+                const text = v2.split("\n")
                 const stock = text[0].match(/[0-9]+/g)
                 if (stock) {
                   fugle = `
@@ -430,15 +437,16 @@
                 dom.querySelector('.card-text').innerHTML += `${k2>0?'<br>':''}<div>${text[0]}${fugle}</div><ol class="m-0 ps-4">${text2.join("")}</ol>`
               }
 
-              const news_url = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `$1`).replace(/\n/g, '')
-              dom.querySelector('.card-subtitle #news_link').innerHTML = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `<a href="javascript:void(0);" onclick="favourite.insert(this)" class="text-warning pe-2"><i class="fa-regular fa-star"></i></a> <a href="$1" target="_blank">${v[1]}</a>\n`).replace(/\n/g, '<br>')
+              const news_url = v[2]
+              // dom.querySelector('.card-subtitle #news_link').innerHTML = `${text[text.length - 1].replace('新聞出處：','')}\n`.replace(/(https:\/\/.+)\n/g, `<a href="javascript:void(0);" onclick="favourite.insert(this)" class="text-warning pe-2"><i class="fa-regular fa-star"></i></a> <a href="$1" target="_blank">${v[1]}</a>\n`).replace(/\n/g, '<br>')
+              dom.querySelector('.card-subtitle #news_link').innerHTML = `<a href="${news_url}" target="_blank">${v[0]}</a>\n`
 
               //檢查是否已加入我的最愛
-              const favourite_data = favourite.get_favourite_data().find(v2=> v2.news_url == news_url)
-              const favourite_dom = dom.querySelector('.card-subtitle #news_link .fa-star')
-              if (favourite_data && favourite_dom) {
-                favourite_dom.classList.add('fa-solid')
-              }
+              // const favourite_data = favourite.get_favourite_data().find(v2=> v2.news_url == news_url)
+              // const favourite_dom = dom.querySelector('.card-subtitle #news_link .fa-star')
+              // if (favourite_data && favourite_dom) {
+              //   favourite_dom.classList.add('fa-solid')
+              // }
               news_div.append(dom)
           }
         }
@@ -450,18 +458,19 @@
             // show_data(data)
             // show_data(await getDatas())
             //pormise all
-            const data = await Promise.all([getDatas(), favourite.init()])
+            // const data = await Promise.all([getDatas(), favourite.init()])
+            const data = await Promise.all([getDatas()])
 
             //按data裡面的v[0] group
-            const group_data = []
-            for (const v of data[0]) {
-              const gstring = v[2].split('新聞出處：')[1]
-              if (group_data.findIndex(v2=> v2[0] == gstring) < 0) {
-                group_data.push([gstring, []])
-              }
-              group_data.find(v2=> v2[0] == gstring)[1].push(v)
-            }
-            news_data = group_data
+            // const group_data = []
+            // for (const v of data[0]) {
+            //   const gstring = v[2].split('新聞出處：')[1]
+            //   if (group_data.findIndex(v2=> v2[0] == gstring) < 0) {
+            //     group_data.push([gstring, []])
+            //   }
+            //   group_data.find(v2=> v2[0] == gstring)[1].push(v)
+            // }
+            news_data = data[0]
             // show_data(JSON.parse(JSON.stringify(group_data)))
             //trigger hot click
             document.querySelector('#button-hot').click()

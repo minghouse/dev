@@ -189,7 +189,7 @@
     </div>
     
     <!--新聞-->
-    <div class="modal" tabindex="-1" id="dialog_news">
+    <div class="modal" tabindex="-1" id="dialog_news" data-bs-keyboard="true">
       <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
           <div class="modal-header">
@@ -220,7 +220,7 @@
     </div>
 
     <!--分析-->
-    <div class="modal" tabindex="-1" id="dialog_news2">
+    <div class="modal" tabindex="-1" id="dialog_news2" data-bs-keyboard="true">
       <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
           <div class="modal-header">
@@ -251,7 +251,7 @@
     </div>
 
     <!--讀取中-->
-    <div class="modal" tabindex="-1" id="dialog_Loading" data-bs-backdrop="static">
+    <div class="modal" tabindex="-1" id="dialog_Loading" data-bs-backdrop="static" data-bs-keyboard="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-body">
@@ -265,7 +265,7 @@
     </div>
 
     <!--系統訊息-->
-    <div class="modal" tabindex="-1" id="dialog_alert" data-bs-backdrop="static">
+    <div class="modal" tabindex="-1" id="dialog_alert" data-bs-backdrop="static" data-bs-keyboard="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
@@ -283,7 +283,7 @@
     </div>
 
     <!-- 收盤價 -->
-    <div class="modal" tabindex="-1" id="dialog_chartjs" data-bs-backdrop="static">
+    <div class="modal" tabindex="-1" id="dialog_chartjs" data-bs-backdrop="static" data-bs-keyboard="true">
       <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
           <div class="modal-header">
@@ -324,7 +324,7 @@
         document.querySelector('#container').classList.remove('d-none')
         //Menu控制
         // const dom_dialog_Loading = new bootstrap.Modal('#dialog_Loading', {
-        //   keyboard: false
+        //   keyboard: true
         // })
         // function loadNewPage(result, userObject) {
         //   var newURL = result + userObject;
@@ -346,11 +346,11 @@
         const table_tr = document.querySelector('#table_tr').cloneNode(true)
         const dom_news = document.querySelector('#dialog_news')
         const dom_dialog_news = new bootstrap.Modal(dom_news, {
-          keyboard: false
+          keyboard: true
         })
         const dom_news2 = document.querySelector('#dialog_news2')
         const dom_dialog_news2 = new bootstrap.Modal(dom_news2, {
-          keyboard: false
+          keyboard: true
         })
         const dom_news_card = dom_news.querySelector('.card').cloneNode(true)
         dom_news.querySelector('.card').remove()
@@ -360,7 +360,7 @@
 
         //系統訊息彈窗
         const dom_dialog_alert = new bootstrap.Modal('#dialog_alert', {
-          keyboard: false
+          keyboard: true
         })
 
         //綁定收盤價旁邊的問號
@@ -377,7 +377,7 @@
         //顯示圖表
         // const dialog_chartjs = document.querySelector('#dialog_chartjs')
         // const dom_dialog_chartjs = new bootstrap.Modal(dialog_chartjs, {
-        //   keyboard: false
+        //   keyboard: true
         // })
         // const show_chartjs = async (stock) => {
         //   document.querySelector('#dialog_chartjs .modal-title').textContent = stock
