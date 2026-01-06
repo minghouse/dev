@@ -562,7 +562,9 @@
                 dom.querySelector('th').innerHTML += `<br><i class="fa-solid fa-arrow-trend-up text-danger"></i>`
               }
               //顯示是否有AI推薦(最近1天內)
-              const ai_recommend = v.news_ai.filter(v2=> v2[3] && dayjs(v2[0]).format('YYYY-MM-DD') <= data.search_date && dayjs(v2[0]).format('YYYY-MM-DD') >= dayjs(data.search_date).subtract(1, 'day').format('YYYY-MM-DD'))
+              const ai_recommend = v.news_ai.filter(v2=> v2[3] && 
+              (v2[3].includes(v.stock[1]) || v2[3].includes(v.stock[0]))
+              && dayjs(v2[0]).format('YYYY-MM-DD') <= data.search_date && dayjs(v2[0]).format('YYYY-MM-DD') >= dayjs(data.search_date).subtract(1, 'day').format('YYYY-MM-DD'))
               if (ai_recommend.length > 0) {
                 dom.querySelector('th').innerHTML += `<br><a href="javascript:void(0)" class="text-decoration-none" id="ai_recommend"><i class="fa-solid fa-robot text-success"></i></a>`
                 dom.querySelector('th #ai_recommend').addEventListener('click', () => {
