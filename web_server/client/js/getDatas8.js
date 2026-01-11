@@ -78,23 +78,18 @@ const getDatas8 = async (search_date, search_date2) => {
         "AI整理-中國時報",
         "AI整理-yahoo財經",
         "AI整理-工商時報",
-        "AI整理-時報新聞",
-        "AI每周整理"
+        "AI整理-時報新聞"
     ]
     const sheetData_promise = []
     for (const v of sheetData_name) {
         const ai_start = (()=>{
-            if (v == 'AI每周整理') {
-                return ai_sn[v] - 20 < 2 ? 2 : ai_sn[v] - 20
-            } else if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞" ].includes(v)) {
+            if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞" ].includes(v)) {
                 return ai_sn[v] - 1000 < 2 ? 2 : ai_sn[v] - 1000
             }
             return 2
         })()
         const ai_end = (()=>{
-            if (v == 'AI每周整理') {
-                return 20
-            } else if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞" ].includes(v)) {
+            if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞" ].includes(v)) {
                 return ai_sn[v]
             }
             return 4000
@@ -106,22 +101,9 @@ const getDatas8 = async (search_date, search_date2) => {
 
     //資料歸類
     const values = {} //經濟日報, 中國時報, yahoo財經, 工商時報, 時報新聞
-    const getDatas6_datas = [] //AI每周整理
     const values2_datas_split = [] //AI整理-經濟日報, AI整理-中國時報, AI整理-yahoo財經, AI整理-工商時報, AI整理-時報新聞
     for (const k in sheetData) {
-        if (sheetData_name[k] == 'AI每周整理') {
-            const getDatas6 = sheetData[k]
-            for (const v of getDatas6.values) {
-                if (v[0] < date_start) {
-                    continue
-                }
-                const news = JSON.parse(v[1])
-                for (const v2 of news) {
-                    const content = `${v2[1]}（${v2[0]}）：\n${v2[2]}\n`
-                    getDatas6_datas.push([v[0], 'AI每周整理', content])
-                }
-            }
-        } else if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞" ].includes(sheetData_name[k])) {
+        if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞" ].includes(sheetData_name[k])) {
             const values2_datas = sheetData[k]
             for (const v of values2_datas.values) {
                 if (v[0] < date_start) {
