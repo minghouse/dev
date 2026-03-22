@@ -305,6 +305,10 @@
               <input type="number" class="form-control form-control-sm" id="filter_volume_gt_value" style="width:100px" value="0" min="0">
             </div>
             <div class="mb-2 form-check">
+              <input class="form-check-input" type="checkbox" id="filter_change_gt7">
+              <label class="form-check-label" for="filter_change_gt7">漲幅 7% 以上</label>
+            </div>
+            <div class="mb-2 form-check">
               <input class="form-check-input" type="checkbox" id="filter_hide_limit">
               <label class="form-check-label" for="filter_hide_limit">隱藏漲停的股票</label>
             </div>
@@ -408,6 +412,7 @@
           document.querySelector('#filter_k15').checked = !!s.k15
           document.querySelector('#filter_volume_gt').checked = !!s.volumeGt
           document.querySelector('#filter_volume_gt_value').value = s.volumeGtValue || 0
+          document.querySelector('#filter_change_gt7').checked = !!s.changeGt7
           document.querySelector('#filter_hide_limit').checked = !!s.hideLimit
         }
         document.querySelector('#search_filter').addEventListener('click', () => {
@@ -420,6 +425,7 @@
             k15: document.querySelector('#filter_k15').checked,
             volumeGt: document.querySelector('#filter_volume_gt').checked,
             volumeGtValue: Number(document.querySelector('#filter_volume_gt_value').value) || 0,
+            changeGt7: document.querySelector('#filter_change_gt7').checked,
             hideLimit: document.querySelector('#filter_hide_limit').checked
           }
           localStorage.setItem('index3_filter_settings', JSON.stringify(s))
@@ -784,6 +790,7 @@
                 const volInK = Number(v.stock[2].replace(/,/g, '')) / 1000
                 if (volInK <= filterSettings.volumeGtValue) showRow = false
               }
+              if (filterSettings.changeGt7 && v.stock[16] < 7) showRow = false
               if (filterSettings.hideLimit && light == 110) showRow = false
               if (showRow) {
                 document.querySelector('#table_tbody').append(dom)
