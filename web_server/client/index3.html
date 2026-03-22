@@ -123,7 +123,7 @@
                 </span>
               </label>
             </div> -->
-            <button type="button" class="btn btn-outline-secondary active" id="search_firecracker">🔥&#129512;</button>
+            <button type="button" class="btn btn-outline-secondary" id="search_filter" title="篩選設定"><i class="fa-solid fa-sliders"></i></button>
             <input type="date" class="form-control rounded-start" placeholder="" id="search_date" >
             <button class="btn btn-outline-secondary" type="button" id="search">查詢</button>
           </div>
@@ -280,6 +280,43 @@
       </div>
     </div>
 
+    <!--篩選設定-->
+    <div class="modal" tabindex="-1" id="dialog_filter">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">篩選設定</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-2 form-check">
+              <input class="form-check-input" type="checkbox" id="filter_firecracker">
+              <label class="form-check-label" for="filter_firecracker">有熱門族群 &#129512;</label>
+            </div>
+            <div class="mb-2 form-check">
+              <input class="form-check-input" type="checkbox" id="filter_k15">
+              <label class="form-check-label" for="filter_k15">有15分K <i class="fa-solid fa-bolt text-warning"></i></label>
+            </div>
+            <div class="mb-2 d-flex align-items-center gap-2">
+              <div class="form-check mb-0">
+                <input class="form-check-input" type="checkbox" id="filter_volume_gt">
+                <label class="form-check-label" for="filter_volume_gt">成交量(張) &gt;</label>
+              </div>
+              <input type="number" class="form-control form-control-sm" id="filter_volume_gt_value" style="width:100px" value="0" min="0">
+            </div>
+            <div class="mb-2 form-check">
+              <input class="form-check-input" type="checkbox" id="filter_hide_limit">
+              <label class="form-check-label" for="filter_hide_limit">隱藏漲停的股票</label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+            <button type="button" class="btn btn-primary" id="filter_submit">套用</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 收盤價 -->
     <div class="modal" tabindex="-1" id="dialog_chartjs" data-bs-backdrop="static">
       <div class="modal-dialog modal-fullscreen">
@@ -320,6 +357,8 @@
 
       const show_dom = async () => {
         document.querySelector('#container').classList.remove('d-none')
+        let currentResult = null
+        let currentShowData = null
         //Menu控制
         // const dom_dialog_Loading = new bootstrap.Modal('#dialog_Loading', {
         //   keyboard: true
@@ -359,6 +398,33 @@
         //系統訊息彈窗
         const dom_dialog_alert = new bootstrap.Modal('#dialog_alert', {
           keyboard: true
+        })
+
+        //篩選設定
+        const dom_dialog_filter = new bootstrap.Modal('#dialog_filter', { keyboard: true })
+        const loadFilterSettings = () => JSON.parse(localStorage.getItem('index3_filter_settings') || '{}')
+        const applySettingsToModal = (s) => {
+          document.querySelector('#filter_firecracker').checked = !!s.firecracker
+          document.querySelector('#filter_k15').checked = !!s.k15
+          document.querySelector('#filter_volume_gt').checked = !!s.volumeGt
+          document.querySelector('#filter_volume_gt_value').value = s.volumeGtValue || 0
+          document.querySelector('#filter_hide_limit').checked = !!s.hideLimit
+        }
+        document.querySelector('#search_filter').addEventListener('click', () => {
+          applySettingsToModal(loadFilterSettings())
+          dom_dialog_filter.show()
+        })
+        document.querySelector('#filter_submit').addEventListener('click', () => {
+          const s = {
+            firecracker: document.querySelector('#filter_firecracker').checked,
+            k15: document.querySelector('#filter_k15').checked,
+            volumeGt: document.querySelector('#filter_volume_gt').checked,
+            volumeGtValue: Number(document.querySelector('#filter_volume_gt_value').value) || 0,
+            hideLimit: document.querySelector('#filter_hide_limit').checked
+          }
+          localStorage.setItem('index3_filter_settings', JSON.stringify(s))
+          dom_dialog_filter.hide()
+          if (currentResult && currentShowData) currentShowData(currentResult)
         })
 
         //綁定收盤價旁邊的問號
@@ -709,16 +775,17 @@
               // dom.querySelector('#show_chartjs').addEventListener('click', () => {
               //   show_chartjs(v.stock[0])
               // })
-              //取得search_firecracker是否active
-              const search_firecracker = document.querySelector('#search_firecracker').classList.contains('active')
-              if (search_firecracker) {
-                if (is_fire && v.stock[16] >= 6) {
-                  document.querySelector('#table_tbody').append(dom)
-                }
-                if (is_fire_week && v.stock[16] >= 6) {
-                  document.querySelector('#table_tbody').append(dom)
-                }
-              } else {
+              //套用篩選條件（全勾選 = AND 邏輯）
+              const filterSettings = loadFilterSettings()
+              let showRow = true
+              if (filterSettings.firecracker && !is_fire_week) showRow = false
+              if (filterSettings.k15 && !(k15 && k15[2] === 'true' && k15[3] === 'true')) showRow = false
+              if (filterSettings.volumeGt) {
+                const volInK = Number(v.stock[2].replace(/,/g, '')) / 1000
+                if (volInK <= filterSettings.volumeGtValue) showRow = false
+              }
+              if (filterSettings.hideLimit && light == 110) showRow = false
+              if (showRow) {
                 document.querySelector('#table_tbody').append(dom)
               }
             }
@@ -737,14 +804,9 @@
               }
             })
           }
-          const result = await new_promise()
-          show_data(result)
-
-          //綁定search_firecracker click
-          document.querySelector('#search_firecracker').addEventListener('click', () => {
-            document.querySelector('#search_firecracker').classList.toggle('active')
-            show_data(result)
-          })
+          currentResult = await new_promise()
+          currentShowData = show_data
+          show_data(currentResult)
         }
         get_datas()
 
