@@ -52,12 +52,13 @@ const getDatas3 = async (search_date) => {
         "AI整理-yahoo財經",
         "AI整理-工商時報",
         "AI整理-時報新聞",
+        "15分K",
         "每日收盤價"
     ]
     const sheetData_promise = []
     for (const v of sheetData_name) {
         const ai_start = (()=>{
-            if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞" ].includes(v)) {
+            if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞", "15分K" ].includes(v)) {
                 return ai_sn[v] - 1000 < 2 ? 2 : ai_sn[v] - 1000
             } else if (v == '每日收盤價') {
                 return 2
@@ -65,7 +66,7 @@ const getDatas3 = async (search_date) => {
             return 2
         })()
         const ai_end = (()=>{
-            if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞" ].includes(v)) {
+            if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞", "15分K" ].includes(v)) {
                 return ai_sn[v]
             } else if (v == '每日收盤價') {
                 return 16
@@ -75,6 +76,8 @@ const getDatas3 = async (search_date) => {
 
         if (v == '每日收盤價') {
             sheetData_promise.push(sheet_search(`${v}!A${ai_start}:J${ai_end}`, 'STOCK'))
+        } else if (v == '15分K') {
+            sheetData_promise.push(sheet_search(`${v}!A${ai_start}:D${ai_end}`))
         } else {
             sheetData_promise.push(sheet_search(`${v}!A${ai_start}:F${ai_end}`))
         }
@@ -86,6 +89,7 @@ const getDatas3 = async (search_date) => {
     const values2_datas_split = [] //AI整理-經濟日報, AI整理-中國時報, AI整理-yahoo財經, AI整理-工商時報, AI整理-時報新聞
     const turnover_data_all = [] //每日漲幅排名
     const close_data_all = [] //每日收盤價
+    const k15_data_all = [] //15分K
     for (const k in sheetData) {
         if ([ "AI整理-經濟日報", "AI整理-中國時報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞" ].includes(sheetData_name[k])) {
             const values2_datas = sheetData[k]
@@ -159,11 +163,20 @@ const getDatas3 = async (search_date) => {
                     return a_percent < b_percent ? 1 : -1
                 }).slice(0, 100)])
             }
+        } else if (sheetData_name[k] == '15分K') {
+            const values2_datas = sheetData[k]
+            //日期	股票代號	是否為紅色	成交量是否>5000
+            for (const v of values2_datas.values) {
+                //日期相同才加入
+                if (v[0] == dayjs(date_now).format('YYYY-MM-DD')) {
+                    k15_data_all.push(v)
+                }
+            }
         }
 
         values[sheetData_name[k]] = sheetData[k].values
     }
-    
+    // console.log(k15_data_all)
     //排序values2_datas_split
     values2_datas_split.sort(function (a, b) {
         return a[0] < b[0] ? 1 : -1
@@ -357,7 +370,8 @@ const getDatas3 = async (search_date) => {
         news: result,
         news_1: values_news,
         news_2: values2_datas_split,
-        turnover_data_stock: turnover_data_stock
+        turnover_data_stock: turnover_data_stock,
+        k15_data_all: k15_data_all
     }
 
     return out

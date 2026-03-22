@@ -562,6 +562,11 @@
               if (v.stock[19]) {
                 dom.querySelector('th').innerHTML += `<br><i class="fa-solid fa-arrow-trend-up text-danger"></i>`
               }
+              //15分K: 當日紅K且量>5000張
+              const k15 = data.k15_data_all.find(v2 => v2[0] === data.search_date && v2[1] === v.stock[0])
+              if (k15 && k15[2] === 'true' && k15[3] === 'true') {
+                dom.querySelector('th').innerHTML += `<br><i class="fa-solid fa-bolt text-warning"></i>`
+              }
               //顯示是否有AI推薦(最近1天內)
               const ai_recommend = v.news_ai.filter(v2=> v2[3] && 
               (v2[3].includes(v.stock[1].replace('*','')) || v2[3].includes(v.stock[0].replace('*',''))) 
