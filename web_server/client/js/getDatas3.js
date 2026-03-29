@@ -4,6 +4,13 @@ import stock_list from './stock_list.js';
 dayjs.extend(dayjs_plugin_utc)
 dayjs.extend(dayjs_plugin_timezone)
 
+// 差異查詢快取：第一次查全部，之後只查新增的部分
+const _cache = {
+    ai_sn: {},        // 各 AI/15分K 表單的上次 ai_sn 值
+    sheetValues: {},  // 各表單快取的完整資料列
+    newsLastRow: {}   // 新聞表單上次取得的最後列號
+}
+
 /**
  * @example
  * const res = await fetch('/google/getDatas')
@@ -55,34 +62,68 @@ const getDatas3 = async (search_date) => {
         "15分K",
         "每日收盤價"
     ]
+    const AI_SHEETS = ["AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞"]
     const sheetData_promise = []
     for (const v of sheetData_name) {
-        const ai_start = (()=>{
-            if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞", "15分K" ].includes(v)) {
-                return ai_sn[v] - 1000 < 2 ? 2 : ai_sn[v] - 1000
-            } else if (v == '每日收盤價') {
-                return 2
+        if (AI_SHEETS.includes(v)) {
+            const prevSn = Number(_cache.ai_sn[v] || 0)
+            const currSn = Number(ai_sn[v])
+            if (!_cache.sheetValues[v]) {
+                // 第一次：取最近 1000 列
+                const start = currSn - 1000 < 2 ? 2 : currSn - 1000
+                sheetData_promise.push(sheet_search(`${v}!A${start}:F${currSn}`))
+            } else if (currSn > prevSn) {
+                // 差異查詢：只取新增的列
+                sheetData_promise.push(sheet_search(`${v}!A${prevSn + 1}:F${currSn}`))
+            } else {
+                // 無新資料
+                sheetData_promise.push(Promise.resolve({ values: [] }))
             }
-            return 2
-        })()
-        const ai_end = (()=>{
-            if ([ "AI整理-經濟日報", "AI整理-yahoo財經", "AI整理-工商時報", "AI整理-時報新聞", "15分K" ].includes(v)) {
-                return ai_sn[v]
-            } else if (v == '每日收盤價') {
-                return 16
-            }
-            return 4000
-        })()
-
-        if (v == '每日收盤價') {
-            sheetData_promise.push(sheet_search(`${v}!A${ai_start}:J${ai_end}`, 'STOCK'))
         } else if (v == '15分K') {
-            sheetData_promise.push(sheet_search(`${v}!A${ai_start}:D${ai_end}`))
+            // 15分K：每次都抓後 500 筆，不使用快取
+            const currSn = Number(ai_sn[v])
+            const start = currSn - 500 < 2 ? 2 : currSn - 500
+            sheetData_promise.push(sheet_search(`${v}!A${start}:D${currSn}`))
+        } else if (v == '每日收盤價') {
+            sheetData_promise.push(sheet_search(`${v}!A2:J16`, 'STOCK'))
         } else {
-            sheetData_promise.push(sheet_search(`${v}!A${ai_start}:F${ai_end}`))
+            // 一般新聞表單
+            if (_cache.sheetValues[v]) {
+                sheetData_promise.push(sheet_search(`${v}!A2:F100`))
+            } else {
+                sheetData_promise.push(sheet_search(`${v}!A2:F2000`))
+            }
         }
     }
-    const sheetData = await Promise.all(sheetData_promise)
+    const sheetData_new = await Promise.all(sheetData_promise)
+
+    // 合併新資料到快取，並組成 sheetData（維持原有處理邏輯）
+    const sheetData = []
+    for (let k = 0; k < sheetData_name.length; k++) {
+        const v = sheetData_name[k]
+        const newValues = (sheetData_new[k] && sheetData_new[k].values) || []
+
+        if (v == '每日收盤價') {
+            _cache.sheetValues[v] = newValues
+        } else if (v == '15分K') {
+            // 15分K 不快取，直接使用抓來的資料
+        } else if (AI_SHEETS.includes(v)) {
+            // AI 分析：合併並去除 14 天前的資料
+            const existing = _cache.sheetValues[v] || []
+            _cache.sheetValues[v] = existing.concat(newValues).filter(r => r[0] >= date_start)
+            _cache.ai_sn[v] = ai_sn[v]
+        } else {
+            // 新聞表單：合併、去重、去除 14 天前的資料
+            const existing = _cache.sheetValues[v] || []
+            const pruned = existing.filter(r => r[1] >= date_start)
+            const seen = new Set(pruned.map(r => r[3]))
+            const deduped_new = newValues.filter(r => !seen.has(r[3]))
+            _cache.sheetValues[v] = pruned.concat(deduped_new)
+        }
+
+        // 15分K 直接用 newValues，其餘用快取
+        sheetData.push({ values: v == '15分K' ? newValues : _cache.sheetValues[v] })
+    }
 
     //資料歸類
     const values = {} //經濟日報, 中國時報, yahoo財經, 工商時報, 時報新聞
