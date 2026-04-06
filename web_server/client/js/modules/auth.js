@@ -32,9 +32,9 @@ async function checkLogin() {
 function showGoogleLogin() {
     const modal = document.createElement("div");
     modal.innerHTML = `
-        <div id="modal_login" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 999;">
-            <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
-                <h3>請登入</h3>
+        <div id="modal_login" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1d21; display: flex; justify-content: center; align-items: center; z-index: 999;">
+            <div style="background: #23272e; padding: 30px 28px; border-radius: 12px; text-align: center; border: 1px solid #3a3f48; box-shadow: 0 4px 24px rgba(0,0,0,0.5);">
+                <h3 style="color: #c9d1d9; margin-bottom: 20px;">請登入</h3>
                 <div id="g_id_onload"
                     data-client_id="${CLIENT_ID}"
                     data-callback="handleCredentialResponse">
