@@ -83,7 +83,7 @@ const getDatas3 = async (search_date) => {
             // 15分K：每次都抓後 500 筆，不使用快取
             const currSn = Number(ai_sn[v])
             const start = currSn - 500 < 2 ? 2 : currSn - 500
-            sheetData_promise.push(sheet_search(`${v}!A${start}:D${currSn}`))
+            sheetData_promise.push(sheet_search(`${v}!A${start}:E${currSn}`))
         } else if (v == '每日收盤價') {
             sheetData_promise.push(sheet_search(`${v}!A2:J16`, 'STOCK'))
         } else {

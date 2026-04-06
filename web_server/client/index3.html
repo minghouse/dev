@@ -297,6 +297,10 @@
               <input class="form-check-input" type="checkbox" id="filter_k15">
               <label class="form-check-label" for="filter_k15">有15分K <i class="fa-solid fa-bolt text-warning"></i></label>
             </div>
+            <div class="mb-2 form-check">
+              <input class="form-check-input" type="checkbox" id="filter_prev_rise7">
+              <label class="form-check-label" for="filter_prev_rise7">第一根上漲 <i class="fa-solid fa-seedling text-success"></i></label>
+            </div>
             <div class="mb-2 d-flex align-items-center gap-2">
               <div class="form-check mb-0">
                 <input class="form-check-input" type="checkbox" id="filter_volume_gt">
@@ -311,6 +315,14 @@
             <div class="mb-2 form-check">
               <input class="form-check-input" type="checkbox" id="filter_hide_limit">
               <label class="form-check-label" for="filter_hide_limit">隱藏漲停的股票</label>
+            </div>
+            <div class="mb-2 d-flex align-items-center gap-2">
+              <div class="form-check mb-0">
+                <input class="form-check-input" type="checkbox" id="filter_price_gt">
+                <label class="form-check-label" for="filter_price_gt">股價</label>
+              </div>
+              <input type="number" class="form-control form-control-sm" id="filter_price_gt_value" style="width:100px" value="0" min="0">
+              <span>以上</span>
             </div>
           </div>
           <div class="modal-footer">
@@ -410,10 +422,13 @@
         const applySettingsToModal = (s) => {
           document.querySelector('#filter_firecracker').checked = !!s.firecracker
           document.querySelector('#filter_k15').checked = !!s.k15
+          document.querySelector('#filter_prev_rise7').checked = !!s.prevRise7
           document.querySelector('#filter_volume_gt').checked = !!s.volumeGt
           document.querySelector('#filter_volume_gt_value').value = s.volumeGtValue || 0
           document.querySelector('#filter_change_gt7').checked = !!s.changeGt7
           document.querySelector('#filter_hide_limit').checked = !!s.hideLimit
+          document.querySelector('#filter_price_gt').checked = !!s.priceGt
+          document.querySelector('#filter_price_gt_value').value = s.priceGtValue || 0
         }
         document.querySelector('#search_filter').addEventListener('click', () => {
           applySettingsToModal(loadFilterSettings())
@@ -423,10 +438,13 @@
           const s = {
             firecracker: document.querySelector('#filter_firecracker').checked,
             k15: document.querySelector('#filter_k15').checked,
+            prevRise7: document.querySelector('#filter_prev_rise7').checked,
             volumeGt: document.querySelector('#filter_volume_gt').checked,
             volumeGtValue: Number(document.querySelector('#filter_volume_gt_value').value) || 0,
             changeGt7: document.querySelector('#filter_change_gt7').checked,
-            hideLimit: document.querySelector('#filter_hide_limit').checked
+            hideLimit: document.querySelector('#filter_hide_limit').checked,
+            priceGt: document.querySelector('#filter_price_gt').checked,
+            priceGtValue: Number(document.querySelector('#filter_price_gt_value').value) || 0
           }
           localStorage.setItem('index3_filter_settings', JSON.stringify(s))
           dom_dialog_filter.hide()
@@ -639,6 +657,10 @@
               if (k15 && k15[2] === 'true' && k15[3] === 'true') {
                 dom.querySelector('th').innerHTML += `<br><i class="fa-solid fa-bolt text-warning"></i>`
               }
+              //15分K: 第一根上漲（前日未漲7%以上）
+              if (k15 && k15[4] === 'false') {
+                dom.querySelector('th').innerHTML += `<br><i class="fa-solid fa-seedling text-success"></i>`
+              }
               //顯示是否有AI推薦(最近1天內)
               const ai_recommend = v.news_ai.filter(v2=> v2[3] && 
               (v2[3].includes(v.stock[1].replace('*','')) || v2[3].includes(v.stock[0].replace('*',''))) 
@@ -786,12 +808,17 @@
               let showRow = true
               if (filterSettings.firecracker && !is_fire_week) showRow = false
               if (filterSettings.k15 && !(k15 && k15[2] === 'true' && k15[3] === 'true')) showRow = false
+              if (filterSettings.prevRise7 && !(k15 && k15[4] === 'false')) showRow = false
               if (filterSettings.volumeGt) {
                 const volInK = Number(v.stock[2].replace(/,/g, '')) / 1000
                 if (volInK <= filterSettings.volumeGtValue) showRow = false
               }
               if (filterSettings.changeGt7 && v.stock[16] < 7) showRow = false
               if (filterSettings.hideLimit && light == 110) showRow = false
+              if (filterSettings.priceGt) {
+                const price = Number(v.stock[8].replace(/,/g, ''))
+                if (price < filterSettings.priceGtValue) showRow = false
+              }
               if (showRow) {
                 document.querySelector('#table_tbody').append(dom)
               }
