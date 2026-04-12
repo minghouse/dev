@@ -376,10 +376,14 @@ const getDatas3 = async (search_date) => {
             } else {
                 v[19] = false
             }
+
+            //昨日成交金額
+            v[20] = v2[4] || null
             
         } else {
             v[18] = false
             v[19] = false
+            v[20] = null
         }
     }
     

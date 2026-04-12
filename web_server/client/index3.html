@@ -771,6 +771,20 @@
                 td[2].querySelector('#continuous_up').textContent = v.stock[17] - 0 + 1
               }
 
+              // 成交值 badge
+              const turnover_raw = Number(String(v.stock[4]).replace(/,/g, ''))
+              const formatTurnover = (val) => {
+                const n = Number(String(val).replace(/,/g, ''))
+                if (isNaN(n) || n <= 0) return null
+                return n >= 100000000 ? `${(n / 100000000).toFixed(2)}億` : `${Math.round(n / 10000)}萬`
+              }
+              const turnover_text = formatTurnover(v.stock[4])
+              const turnover_prev_text = formatTurnover(v.stock[20])
+              let turnover_html = ''
+              if (turnover_text) turnover_html += `<br><span class="badge rounded-pill text-bg-info">成交值 ${turnover_text}</span>`
+              if (turnover_prev_text) turnover_html += `<br><span class="badge rounded-pill text-bg-info">前日 ${turnover_prev_text}</span>`
+              if (turnover_html) td[2].querySelector('.d-inline').insertAdjacentHTML('afterend', turnover_html)
+
               const turnover_data_stock = data.turnover_data_stock.find(v2=>v2.name == v.stock[1])
               //首次上榜
               if (!turnover_data_stock) {
