@@ -7,7 +7,7 @@ const browser = (req, res) => {
     const auth = req.query.auth;
     const BROWSER_AUTH = process.env.BROWSER_AUTH;
 
-    if (auth !== BROWSER_AUTH) {
+    if (auth !== BROWSER_AUTH && !req.session.is_login) {
         res.end('auth error');
         return;
     }

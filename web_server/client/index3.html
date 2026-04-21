@@ -523,6 +523,7 @@
       import { checkLogin } from "./js/modules/auth.js";
       import getDatas3 from './js/getDatas3.js';
       import getDatas5_buy_history from './js/getDatas5_buy_history.js';
+      import { settings } from "./js/modules/settings.js";
 
       const show_dom = async () => {
         document.querySelector('#container').classList.remove('d-none')
@@ -739,13 +740,13 @@
           try {
             const _fetch = async (sid) => {
               const target = `https://query1.finance.yahoo.com/v8/finance/chart/${sid}?range=1d&interval=5m`
-              const url = `https://corsproxy.io/?${encodeURIComponent(target)}`
+              const url = `${settings.api_domain}/fetch?url=${encodeURIComponent(target)}`
               const res = await fetch(url)
               if (res.status === 404) return null
               return await res.json()
             }
             let data = await _fetch(id + suffix)
-            if (data === null || !data.chart.result[0].indicators.quote[0].close) {
+            if (data === null || data.chart.result == null || !data.chart.result[0].indicators.quote[0].close) {
               // 404 或抓不到就換另一個後綴（TW ↔ TWO）
               suffix = suffix === '.TW' ? '.TWO' : '.TW'
               data = await _fetch(id + suffix)
@@ -1041,6 +1042,7 @@
               }
               if (showRow) {
                 document.querySelector('#table_tbody').append(dom)
+                // if (v.stock[0] == '5498') 
                 fetchSparkline(v.stock[0])
               }
             }

@@ -157,7 +157,23 @@ app.get('/browser', async (req, res) => {
         console.log(error)
     }
 });
-
+//fetch接口
+app.get('/fetch', async (req, res) => {
+    try {
+        if (!req.session.is_login) {
+            res.status(500).end('auth error');
+            return;
+        }
+        
+        const url = req.query.url;
+        const response = await fetch(url);
+        const data = await response.text();
+        res.send(data);
+    } catch (error) {
+        console.error('Fetch error:', error);
+        res.status(500).send('Error fetching data');
+    }
+});
 
 const port = process.env.PORT || 3000;
 

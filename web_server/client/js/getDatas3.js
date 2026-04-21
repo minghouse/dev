@@ -1,5 +1,6 @@
 import sheet_search from './sheet_search.js';
 import stock_list from './stock_list.js';
+import { settings } from "./modules/settings.js";
 
 dayjs.extend(dayjs_plugin_utc)
 dayjs.extend(dayjs_plugin_timezone)
@@ -231,9 +232,33 @@ const getDatas3 = async (search_date) => {
             //取得當日的成交金額排序前20
             const yahoo_turnover = await (async () => {
                 // const response = await fetch(`https://dev-cpzu.onrender.com/google/rank_changeup`);
-                const response = await fetch(`https://newsdev.duckdns.org/google/rank_changeup`);
-                const result = await response.json() || {}
-                return result
+                // const response = await fetch(`https://newsdev.duckdns.org/google/rank_changeup`);
+                const url = `${settings.api_domain}/fetch?url=${encodeURIComponent('https://tw.stock.yahoo.com/rank/change-up')}`
+                const response = await fetch(url);
+                
+                const html = await response.text();
+                const idx = html.indexOf('root.App.main = ');
+                if (idx === -1) {
+                    console.error(`[Yahoo] 找不到 root.App.main，URL: ${url}`);
+                    return { symbols: [], rankTime: null };
+                }
+                const raw = html.substring(idx + 'root.App.main = '.length);
+                const part1 = raw.split('"main-0-StockRanking":')[1];
+                if (!part1) {
+                    console.error(`[Yahoo] 找不到 StockRanking 資料，URL: ${url}`);
+                    return { symbols: [], rankTime: null };
+                }
+                const part2 = part1.split('"UserStore"')[0];
+                const part3 = part2.split('"BankStore"')[0];
+                const part4 = part3.split('"PortfolioUIStore"')[0];
+                const part5 = part4.split('"FundStore"')[0];
+                const cleaned = part5.replace(/\},\s*$/, '');
+                
+                const data = JSON.parse(cleaned);
+                return {
+                    data: data?.list || [],
+                    time: (data?.listMeta?.rankTime||'').split('T')[0]
+                }
             })()
             
             //yahoo成交值格式轉為證交所的格式

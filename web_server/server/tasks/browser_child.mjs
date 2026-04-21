@@ -4,10 +4,10 @@ async function main() {
     try {
         const [, , url, selector = 'body', auth, BROWSER_AUTH] = process.argv;
 
-        if (auth !== BROWSER_AUTH) {
-            console.error('auth error');
-            process.exit(1);
-        }
+        // if (auth !== BROWSER_AUTH) {
+        //     console.error('auth error');
+        //     process.exit(1);
+        // }
 
         const browserInstance = await chromium.launch({
             args: [
