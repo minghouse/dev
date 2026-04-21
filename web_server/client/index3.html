@@ -195,6 +195,14 @@
       .my-f-70 {
         font-size:70%;
       }
+
+      /* Sparkline */
+      .td-sparkline {
+        display: block;
+        width: 80px;
+        height: 28px;
+        margin-top: 3px;
+      }
     </style>
   </head>
   <body>
@@ -700,6 +708,58 @@
 
         // }
 
+        // === Sparkline 輔助 ===
+        const _drawSparkline = (canvas, prices, isUp) => {
+          const w = canvas.width || 80
+          const h = canvas.height || 28
+          const min = Math.min(...prices)
+          const max = Math.max(...prices)
+          const range = max - min || 1
+          const ctx = canvas.getContext('2d')
+          ctx.clearRect(0, 0, w, h)
+          ctx.beginPath()
+          ctx.strokeStyle = isUp ? '#eb0f29' : '#008d00'
+          ctx.lineWidth = 1.5
+          ctx.lineJoin = 'round'
+          prices.forEach((p, i) => {
+            const x = (i / (prices.length - 1)) * w
+            const y = h - ((p - min) / range) * (h - 4) - 2
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y)
+          })
+          ctx.stroke()
+          ctx.lineTo(w, h)
+          ctx.lineTo(0, h)
+          ctx.fillStyle = isUp ? 'rgba(235,15,41,0.1)' : 'rgba(0,141,0,0.1)'
+          ctx.fill()
+        }
+        const fetchSparkline = async (id) => {
+          const canvas = document.getElementById(`spark-${id}`)
+          if (!canvas) return
+          let suffix = (id.length === 6 || id.startsWith('8') || id.startsWith('6')) ? '.TWO' : '.TW'
+          try {
+            const _fetch = async (sid) => {
+              const target = `https://query1.finance.yahoo.com/v8/finance/chart/${sid}?range=1d&interval=5m`
+              const url = `https://corsproxy.io/?${encodeURIComponent(target)}`
+              const res = await fetch(url)
+              if (res.status === 404) return null
+              return await res.json()
+            }
+            let data = await _fetch(id + suffix)
+            if (data === null || !data.chart.result[0].indicators.quote[0].close) {
+              // 404 或抓不到就換另一個後綴（TW ↔ TWO）
+              suffix = suffix === '.TW' ? '.TWO' : '.TW'
+              data = await _fetch(id + suffix)
+            }
+            const result = data.chart.result[0]
+            const prices = result.indicators.quote[0].close.filter(p => p !== null)
+            if (prices.length < 2) return
+            const prevClose = result.meta.previousClose || prices[0]
+            const isUp = prices[prices.length - 1] >= prevClose
+            _drawSparkline(canvas, prices, isUp)
+          } catch (e) { /* 靜默失敗 */ }
+        }
+        // === Sparkline 輔助結束 ===
+
         //讀取資料
         const get_datas = async ()=>{
           const search_date = document.querySelector('#search_date').value
@@ -738,8 +798,9 @@
               const td = dom.querySelectorAll('td')
               // td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}`
               td[0].innerHTML = `${v.stock[1]}<br>${v.stock[0]}
-              <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+              <a href="https://tw.stock.yahoo.com/quote/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
               <a href="https://www.google.com/search?q=${encodeURIComponent(v.stock[1])}&tbm=nws&tbs=sbd:1" class="text-decoration-none" target="_blank">G</a>
+              <br><canvas class="td-sparkline" id="spark-${v.stock[0]}" width="80" height="28"></canvas>
               `
               //轉為億，小數點後兩位，四捨五入
               // td[1].textContent = `${(v.stock[4].replace(/,/g, '')/100000000).toFixed(2)}億`
@@ -930,7 +991,7 @@
               
               td[3].querySelector('#b_news_ai').addEventListener('click', function() {
                 dom_news2.querySelector('.modal-title').innerHTML = `${v.stock[1]}(${v.stock[0]})
-                <a href="https://www.fugle.tw/ai/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
+                <a href="https://tw.stock.yahoo.com/quote/${v.stock[0]}" class="text-decoration-none" id="show_chartjs" target="_blank"><i class="fa-solid fa-chart-line"></i></a>
                 <a href="https://www.google.com/search?q=${encodeURIComponent(v.stock[1])}&tbm=nws&tbs=sbd:1" class="text-decoration-none" target="_blank">G</a>
                 `
                 dom_news2.querySelector('.modal-body').innerHTML = ''
@@ -980,6 +1041,7 @@
               }
               if (showRow) {
                 document.querySelector('#table_tbody').append(dom)
+                fetchSparkline(v.stock[0])
               }
             }
             // console.log(ai_news.join("\n\n"))
