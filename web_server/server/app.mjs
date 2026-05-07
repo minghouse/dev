@@ -27,6 +27,8 @@ import login_status from './tasks/api/login_status.mjs';
 import logout from './tasks/api/logout.mjs';
 //瀏覽器解析body的套件
 import browser from './tasks/browser.mjs';
+//東森財經 YT 直播監控
+import yt_monitor from './tasks/yt_monitor.mjs';
 
 const __filename = fileURLToPath(import.meta.url); // 獲取檔案的完整路徑
 const __dirname = path.dirname(__filename);       // 獲取檔案所在的目錄
@@ -149,6 +151,16 @@ app.get('/api/login_status', (req, res) => {
 app.get('/api/logout', (req, res) => {
     logout(req, res)
 })
+//東森財經 YT 直播監控
+app.get('/yt_monitor/start', (req, res) => {
+    yt_monitor.start(req, res)
+});
+app.get('/yt_monitor/stop', async (req, res) => {
+    await yt_monitor.stop(req, res)
+});
+app.get('/yt_monitor/status', (req, res) => {
+    yt_monitor.getStatus(req, res)
+});
 //瀏覽器解析body的套件
 app.get('/browser', async (req, res) => {
     try {

@@ -17,6 +17,13 @@ const get_after_trading = async (date_now) => {
         }
 
         const result = ((j.tables || [])[8] || {}).data || []
+        // console.log(result.length)
+        for (const v of result) {
+            const cheerio = Cheerio.load(`${v[9]}`);
+            // v[9] = cheerio('p').text().trim();
+            v[9] = /\+/.test(v[9]) ? '+' : (/\-/.test(v[9]) ? '-' : '')
+        }
+        
         //櫃買收盤價
         const date_now2 = encodeURIComponent(`${date_now_twse.substring(0, 4)-1911}/${date_now_twse.substring(4, 6)}/${date_now_twse.substring(6, 8)}`)
         var options = {
