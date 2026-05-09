@@ -14,9 +14,11 @@
     "dayjs": "^1.10.4",
     "express": "^4.17.1",
     "express-session": "^1.17.3",
-    "session-file-store": "^1.5.0",
     "mysql2": "^3.10.0",
-    "playwright": "^1.51.0"
+    "openai": "^6.36.0",
+    "playwright": "^1.51.0",
+    "session-file-store": "^1.5.0",
+    "sharp": "^0.34.5"
   },
   "engines": {
     "node": "20.x"
