@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 import OpenAI from 'openai';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, readdir, readFile, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -13,12 +13,70 @@ const CAPTURE_DIR = path.resolve(__dirname, '..', '..', '..', 'yt_monitor');
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const randomBetween = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// 簡單指紋比對狀態（分別保存黃色區與整張圖的最後一張指紋）
-let lastFingerprintYellow = null;
-let lastFingerprintFull = null;
+// 簡單指紋比對狀態（分別保存黃色區與整張圖的指紋陣列）
+let lastFingerprintYellow = [];
+let lastFingerprintFull = [];
 const FINGERPRINT_SIZE = 16; // 縮小尺寸 (16x16)
 const THRESHOLDS = [/*0.85,*/ 0.92/*, 0.96*/];
-let CURRENT_THRESHOLD = 0.92; // 決定是否視為重複的門檻，可做 A/B
+let CURRENT_THRESHOLD = 0.988; // 決定是否視為重複的門檻，可做 A/B
+
+// 可配置的顏色與區段閾值（如需微調可在此修改）
+const TOP_BAND_RATIO = 0.18; // 頂部紅色判定區域高度 (畫面比例)
+const WHITE_BAND_RATIO = 0.68; // 頂部下方白底檢測區域高度
+const TOP_RED_RATIO_THRESHOLD = 0.12; // 頂部需要被視為紅色的最低比例
+const WHITE_BELOW_RATIO_THRESHOLD = 0.4; // 判定下方為白底的比例門檻
+
+// 紅色像素判定參數
+const RED_R_MIN = 150;
+const RED_G_MAX = 110;
+const RED_B_MAX = 110;
+const RED_DIFF_G = 40;
+const RED_DIFF_B = 40;
+const RED_SAT_MIN = 40;
+
+// 白色像素判定參數
+const WHITE_RGB_MIN = 220;
+const WHITE_MAX_DIFF = 30;
+// 黃色與藍字判定參數
+const YELLOW_RATIO_THRESHOLD = 0.4; // 底部黃底比例門檻（原先為 0.12）
+const BLUE_B_MIN = 150;
+const BLUE_R_MAX = 120;
+const BLUE_G_MAX = 120;
+const BLUE_DIFF = 40;
+const BLUE_SAT_MIN = 35;
+const BLUE_IN_YELLOW_RATIO_THRESHOLD = 0.08; // 黃底內藍字比例門檻（可調）
+
+// 文字重複檢查設定
+const TEXT_DUPLICATE_THRESHOLD = 0.80; // 相似度 >= 0.8 視為重複
+const MAX_STORED_TEXTS = 200;
+let lastDetectedTexts = [];
+// 送給 AI 前的放大比例（1 = 原大小，1.5 = 放大 1.5 倍）
+const CAPTURE_SCALE = 1.5;
+
+function stringSimilarityBigram(a, b) {
+  if (!a || !b) return 0;
+  a = a.trim().toLowerCase();
+  b = b.trim().toLowerCase();
+  if (a === b) return 1;
+  const toBigrams = (s) => {
+    const arr = [];
+    for (let i = 0; i < s.length - 1; i++) arr.push(s.slice(i, i + 2));
+    return arr;
+  };
+  const A = toBigrams(a);
+  const B = toBigrams(b);
+  if (A.length === 0 || B.length === 0) return 0;
+  const freq = Object.create(null);
+  for (const g of A) freq[g] = (freq[g] || 0) + 1;
+  let intersection = 0;
+  for (const g of B) {
+    if (freq[g]) {
+      intersection += 1;
+      freq[g] -= 1;
+    }
+  }
+  return (2.0 * intersection) / (A.length + B.length);
+}
 
 // 從 buffer 針對黃色區塊位置計算簡單指紋
 async function computeYellowRegionFingerprint(imageBuffer) {
@@ -55,15 +113,22 @@ function computeHammingSimilarity(a, b) {
 async function isDuplicateYellowImage(imageBuffer) {
   try {
     const fp = await computeYellowRegionFingerprint(imageBuffer);
-    if (lastFingerprintYellow) {
-      const sim = computeHammingSimilarity(fp, lastFingerprintYellow);
-      const checks = THRESHOLDS.map(t => `${t}:${(sim >= t)}`).join(', ');
-      console.log(`🔍 黃底指紋相似度: ${sim.toFixed(3)} | 門檻比較: ${checks}`);
-      if (sim >= CURRENT_THRESHOLD) {
+    // 與已存在的指紋陣列比較，取最大相似度
+    if (lastFingerprintYellow && lastFingerprintYellow.length > 0) {
+      let maxSim = 0;
+      for (const existing of lastFingerprintYellow) {
+        const sim = computeHammingSimilarity(fp, existing);
+        if (sim > maxSim) maxSim = sim;
+      }
+      const checks = THRESHOLDS.map(t => `${t}:${(maxSim >= t)}`).join(', ');
+      console.log(`🔍 黃底指紋最高相似度: ${maxSim.toFixed(3)} | 門檻比較: ${checks}`);
+      if (maxSim >= CURRENT_THRESHOLD) {
         return true;
       }
     }
-    lastFingerprintYellow = fp;
+
+    // 非重複，加入指紋陣列供未來比對使用
+    lastFingerprintYellow.push(fp);
     return false;
   } catch (err) {
     // 若指紋計算失敗，保守處理為非重複
@@ -90,19 +155,92 @@ async function computeFullImageFingerprint(imageBuffer) {
 async function isDuplicateFullImage(imageBuffer) {
   try {
     const fp = await computeFullImageFingerprint(imageBuffer);
-    if (lastFingerprintFull) {
-      const sim = computeHammingSimilarity(fp, lastFingerprintFull);
-      const checks = THRESHOLDS.map(t => `${t}:${(sim >= t)}`).join(', ');
-      console.log(`🔍 全圖指紋相似度: ${sim.toFixed(3)} | 門檻比較: ${checks}`);
-      if (sim >= CURRENT_THRESHOLD) {
+    if (lastFingerprintFull && lastFingerprintFull.length > 0) {
+      let maxSim = 0;
+      for (const existing of lastFingerprintFull) {
+        const sim = computeHammingSimilarity(fp, existing);
+        if (sim > maxSim) maxSim = sim;
+      }
+      const checks = THRESHOLDS.map(t => `${t}:${(maxSim >= t)}`).join(', ');
+      console.log(`🔍 全圖指紋最高相似度: ${maxSim.toFixed(3)} | 門檻比較: ${checks}`);
+      if (maxSim >= CURRENT_THRESHOLD) {
         return true;
       }
     }
-    lastFingerprintFull = fp;
+
+    // 非重複，加入指紋陣列供未來比對使用
+    lastFingerprintFull.push(fp);
     return false;
   } catch (err) {
     console.warn('整張圖指紋比對失敗，略過過濾:', err.message);
     return false;
+  }
+}
+
+async function addFingerprintIfNotSimilar(fp, arr) {
+  if (!arr || arr.length === 0) {
+    arr.push(fp);
+    return true;
+  }
+  let maxSim = 0;
+  for (const existing of arr) {
+    const sim = computeHammingSimilarity(fp, existing);
+    if (sim > maxSim) maxSim = sim;
+  }
+  if (maxSim < CURRENT_THRESHOLD) {
+    arr.push(fp);
+    return true;
+  }
+  return false;
+}
+
+// 讀取當日資料夾中的圖片並預先計算指紋，啟動時呼叫
+async function loadTodayFingerprints() {
+  try {
+    const now = new Date();
+    const dateDir = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const todayDir = path.join(CAPTURE_DIR, dateDir);
+    const entries = await readdir(todayDir).catch(() => []);
+    if (!entries || entries.length === 0) {
+      console.log('ℹ️ 當日沒有已儲存的截圖可讀取指紋');
+      return;
+    }
+
+    let count = 0;
+    for (const fname of entries) {
+      if (!/\.(png|jpg|jpeg)$/i.test(fname)) continue;
+      const fpath = path.join(todayDir, fname);
+      try {
+        const buf = await readFile(fpath);
+        const yfp = await computeYellowRegionFingerprint(buf).catch(() => null);
+        const ffp = await computeFullImageFingerprint(buf).catch(() => null);
+        if (yfp) await addFingerprintIfNotSimilar(yfp, lastFingerprintYellow);
+        if (ffp) await addFingerprintIfNotSimilar(ffp, lastFingerprintFull);
+        count += 1;
+      } catch (_) { /* ignore individual file errors */ }
+    }
+    // 讀取當日 data.json（若存在）並把 text_raw 載入到 lastDetectedTexts
+    try {
+      const dataJsonPath = path.join(todayDir, 'data.json');
+      const txtBuf = await readFile(dataJsonPath, { encoding: 'utf8' }).catch(() => null);
+      if (txtBuf) {
+        const arr = JSON.parse(txtBuf);
+        if (Array.isArray(arr)) {
+          for (const it of arr) {
+            if (it && it.text_raw) {
+              lastDetectedTexts.push(String(it.text_raw));
+            }
+          }
+          // 保留最新的上限
+          if (lastDetectedTexts.length > MAX_STORED_TEXTS) {
+            lastDetectedTexts = lastDetectedTexts.slice(-MAX_STORED_TEXTS);
+          }
+        }
+      }
+    } catch (_) { /* ignore */ }
+    console.log(`ℹ️ 已讀取 ${count} 張當日截圖並載入指紋 (黃底:${lastFingerprintYellow.length}, 全圖:${lastFingerprintFull.length})`);
+  } catch (err) {
+    console.warn('讀取當日指紋時發生錯誤:', err.message);
   }
 }
 
@@ -111,17 +249,23 @@ async function detectNewsPattern(imageBuffer) {
   const { data, info } = await sharp(imageBuffer).raw().toBuffer({ resolveWithObject: true });
   const { width, height, channels } = info;
 
-  const topBandEnd = Math.max(1, Math.floor(height * 0.22));
-  const bottomBandStart = Math.max(0, Math.floor(height * 0.70));
-  const aboveBottomBlackStart = Math.max(0, Math.floor(height * 0.52));
+  const topBandEnd = Math.max(1, Math.floor(height * TOP_BAND_RATIO));
+  const bottomBandStart = Math.max(0, Math.floor(height * 0.684));
+  const aboveBottomBlackStart = Math.max(0, Math.floor(height * 0.173));
   const aboveBottomBlackEnd = bottomBandStart;
+  // 新增：檢查頭部紅底下方是否為白底（通常紅塊下方為白底的情形）
+  const whiteBelowStart = topBandEnd;
+  const whiteBelowEnd = Math.min(height, topBandEnd + Math.max(1, Math.floor(height * WHITE_BAND_RATIO)));
 
   let topRedCount = 0;
   let topTotal = 0;
   let bottomYellowCount = 0;
   let bottomTotal = 0;
+  let bottomBlueCount = 0;
   let aboveBottomBlackCount = 0;
   let aboveBottomBlackTotal = 0;
+  let whiteBelowCount = 0;
+  let whiteBelowTotal = 0;
 
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
@@ -142,18 +286,26 @@ async function detectNewsPattern(imageBuffer) {
         saturation >= 35;
 
       const isRedPixel =
-        r >= 140 &&
-        g <= 105 &&
-        b <= 105 &&
-        (r - g) >= 30 &&
-        (r - b) >= 30 &&
-        saturation >= 35;
+        r >= RED_R_MIN &&
+        g <= RED_G_MAX &&
+        b <= RED_B_MAX &&
+        (r - g) >= RED_DIFF_G &&
+        (r - b) >= RED_DIFF_B &&
+        saturation >= RED_SAT_MIN;
 
-      const isBlackPixel =
-        r <= 72 &&
-        g <= 72 &&
-        b <= 72 &&
-        saturation <= 24;
+      const isWhitePixel =
+        r >= WHITE_RGB_MIN &&
+        g >= WHITE_RGB_MIN &&
+        b >= WHITE_RGB_MIN &&
+        (max - min) <= WHITE_MAX_DIFF;
+
+      const isBluePixel =
+        b >= BLUE_B_MIN &&
+        r <= BLUE_R_MAX &&
+        g <= BLUE_G_MAX &&
+        (b - r) >= BLUE_DIFF &&
+        (b - g) >= BLUE_DIFF &&
+        saturation >= BLUE_SAT_MIN;
 
       if (y < topBandEnd) {
         topTotal += 1;
@@ -163,11 +315,12 @@ async function detectNewsPattern(imageBuffer) {
       if (y >= bottomBandStart) {
         bottomTotal += 1;
         if (isYellowPixel) bottomYellowCount += 1;
+        if (isBluePixel) bottomBlueCount += 1;
       }
 
-      if (y >= aboveBottomBlackStart && y < aboveBottomBlackEnd) {
-        aboveBottomBlackTotal += 1;
-        if (isBlackPixel) aboveBottomBlackCount += 1;
+      if (y >= whiteBelowStart && y < whiteBelowEnd) {
+        whiteBelowTotal += 1;
+        if (isWhitePixel) whiteBelowCount += 1;
       }
     }
   }
@@ -175,16 +328,26 @@ async function detectNewsPattern(imageBuffer) {
   const topRedRatio = topTotal > 0 ? topRedCount / topTotal : 0;
   const bottomYellowRatio = bottomTotal > 0 ? bottomYellowCount / bottomTotal : 0;
   const aboveBottomBlackRatio = aboveBottomBlackTotal > 0 ? aboveBottomBlackCount / aboveBottomBlackTotal : 0;
-  const hasTopRed = topRedRatio >= 0.10;
-  const hasBottomYellow = bottomYellowRatio >= 0.12 && aboveBottomBlackRatio >= 0.20;
+  const hasTopRed = topRedRatio >= TOP_RED_RATIO_THRESHOLD;
+  const bottomBlueRatio = bottomTotal > 0 ? bottomBlueCount / bottomTotal : 0;
+  const whiteBelowRatio = whiteBelowTotal > 0 ? whiteBelowCount / whiteBelowTotal : 0;
+  // 黃底改為：底部黃色比例達標，且在該區域有足夠藍色文字比例
+  // console.log(bottomYellowRatio, bottomBlueRatio, hasTopRed, whiteBelowRatio)
+  const hasBottomYellow = bottomYellowRatio >= YELLOW_RATIO_THRESHOLD && bottomBlueRatio >= BLUE_IN_YELLOW_RATIO_THRESHOLD;
+  // console.log(whiteBelowRatio)
+  const hasTopRedBelowWhite = hasTopRed && whiteBelowRatio >= WHITE_BELOW_RATIO_THRESHOLD;
 
   return {
-    shouldAnalyze: hasTopRed || hasBottomYellow,
+    shouldAnalyze: hasBottomYellow || hasTopRedBelowWhite,
     hasTopRed,
+    hasTopRedBelowWhite,
     hasBottomYellow,
     topRedRatio,
     bottomYellowRatio,
-    aboveBottomBlackRatio
+    aboveBottomBlackRatio,
+    whiteBelowRatio
+    ,
+    bottomBlueRatio
   };
 }
 
@@ -505,6 +668,9 @@ async function monitorLoop() {
   let loopCount = 0;
   let lastHumanActivityAt = 0;
 
+  // 啟動時先讀取當日已存檔案的指紋，以便初次比對
+  await loadTodayFingerprints();
+
   browserInstance = await chromium.launch({
     headless: false,
     channel: 'chrome',
@@ -611,13 +777,22 @@ async function monitorLoop() {
         // 1. 快速顏色檢測（先擷取但不馬上儲存）
         await pinPageToTop(page);
         const captureBuffer = await page.screenshot({ clip: CAPTURE_AREA });
+        // 除錯：顯示截圖實際像素大小
+        // try {
+        //   const m = await sharp(captureBuffer).metadata();
+        //   console.log(`📸 captureBuffer size: ${m.width}x${m.height}, channels=${m.channels}`);
+        //   const dpr = await page.evaluate(() => window.devicePixelRatio).catch(() => 1);
+        //   console.log(`🧭 page.devicePixelRatio = ${dpr}`);
+        // } catch (_) { /* ignore */ }
         // console.log(`🔎 已擷取監控區截圖 clip=${JSON.stringify(CAPTURE_AREA)}`);
         const patternCheck = await detectNewsPattern(captureBuffer);
 
         if (patternCheck.shouldAnalyze) {
           const hitTypes = [];
-          if (patternCheck.hasBottomYellow) hitTypes.push(`底部黃底 ${(patternCheck.bottomYellowRatio * 100).toFixed(1)}% + 上方黑底 ${(patternCheck.aboveBottomBlackRatio * 100).toFixed(1)}%`);
-          if (patternCheck.hasTopRed) hitTypes.push(`頭部紅底 ${(patternCheck.topRedRatio * 100).toFixed(1)}%`);
+          if (patternCheck.hasBottomYellow) hitTypes.push(`底部黃底 ${(patternCheck.bottomYellowRatio * 100).toFixed(1)}% + 黃底內藍字 ${(patternCheck.bottomBlueRatio * 100).toFixed(1)}%`);
+          if (patternCheck.hasTopRedBelowWhite) {
+            hitTypes.push(`頭部紅底 + 下方白底 ${(patternCheck.whiteBelowRatio * 100).toFixed(1)}%`);
+          }
           console.log(`🎯 命中色塊條件 (${hitTypes.join(' / ')})，請求 AI 分析...`);
 
           // 如果是黃底情況，先做黃色區域的指紋比對，避免重複送同樣的畫面
@@ -630,9 +805,8 @@ async function monitorLoop() {
               continue;
             }
           }
-
-          // 若為頭部紅底（或其他需整張比對的情況），用整張圖指紋比對
-          if (patternCheck.hasTopRed) {
+          // 若為頭部紅底（含下方白底情況），用整張圖指紋比對
+          if (patternCheck.hasTopRedBelowWhite) {
             const isDupFull = await isDuplicateFullImage(captureBuffer);
             if (isDupFull) {
               console.log('🔁 偵測到重複整張圖片，略過分析');
@@ -642,16 +816,35 @@ async function monitorLoop() {
             }
           }
 
-          // 通過過濾後，才儲存截圖（僅儲存符合條件的圖片）
-          const savedFilePath = await saveCaptureImage(captureBuffer, { prefix: 'monitor_area' });
-          console.log(`💾 已儲存待分析截圖: ${savedFilePath}`);
+          // 儲存後確保指紋陣列也包含此圖的指紋（避免某些路徑沒加到陣列）
+          try {
+            const yfp = await computeYellowRegionFingerprint(captureBuffer).catch(() => null);
+            const ffp = await computeFullImageFingerprint(captureBuffer).catch(() => null);
+            if (yfp) await addFingerprintIfNotSimilar(yfp, lastFingerprintYellow);
+            if (ffp) await addFingerprintIfNotSimilar(ffp, lastFingerprintFull);
+          } catch (_) { /* ignore */ }
 
-          const promptText = patternCheck.hasTopRed
+          const promptText = (patternCheck.hasTopRedBelowWhite)
             ? '你是 OCR 引擎。只做逐字轉錄，不可摘要、不可改寫、不可翻譯、不可修正錯字。請針對整張圖片輸出 JSON：{ "stock_name": "股票名稱", "stock_code": "股票代號", "scope": "full", "text_raw": "逐字原文" }。'
             : '你是 OCR 引擎。只做逐字轉錄，不可摘要、不可改寫、不可翻譯、不可修正錯字。請只針對圖片中的黃色區域做文字轉錄，輸出 JSON：{ "stock_name": "股票名稱", "stock_code": "股票代號", "scope": "yellow", "yellow_type": "最新消息|獨家消息|無法判斷", "text_raw": "逐字內容" }。';
 
           // 2. 使用同一張整塊區域圖（不再分 detection/ocr）
-          const base64Image = captureBuffer.toString('base64');
+          // const base64Image = captureBuffer.toString('base64');
+          // 若設定放大比例，先用 sharp 放大後再轉 base64 傳給 AI
+          let ocrBuffer = captureBuffer;
+          if (CAPTURE_SCALE && CAPTURE_SCALE !== 1) {
+            try {
+              const meta = await sharp(captureBuffer).metadata();
+              const targetW = Math.max(1, Math.round(meta.width * CAPTURE_SCALE));
+              const targetH = Math.max(1, Math.round(meta.height * CAPTURE_SCALE));
+              ocrBuffer = await sharp(captureBuffer).resize(targetW, targetH).toBuffer();
+              // console.log(`🔍 OCR 圖片已放大 ${CAPTURE_SCALE}x -> ${targetW}x${targetH}`);
+            } catch (err) {
+              console.warn('⚠️ OCR 放大失敗，使用原始截圖:', err.message);
+              ocrBuffer = captureBuffer;
+            }
+          }
+          const base64Image = ocrBuffer.toString('base64');
 
           // 3. 呼叫 gpt-5.4-mini
           const response = await openai.chat.completions.create({
@@ -677,7 +870,61 @@ async function monitorLoop() {
           });
 
           const result = JSON.parse(response.choices[0].message.content);
+          result.text_raw = result.text_raw.replace('獨家消息', '').replace('最新消息', '').trim();
+
+          // 文字重複檢查：與最近偵測到的文字比對，若相似度 >= TEXT_DUPLICATE_THRESHOLD 視為重複並略過
+          try {
+            const txt = (result.text_raw || '').trim();
+            let isDupText = false;
+            for (const prev of lastDetectedTexts) {
+              if (stringSimilarityBigram(prev, txt) >= TEXT_DUPLICATE_THRESHOLD) {
+                isDupText = true;
+                break;
+              }
+            }
+            if (isDupText) {
+              console.log('🔁 AI 文字結果與先前相似 >= 80%，略過後續處理');
+              // 不儲存、不送出，直接略過
+              monitorErrorCount = 0;
+              continue;
+            }
+            // 非重複，加入記錄（保留上限）
+            if (txt) {
+              lastDetectedTexts.push(txt);
+              if (lastDetectedTexts.length > MAX_STORED_TEXTS) lastDetectedTexts.shift();
+            }
+          } catch (e) {
+            console.warn('文字重複檢查失敗，略過此檢查:', e.message);
+          }
+
           if (result) {
+              
+            // 通過過濾後，才儲存截圖（僅儲存符合條件的圖片）
+            const savedFilePath = await saveCaptureImage(captureBuffer, { prefix: 'monitor_area' });
+            console.log(`💾 已儲存待分析截圖: ${savedFilePath}`);
+
+            // 同目錄下更新或建立 data.json，加入本次 result.text_raw 與檔名與時間
+            try {
+              const entry = {
+                file: path.basename(savedFilePath),
+                text_raw: result.text_raw || '',
+                timestamp: (new Date()).toISOString()
+              };
+              const dir = path.dirname(savedFilePath);
+              const dataFile = path.join(dir, 'data.json');
+              let arr = [];
+              const existing = await readFile(dataFile, { encoding: 'utf8' }).catch(() => null);
+              if (existing) {
+                try { arr = JSON.parse(existing); } catch (_) { arr = []; }
+              }
+              arr.push(entry);
+              // 保留最多 MAX_STORED_TEXTS 條
+              if (arr.length > MAX_STORED_TEXTS) arr = arr.slice(-MAX_STORED_TEXTS);
+              await writeFile(dataFile, JSON.stringify(arr, null, 2), { encoding: 'utf8' });
+            } catch (e) {
+              console.warn('寫入 data.json 失敗:', e.message);
+            }
+
             console.log('🤖 AI 分析結果：', result);
           }
         }
