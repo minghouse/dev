@@ -660,8 +660,8 @@ async function ensurePlayback(page, ytUrl) {
 }
 
 async function monitorLoop() {
-  // const YT_URL = 'https://www.youtube.com/watch?v=1I2iq41Akmo';
-  const YT_URL = 'https://www.youtube.com/watch?v=oB2QY06L5Ew';
+  const YT_URL = 'https://www.youtube.com/watch?v=1I2iq41Akmo';
+  // const YT_URL = 'https://www.youtube.com/watch?v=oB2QY06L5Ew';
   let monitorErrorCount = 0;
   let lastCurrentTime = -1;
   let stalledCycles = 0;
