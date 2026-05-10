@@ -672,7 +672,8 @@ async function monitorLoop() {
   await loadTodayFingerprints();
 
   browserInstance = await chromium.launch({
-    headless: false,
+    // headless: false,
+    headless: true,
     channel: 'chrome',
     args: [
       '--no-sandbox',
