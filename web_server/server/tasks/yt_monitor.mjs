@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const CAPTURE_DIR = path.resolve(__dirname, '..', '..', '..', 'yt_monitor');
+const CAPTURE_DIR = path.resolve(__dirname, '..', '..', '..', 'uploads', 'yt_monitor');
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const randomBetween = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
