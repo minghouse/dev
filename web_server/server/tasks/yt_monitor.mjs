@@ -23,7 +23,7 @@ let CURRENT_THRESHOLD = 0.988; // 決定是否視為重複的門檻，可做 A/B
 // 可配置的顏色與區段閾值（如需微調可在此修改）
 const TOP_BAND_RATIO = 0.18; // 頂部紅色判定區域高度 (畫面比例)
 const WHITE_BAND_RATIO = 0.68; // 頂部下方白底檢測區域高度
-const TOP_RED_RATIO_THRESHOLD = 0.12; // 頂部需要被視為紅色的最低比例
+const TOP_RED_RATIO_THRESHOLD = 0.4; // 頂部需要被視為紅色的最低比例
 const WHITE_BELOW_RATIO_THRESHOLD = 0.4; // 判定下方為白底的比例門檻
 
 // 紅色像素判定參數
@@ -152,6 +152,61 @@ async function computeFullImageFingerprint(imageBuffer) {
   return bits;
 }
 
+// 從圖中找出黃底像素的 bounding box，回傳裁切後的 buffer（若找不到回傳 null）
+async function extractYellowRegionBuffer(imageBuffer) {
+  try {
+    const img = sharp(imageBuffer);
+    const { data, info } = await img.raw().toBuffer({ resolveWithObject: true });
+    const { width, height, channels } = info;
+    // 只掃描畫面底部的區域（與 detectNewsPattern 使用的 bottomBandStart 一致）
+    const bottomBandStart = Math.max(0, Math.floor(height * 0.684));
+
+    let minX = width, minY = height, maxX = -1, maxY = -1;
+    for (let y = bottomBandStart; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const idx = (y * width + x) * channels;
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const saturation = max - min;
+
+        const isYellowPixel =
+          r >= 145 &&
+          g >= 120 &&
+          b <= 145 &&
+          (r - b) >= 25 &&
+          saturation >= 35;
+
+        if (isYellowPixel) {
+          if (x < minX) minX = x;
+          if (y < minY) minY = y;
+          if (x > maxX) maxX = x;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+
+    if (maxX < 0 || maxY < 0) return null;
+
+    // 擴張些許 margin
+    const MARGIN = 6;
+    const left = Math.max(0, minX - MARGIN);
+    const top = Math.max(0, minY - MARGIN);
+    const right = Math.min(width - 1, maxX + MARGIN);
+    const bottom = Math.min(height - 1, maxY + MARGIN);
+    const w = right - left + 1;
+    const h = bottom - top + 1;
+
+    if (w <= 0 || h <= 0) return null;
+
+    return await img.extract({ left, top, width: w, height: h }).toBuffer();
+  } catch (err) {
+    return null;
+  }
+}
+
 async function isDuplicateFullImage(imageBuffer) {
   try {
     const fp = await computeFullImageFingerprint(imageBuffer);
@@ -251,8 +306,6 @@ async function detectNewsPattern(imageBuffer) {
 
   const topBandEnd = Math.max(1, Math.floor(height * TOP_BAND_RATIO));
   const bottomBandStart = Math.max(0, Math.floor(height * 0.684));
-  const aboveBottomBlackStart = Math.max(0, Math.floor(height * 0.173));
-  const aboveBottomBlackEnd = bottomBandStart;
   // 新增：檢查頭部紅底下方是否為白底（通常紅塊下方為白底的情形）
   const whiteBelowStart = topBandEnd;
   const whiteBelowEnd = Math.min(height, topBandEnd + Math.max(1, Math.floor(height * WHITE_BAND_RATIO)));
@@ -264,8 +317,9 @@ async function detectNewsPattern(imageBuffer) {
   let bottomBlueCount = 0;
   let aboveBottomBlackCount = 0;
   let aboveBottomBlackTotal = 0;
-  let whiteBelowCount = 0;
-  let whiteBelowTotal = 0;
+  // 改為逐列計算用於偵測白灰交錯條紋
+  const rowWhiteCounts = new Array(height).fill(0);
+  const rowLightCounts = new Array(height).fill(0);
 
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
@@ -319,8 +373,12 @@ async function detectNewsPattern(imageBuffer) {
       }
 
       if (y >= whiteBelowStart && y < whiteBelowEnd) {
-        whiteBelowTotal += 1;
-        if (isWhitePixel) whiteBelowCount += 1;
+        // 計算純白像素（較嚴格）與淺色像素（白或淺灰）
+        if (isWhitePixel) rowWhiteCounts[y] += 1;
+        const brightness = Math.round((r + g + b) / 3);
+        // 淺色判定容許較低亮度與較大色差，用於白灰條紋情況
+        const isLightPixel = brightness >= 180 && (max - min) <= 80;
+        if (isLightPixel) rowLightCounts[y] += 1;
       }
     }
   }
@@ -330,12 +388,39 @@ async function detectNewsPattern(imageBuffer) {
   const aboveBottomBlackRatio = aboveBottomBlackTotal > 0 ? aboveBottomBlackCount / aboveBottomBlackTotal : 0;
   const hasTopRed = topRedRatio >= TOP_RED_RATIO_THRESHOLD;
   const bottomBlueRatio = bottomTotal > 0 ? bottomBlueCount / bottomTotal : 0;
-  const whiteBelowRatio = whiteBelowTotal > 0 ? whiteBelowCount / whiteBelowTotal : 0;
+  // 逐列白/淺色比率（白灰交錯偵測）
+  const whiteRowRatios = [];
+  const lightRowRatios = [];
+  for (let ry = whiteBelowStart; ry < whiteBelowEnd; ry++) {
+    whiteRowRatios.push(rowWhiteCounts[ry] / width);
+    lightRowRatios.push(rowLightCounts[ry] / width);
+  }
+  const rowsCount = whiteRowRatios.length;
+  const meanWhiteRowRatio = rowsCount > 0 ? whiteRowRatios.reduce((s, v) => s + v, 0) / rowsCount : 0;
+  const meanLightRowRatio = rowsCount > 0 ? lightRowRatios.reduce((s, v) => s + v, 0) / rowsCount : 0;
+
+  // 交錯檢測：計算逐列是否在白/淺色與非淺色之間頻繁切換
+  let transitions = 0;
+  const ROW_WHITE_RATIO_THRESHOLD = 0.50; // 一列若超過此比例視為"白列/淺色列"
+  let prevIsLightRow = null;
+  for (let i = 0; i < rowsCount; i++) {
+    const isLightRow = lightRowRatios[i] >= ROW_WHITE_RATIO_THRESHOLD || whiteRowRatios[i] >= ROW_WHITE_RATIO_THRESHOLD;
+    if (prevIsLightRow !== null && isLightRow !== prevIsLightRow) transitions += 1;
+    prevIsLightRow = isLightRow;
+  }
+  const alternationRate = rowsCount > 1 ? transitions / (rowsCount - 1) : 0;
+
+  // 白色下方判定：若平均淺色比率足夠或同時出現淺色平均+交錯條紋
+  const whiteBelowRatio = Math.max(meanWhiteRowRatio, meanLightRowRatio);
   // 黃底改為：底部黃色比例達標，且在該區域有足夠藍色文字比例
   // console.log(bottomYellowRatio, bottomBlueRatio, hasTopRed, whiteBelowRatio)
   const hasBottomYellow = bottomYellowRatio >= YELLOW_RATIO_THRESHOLD && bottomBlueRatio >= BLUE_IN_YELLOW_RATIO_THRESHOLD;
-  // console.log(whiteBelowRatio)
-  const hasTopRedBelowWhite = hasTopRed && whiteBelowRatio >= WHITE_BELOW_RATIO_THRESHOLD;
+  // 僅接受白灰交錯模式（白灰白灰），排除大片淺色情況
+  const ALTERNATION_RATE_THRESHOLD = 0.08; // 逐列交替率門檻（提高以避免邊緣通過）
+  const STRIPED_MEAN_LIGHT_THRESHOLD = 0.35; // 條紋情況下要求的平均淺色比
+  // 通過條件：平均淺色達到條紋最低值且列間交替率達標（嚴格交錯偵測）
+  const whiteBelowPass = (meanLightRowRatio >= STRIPED_MEAN_LIGHT_THRESHOLD && alternationRate >= ALTERNATION_RATE_THRESHOLD);
+  const hasTopRedBelowWhite = hasTopRed && whiteBelowPass;
 
   return {
     shouldAnalyze: hasBottomYellow || hasTopRedBelowWhite,
@@ -345,8 +430,11 @@ async function detectNewsPattern(imageBuffer) {
     topRedRatio,
     bottomYellowRatio,
     aboveBottomBlackRatio,
-    whiteBelowRatio
-    ,
+    whiteBelowRatio,
+    meanLightRowRatio,
+    meanWhiteRowRatio,
+    alternationRate,
+    transitions,
     bottomBlueRatio
   };
 }
@@ -529,7 +617,7 @@ async function clickRetryIfPresent(page) {
       const button = await page.$(selector);
       if (button) {
         await button.click({ delay: 40 }).catch(() => {});
-        console.warn(`🔁 已點擊播放重試按鈕: ${selector}`);
+        // console.warn(`🔁 已點擊播放重試按鈕: ${selector}`);
         return true;
       }
     } catch (_) { /* ignore */ }
@@ -829,22 +917,38 @@ async function monitorLoop() {
             ? '你是 OCR 引擎。只做逐字轉錄，不可摘要、不可改寫、不可翻譯、不可修正錯字。請針對整張圖片輸出 JSON：{ "stock_name": "股票名稱", "stock_code": "股票代號", "scope": "full", "text_raw": "逐字原文" }。'
             : '你是 OCR 引擎。只做逐字轉錄，不可摘要、不可改寫、不可翻譯、不可修正錯字。請只針對圖片中的黃色區域做文字轉錄，輸出 JSON：{ "stock_name": "股票名稱", "stock_code": "股票代號", "scope": "yellow", "yellow_type": "最新消息|獨家消息|無法判斷", "text_raw": "逐字內容" }。';
 
-          // 2. 使用同一張整塊區域圖（不再分 detection/ocr）
-          // const base64Image = captureBuffer.toString('base64');
-          // 若設定放大比例，先用 sharp 放大後再轉 base64 傳給 AI
+          // 2. 根據命中類型決定要傳給 AI 的區塊：
+          //    - 若為黃底：嘗試只擷取黃色區域送 AI
+          //    - 否則（頭部紅底等）：傳整張擷取區
           let ocrBuffer = captureBuffer;
-          if (CAPTURE_SCALE && CAPTURE_SCALE !== 1) {
-            try {
-              const meta = await sharp(captureBuffer).metadata();
-              const targetW = Math.max(1, Math.round(meta.width * CAPTURE_SCALE));
-              const targetH = Math.max(1, Math.round(meta.height * CAPTURE_SCALE));
-              ocrBuffer = await sharp(captureBuffer).resize(targetW, targetH).toBuffer();
-              // console.log(`🔍 OCR 圖片已放大 ${CAPTURE_SCALE}x -> ${targetW}x${targetH}`);
-            } catch (err) {
-              console.warn('⚠️ OCR 放大失敗，使用原始截圖:', err.message);
-              ocrBuffer = captureBuffer;
+          if (patternCheck.hasBottomYellow) {
+            const yellowCrop = await extractYellowRegionBuffer(captureBuffer).catch(() => null);
+            if (yellowCrop) {
+              ocrBuffer = yellowCrop;
             }
           }
+
+          // 若設定放大比例，先用 sharp 放大後再轉 base64 傳給 AI
+          if (CAPTURE_SCALE && CAPTURE_SCALE !== 1) {
+            try {
+              const meta = await sharp(ocrBuffer).metadata();
+              const w = meta.width || 0;
+              const h = meta.height || 0;
+              // 若裁切區非常小，放大可能失敗或造成模糊，改以原圖直接送出
+              if (w < 40 || h < 12) {
+                console.warn(`⚠️ OCR 裁切區太小 (w=${w},h=${h})，跳過放大`);
+              } else {
+                const targetW = Math.max(1, Math.round(w * CAPTURE_SCALE));
+                const targetH = Math.max(1, Math.round(h * CAPTURE_SCALE));
+                ocrBuffer = await sharp(ocrBuffer)
+                  .resize({ width: targetW, height: targetH, kernel: sharp.kernel.lanczos3 })
+                  .toBuffer();
+              }
+            } catch (err) {
+              console.warn('⚠️ OCR 放大失敗，使用原始裁切或截圖:', err && err.message ? err.message : String(err));
+            }
+          }
+
           const base64Image = ocrBuffer.toString('base64');
 
           // 3. 呼叫 gpt-5.4-mini
@@ -871,7 +975,8 @@ async function monitorLoop() {
           });
 
           const result = JSON.parse(response.choices[0].message.content);
-          result.text_raw = result.text_raw.replace('獨家消息', '').replace('最新消息', '').trim();
+          // result.text_raw = result.text_raw.replace('獨家消息', '').replace('最新消息', '').trim();
+          result.text_raw = result.text_raw.replace(/(獨家消息|獨家\n消息|最新消息|最新\n消息)/g, '').trim();
 
           // 文字重複檢查：與最近偵測到的文字比對，若相似度 >= TEXT_DUPLICATE_THRESHOLD 視為重複並略過
           try {
@@ -990,5 +1095,8 @@ export async function stop(req, res) {
 export function getStatus(req, res) {
   res.json({ running: isRunning });
 }
+
+// 匯出檢測函式供測試腳本使用
+export { detectNewsPattern };
 
 export default { start, stop, getStatus };
