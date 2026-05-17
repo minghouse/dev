@@ -13,6 +13,18 @@ const CAPTURE_DIR = path.resolve(__dirname, '..', '..', '..', 'uploads', 'yt_mon
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const randomBetween = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
+// 安全截圖：在 timeout 後放棄並回傳 null，避免迴圈被卡住
+async function safeScreenshot(page, options = {}, timeoutMs = 6000) {
+  try {
+    const shotPromise = page.screenshot(options);
+    const timeoutPromise = new Promise((_, rej) => setTimeout(() => rej(new Error('screenshot timeout')), timeoutMs));
+    return await Promise.race([shotPromise, timeoutPromise]);
+  } catch (err) {
+    console.warn('📸 safeScreenshot 失敗:', err.message);
+    return null;
+  }
+}
+
 // 簡單指紋比對狀態（分別保存黃色區與整張圖的指紋陣列）
 let lastFingerprintYellow = [];
 let lastFingerprintFull = [];
@@ -25,6 +37,7 @@ const TOP_BAND_RATIO = 0.18; // 頂部紅色判定區域高度 (畫面比例)
 const WHITE_BAND_RATIO = 0.68; // 頂部下方白底檢測區域高度
 const TOP_RED_RATIO_THRESHOLD = 0.4; // 頂部需要被視為紅色的最低比例
 const WHITE_BELOW_RATIO_THRESHOLD = 0.4; // 判定下方為白底的比例門檻
+const BOTTOM_BAND_RATIO = 0.60; // 底部掃描起點比例（原先 0.684，改為較寬的掃描區以捕捉不太靠底的黃底）
 
 // 紅色像素判定參數
 const RED_R_MIN = 150;
@@ -76,6 +89,25 @@ function stringSimilarityBigram(a, b) {
     }
   }
   return (2.0 * intersection) / (A.length + B.length);
+}
+
+// RGB -> HSV (h:0-360, s:0-100, v:0-100)
+function rgbToHsv(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0;
+  const d = max - min;
+  const v = max;
+  const s = max === 0 ? 0 : d / max;
+  if (d !== 0) {
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h *= 60;
+  }
+  return { h: Math.round(h), s: Math.round(s * 100), v: Math.round(v * 100) };
 }
 
 // 從 buffer 針對黃色區塊位置計算簡單指紋
@@ -155,11 +187,11 @@ async function computeFullImageFingerprint(imageBuffer) {
 // 從圖中找出黃底像素的 bounding box，回傳裁切後的 buffer（若找不到回傳 null）
 async function extractYellowRegionBuffer(imageBuffer) {
   try {
-    const img = sharp(imageBuffer);
-    const { data, info } = await img.raw().toBuffer({ resolveWithObject: true });
+    const src = sharp(imageBuffer);
+    const { data, info } = await src.raw().toBuffer({ resolveWithObject: true });
     const { width, height, channels } = info;
     // 只掃描畫面底部的區域（與 detectNewsPattern 使用的 bottomBandStart 一致）
-    const bottomBandStart = Math.max(0, Math.floor(height * 0.684));
+    const bottomBandStart = Math.max(0, Math.floor(height * BOTTOM_BAND_RATIO));
 
     let minX = width, minY = height, maxX = -1, maxY = -1;
     for (let y = bottomBandStart; y < height; y++) {
@@ -201,7 +233,8 @@ async function extractYellowRegionBuffer(imageBuffer) {
 
     if (w <= 0 || h <= 0) return null;
 
-    return await img.extract({ left, top, width: w, height: h }).toBuffer();
+    // 使用新的 sharp 實例並明確輸出為 PNG，避免重用已消耗的 pipeline
+    return await sharp(imageBuffer).extract({ left, top, width: w, height: h }).png().toBuffer();
   } catch (err) {
     return null;
   }
@@ -305,7 +338,7 @@ async function detectNewsPattern(imageBuffer) {
   const { width, height, channels } = info;
 
   const topBandEnd = Math.max(1, Math.floor(height * TOP_BAND_RATIO));
-  const bottomBandStart = Math.max(0, Math.floor(height * 0.684));
+  const bottomBandStart = Math.max(0, Math.floor(height * BOTTOM_BAND_RATIO));
   // 新增：檢查頭部紅底下方是否為白底（通常紅塊下方為白底的情形）
   const whiteBelowStart = topBandEnd;
   const whiteBelowEnd = Math.min(height, topBandEnd + Math.max(1, Math.floor(height * WHITE_BAND_RATIO)));
@@ -332,12 +365,16 @@ async function detectNewsPattern(imageBuffer) {
       const min = Math.min(r, g, b);
       const saturation = max - min;
 
-      const isYellowPixel =
-        r >= 145 &&
-        g >= 120 &&
-        b <= 145 &&
-        (r - b) >= 25 &&
-        saturation >= 35;
+        // 先用較保守的 RGB 條件，再用 HSV 補強（涵蓋較淡或不同飽和度的黃）
+        const isYellowPixelRGB =
+          r >= 145 &&
+          g >= 120 &&
+          b <= 145 &&
+          (r - b) >= 25 &&
+          saturation >= 35;
+        const hsv = rgbToHsv(r, g, b);
+        const isYellowPixelHSV = hsv.h >= 30 && hsv.h <= 85 && hsv.s >= 20 && hsv.v >= 40;
+        const isYellowPixel = isYellowPixelRGB || isYellowPixelHSV;
 
       const isRedPixel =
         r >= RED_R_MIN &&
@@ -418,8 +455,10 @@ async function detectNewsPattern(imageBuffer) {
   // 僅接受白灰交錯模式（白灰白灰），排除大片淺色情況
   const ALTERNATION_RATE_THRESHOLD = 0.08; // 逐列交替率門檻（提高以避免邊緣通過）
   const STRIPED_MEAN_LIGHT_THRESHOLD = 0.35; // 條紋情況下要求的平均淺色比
-  // 通過條件：平均淺色達到條紋最低值且列間交替率達標（嚴格交錯偵測）
-  const whiteBelowPass = (meanLightRowRatio >= STRIPED_MEAN_LIGHT_THRESHOLD && alternationRate >= ALTERNATION_RATE_THRESHOLD);
+  // 通過條件：接受「白灰交錯條紋」或「純白底」兩種情況
+  const whiteBelowStriped = (meanLightRowRatio >= STRIPED_MEAN_LIGHT_THRESHOLD && alternationRate >= ALTERNATION_RATE_THRESHOLD);
+  const whiteBelowSolid = whiteBelowRatio >= WHITE_BELOW_RATIO_THRESHOLD;
+  const whiteBelowPass = whiteBelowStriped || whiteBelowSolid;
   const hasTopRedBelowWhite = hasTopRed && whiteBelowPass;
 
   return {
@@ -748,8 +787,9 @@ async function ensurePlayback(page, ytUrl) {
 }
 
 async function monitorLoop() {
-  const YT_URL = 'https://www.youtube.com/watch?v=1I2iq41Akmo';
+  // const YT_URL = 'https://www.youtube.com/watch?v=1I2iq41Akmo';
   // const YT_URL = 'https://www.youtube.com/watch?v=oB2QY06L5Ew';
+  const YT_URL = 'https://www.youtube.com/watch?v=mUIvSAHx2oU';
   let monitorErrorCount = 0;
   let lastCurrentTime = -1;
   let stalledCycles = 0;
@@ -760,8 +800,8 @@ async function monitorLoop() {
   await loadTodayFingerprints();
 
   browserInstance = await chromium.launch({
-    // headless: false,
-    headless: true,
+    headless: false,
+    // headless: true,
     channel: 'chrome',
     args: [
       '--no-sandbox',
@@ -865,7 +905,14 @@ async function monitorLoop() {
 
         // 1. 快速顏色檢測（先擷取但不馬上儲存）
         await pinPageToTop(page);
-        const captureBuffer = await page.screenshot({ clip: CAPTURE_AREA });
+        console.log('📸 開始擷取監控區截圖');
+        const captureBuffer = await safeScreenshot(page, { clip: CAPTURE_AREA }, 6000);
+        if (!captureBuffer) {
+          console.warn('⚠️ 擷取監控區截圖失敗或逾時，跳過本輪偵測');
+          monitorErrorCount = 0;
+          // await sleep(randomBetween(2000, 3800));
+          continue;
+        }
         // 除錯：顯示截圖實際像素大小
         // try {
         //   const m = await sharp(captureBuffer).metadata();
@@ -874,7 +921,15 @@ async function monitorLoop() {
         //   console.log(`🧭 page.devicePixelRatio = ${dpr}`);
         // } catch (_) { /* ignore */ }
         // console.log(`🔎 已擷取監控區截圖 clip=${JSON.stringify(CAPTURE_AREA)}`);
-        const patternCheck = await detectNewsPattern(captureBuffer);
+        let patternCheck = null;
+        try {
+          patternCheck = await detectNewsPattern(captureBuffer);
+        } catch (err) {
+          console.error('🔎 detectNewsPattern 失敗:', err.message);
+          monitorErrorCount = 0;
+          // await sleep(randomBetween(2000, 3800));
+          continue;
+        }
 
         if (patternCheck.shouldAnalyze) {
           const hitTypes = [];
@@ -890,7 +945,7 @@ async function monitorLoop() {
             if (isDup) {
               console.log('🔁 偵測到重複黃底圖片，略過分析');
               monitorErrorCount = 0;
-              await sleep(randomBetween(3000, 4200));
+              await sleep(randomBetween(1000, 1000));
               continue;
             }
           }
@@ -900,7 +955,7 @@ async function monitorLoop() {
             if (isDupFull) {
               console.log('🔁 偵測到重複整張圖片，略過分析');
               monitorErrorCount = 0;
-              await sleep(randomBetween(3000, 4200));
+              await sleep(randomBetween(1000, 1000));
               continue;
             }
           }
@@ -1031,6 +1086,63 @@ async function monitorLoop() {
               console.warn('寫入 data.json 失敗:', e.message);
             }
 
+              // 嘗試發送 Telegram 通知（若有設定環境變數）
+              try {
+                const tgToken = process.env.TELEGRAM_API_KEY;
+                const tgChatId = process.env.TELEGRAM_CHAT_ID;
+                if (tgToken && tgChatId) {
+                  try {
+                    const imgBuf = await readFile(savedFilePath).catch(() => null);
+                    const caption = (result.text_raw || '').trim();
+                    if (imgBuf) {
+                      try {
+                        // 使用 Node 內建 FormData/Blob 上傳二進位圖片（直接用 buffer），並同時傳送 caption
+                        const form = new FormData();
+                        form.append('chat_id', tgChatId);
+                        form.append('photo', new Blob([imgBuf], { type: 'image/png' }), path.basename(savedFilePath));
+                        if (caption) form.append('caption', caption);
+
+                        const resp = await fetch(`https://api.telegram.org/bot${tgToken}/sendPhoto`, {
+                          method: 'POST',
+                          body: form
+                        }).catch(() => null);
+
+                        if (!resp || !resp.ok) {
+                          console.warn('Telegram sendPhoto (multipart) 失敗，改用 sendMessage 傳送文字');
+                          await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ chat_id: tgChatId, text: caption || '(無文字)' })
+                          }).catch(() => {});
+                        } else {
+                          console.log('📨 已發送 Telegram 通知 (含圖片)');
+                        }
+                      } catch (e) {
+                        console.warn('發送 Telegram 圖片時發生錯誤，改用文字傳送:', e && e.message ? e.message : String(e));
+                        await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ chat_id: tgChatId, text: caption || '(無文字)' })
+                        }).catch(() => {});
+                      }
+                    } else {
+                      // 若無法讀取圖片，改以文字通知
+                      await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: tgChatId, text: caption || '(無文字)' })
+                      }).catch(() => {});
+                      console.log('📨 已發送 Telegram 文字通知（圖片讀取失敗）');
+                    }
+                  } catch (e) {
+                    console.warn('發送 Telegram 訊息失敗:', e && e.message ? e.message : String(e));
+                  }
+                } else {
+                  if (!tgToken) console.log('ℹ️ TELEGRAM_API_KEY 未設定，略過 Telegram 發送');
+                  if (!tgChatId) console.log('ℹ️ TELEGRAM_CHAT_ID 未設定，略過 Telegram 發送');
+                }
+              } catch (_) { /* ignore 外層錯誤 */ }
+
             console.log('🤖 AI 分析結果：', result);
           }
         }
@@ -1047,7 +1159,7 @@ async function monitorLoop() {
         }
       }
 
-      await sleep(randomBetween(5000, 6400));
+      await sleep(randomBetween(3000, 5000));
     }
   } finally {
     await browserInstance.close().catch(() => {});
