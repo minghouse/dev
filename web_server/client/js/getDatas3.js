@@ -252,7 +252,7 @@ const getDatas3 = async (search_date) => {
                 const part3 = part2.split('"BankStore"')[0];
                 const part4 = part3.split('"PortfolioUIStore"')[0];
                 const part5 = part4.split('"FundStore"')[0];
-                const part6 = part5.split('"ClientStore"')[0] + '}';
+                const part6 = part5.split('"ClientStore"')[0];
                 const cleaned = part6.replace(/\},\s*$/, '');
                 console.log(cleaned)
                 const data = JSON.parse(cleaned);
