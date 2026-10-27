@@ -281,6 +281,13 @@
       import stock_list from './js/stock_list.js';
       import getDatas from './js/getDatas.js';
 
+      const stock_list_keywords = Array.from(new Set(
+        stock_list
+          .flatMap(v => [v[1], v[2]])
+          .map(v => (v || '').trim())
+          .filter(v => v )
+      ))
+
       const show_dom = async () => {
         document.querySelector('#container').classList.remove('d-none')
         //Menu控制
@@ -340,6 +347,7 @@
           const is_not = document.querySelector('#text-search').value.startsWith('!')
           // console.log(is_not)
           const text_search = (document.querySelector('#text-search').value || '').replace('!', '').split(' ')
+          const has_stock_list_symbol = text_search.includes('#sym:stock_list')
           if (text_search == '') {
             show_data(JSON.parse(JSON.stringify(news_data)))
             return
@@ -351,6 +359,35 @@
 
           show_data(JSON.parse(JSON.stringify(news_data)))
           const news_div = document.querySelectorAll('#news')
+
+          // 特殊符號：只保留標題含有 stock_list 股票代號或名稱的新聞
+          if (has_stock_list_symbol) {
+            for (const v of news_div) {
+              const title = (v.querySelector('.card-title')?.textContent || '').trim()
+              const matched_keywords = stock_list_keywords.filter(keyword => title.includes(keyword))
+              const is_match = matched_keywords.length > 0
+              if (!is_match) {
+                v.remove()
+                continue
+              }
+
+              // 將命中關鍵字反白（先長字串，避免短字先替換破壞較長關鍵字）
+              const title_dom = v.querySelector('.card-title .fw-bold')
+              if (title_dom) {
+                const sorted_keywords = [...new Set(matched_keywords)].sort((a, b) => b.length - a.length)
+                let highlighted_title = title_dom.innerHTML
+                for (const keyword of sorted_keywords) {
+                  highlighted_title = highlighted_title.replaceAll(keyword, `<span class="bg-warning">${keyword}</span>`)
+                }
+                title_dom.innerHTML = highlighted_title
+              }
+            }
+
+            dom_button_search.disabled = false
+            dom_button_search.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i>'
+            return
+          }
+
           for (const v of news_div) {
             v.style.display = 'none'
             for (const v2 of text_search) {
@@ -413,8 +450,8 @@
           document.querySelectorAll('.btn-outline-secondary').forEach(v=> v.classList.remove('active'))
           dom_button_recommendation.classList.add('active')
 
-          //帶入搜尋條件：推薦
-          document.querySelector('#text-search').value = 'AI推薦'
+          //帶入搜尋條件：標題有在 stock_list
+          document.querySelector('#text-search').value = '#sym:stock_list'
           dom_button_search.click()
         })
         
