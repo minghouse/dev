@@ -466,6 +466,10 @@
               <label class="form-check-label" for="filter_change_gt7">漲幅 7% 以上</label>
             </div>
             <div class="mb-2 form-check">
+              <input class="form-check-input" type="checkbox" id="filter_has_today_news">
+              <label class="form-check-label" for="filter_has_today_news">只顯示今日有新聞</label>
+            </div>
+            <div class="mb-2 form-check">
               <input class="form-check-input" type="checkbox" id="filter_hide_limit">
               <label class="form-check-label" for="filter_hide_limit">隱藏漲停的股票</label>
             </div>
@@ -580,6 +584,7 @@
           document.querySelector('#filter_volume_gt').checked = !!s.volumeGt
           document.querySelector('#filter_volume_gt_value').value = s.volumeGtValue || 0
           document.querySelector('#filter_change_gt7').checked = !!s.changeGt7
+          document.querySelector('#filter_has_today_news').checked = !!s.hasTodayNews
           document.querySelector('#filter_hide_limit').checked = !!s.hideLimit
           document.querySelector('#filter_price_gt').checked = !!s.priceGt
           document.querySelector('#filter_price_gt_value').value = s.priceGtValue || 0
@@ -596,6 +601,7 @@
             volumeGt: document.querySelector('#filter_volume_gt').checked,
             volumeGtValue: Number(document.querySelector('#filter_volume_gt_value').value) || 0,
             changeGt7: document.querySelector('#filter_change_gt7').checked,
+            hasTodayNews: document.querySelector('#filter_has_today_news').checked,
             hideLimit: document.querySelector('#filter_hide_limit').checked,
             priceGt: document.querySelector('#filter_price_gt').checked,
             priceGtValue: Number(document.querySelector('#filter_price_gt_value').value) || 0
@@ -785,6 +791,37 @@
             // document.querySelector('#price3_badge').textContent = data.news.filter(v => /\-/.test(v[9])).length
 
             const ai_news = []
+            const stockNamesForNewsFilter = data.news
+              .map(v => String(v[1] || '').replace(/\*/g, '').trim())
+              .filter(Boolean)
+            const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+            const getMentionedCompanyCount = (newsItem) => {
+              const text = `${newsItem?.[3] || ''}\n${newsItem?.[5] || ''}`
+              let count = 0
+              for (const name of stockNamesForNewsFilter) {
+                const re = new RegExp(escapeRegExp(name), 'g')
+                if (re.test(text)) count++
+              }
+              return count
+            }
+            const hasCompanyInTitle = (newsItem, stockName) => {
+              const title = String(newsItem?.[3] || '')
+              const cleanStockName = String(stockName || '').replace(/\*/g, '').trim()
+              if (!cleanStockName) return false
+              return new RegExp(escapeRegExp(cleanStockName)).test(title)
+            }
+            const highlightStockInText = (text, stockCode, stockName) => {
+              const code = String(stockCode || '').trim()
+              const name = String(stockName || '').replace(/\*/g, '').trim()
+              const parts = [code, name].filter(Boolean).map(escapeRegExp)
+              if (parts.length === 0) return String(text || '')
+              const reg = new RegExp(`(${parts.join('|')})`, 'g')
+              return String(text || '').replace(reg, `<span class="bg-warning">$1</span>`)
+            }
+            const filterNewsForStock = (newsList, stockName) => newsList.filter(newsItem => {
+              if (getMentionedCompanyCount(newsItem) > 5) return false
+              return hasCompanyInTitle(newsItem, stockName)
+            })
             let kk = 0
             for (const k in data.news) {
               // if (k==0) continue
@@ -792,6 +829,7 @@
                 stock: data.news[k]
               }
               v.news = data.news_1.filter(v2=> (new RegExp(v.stock[1])).test(v2[5]))
+              v.news_filtered = filterNewsForStock(v.news, v.stock[1])
               v.news_ai = data.news_2.filter(v2=> (new RegExp(v.stock[1])).test(v2[2].split("\n")[0]))
               
               const dom = table_tr.cloneNode(true)
@@ -861,8 +899,8 @@
               }
               
               //顯示排名&是否熱門
-              const is_fire = v.news.filter(v2 => v2[1] >= data.now).findIndex(v=> /熱門/.test(v[3])) >= 0 ? true : false
-              const is_fire_week = v.news.filter(v2 => v2[1] >= data.now_week).findIndex(v=> /熱門族群/.test(v[3])) >= 0 ? true : false
+              const is_fire = v.news_filtered.filter(v2 => v2[1] >= data.now).findIndex(v=> /熱門/.test(v[3])) >= 0 ? true : false
+              const is_fire_week = v.news_filtered.filter(v2 => v2[1] >= data.now_week).findIndex(v=> /熱門族群/.test(v[3])) >= 0 ? true : false
               dom.querySelector('th').innerHTML = `${++kk}${is_fire ? `<br><a href="javascript:void(0)" class="text-decoration-none" id="fire">🔥</a>` : ''}`
               dom.querySelector('th').innerHTML += `${is_fire_week ? `<br><a href="javascript:void(0)" class="text-decoration-none" id="fire_week">&#129512;</a>` : ''}`
               //v[18] = true = 量增 <i class="fa-solid fa-up-long"></i>
@@ -910,12 +948,12 @@
               if (dom.querySelector('th #fire')) {
                 dom.querySelector('th #fire').addEventListener('click', () => {
                     //取得熱門新聞
-                    const news = v.news.filter(v2 => v2[1] >= data.now && /熱門/.test(v2[3]))
+                    const news = v.news_filtered.filter(v2 => v2[1] >= data.now && /熱門/.test(v2[3]))
                     dom_news.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
                     dom_news.querySelector('.modal-body').innerHTML = ''
                     for (const v2 of news) {
                       const dom_news_card_clone = dom_news_card.cloneNode(true)
-                      dom_news_card_clone.querySelector('.card-title').textContent = v2[3]
+                      dom_news_card_clone.querySelector('.card-title').innerHTML = highlightStockInText(v2[3], v.stock[0], v.stock[1])
                       dom_news_card_clone.querySelector('#news_time').textContent = v2[1]
                       //渲染內容
                       const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
@@ -931,12 +969,12 @@
               if (dom.querySelector('th #fire_week')) {
                 dom.querySelector('th #fire_week').addEventListener('click', () => {
                     //取得熱門新聞
-                    const news = v.news.filter(v2 => v2[1] >= data.now_week && /熱門族群/.test(v2[3]))
+                    const news = v.news_filtered.filter(v2 => v2[1] >= data.now_week && /熱門族群/.test(v2[3]))
                     dom_news.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
                     dom_news.querySelector('.modal-body').innerHTML = ''
                     for (const v2 of news) {
                       const dom_news_card_clone = dom_news_card.cloneNode(true)
-                      dom_news_card_clone.querySelector('.card-title').textContent = v2[3]
+                      dom_news_card_clone.querySelector('.card-title').innerHTML = highlightStockInText(v2[3], v.stock[0], v.stock[1])
                       dom_news_card_clone.querySelector('#news_time').textContent = v2[1]
                       //渲染內容
                       const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
@@ -961,13 +999,13 @@
               }
               
               //新聞按鈕
-              td[3].querySelector('#b_news span').textContent = `${v.news.filter(v2 => v2[1] >= data.now).length}/${v.news.length}`
+              td[3].querySelector('#b_news span').textContent = `${v.news_filtered.filter(v2 => v2[1] >= data.now).length}/${v.news_filtered.length}`
               td[3].querySelector('#b_news').addEventListener('click', function() {
                 dom_news.querySelector('.modal-title').textContent = `${v.stock[1]}(${v.stock[0]})`
                 dom_news.querySelector('.modal-body').innerHTML = ''
-                for (const v2 of v.news) {
+                for (const v2 of v.news_filtered) {
                     const dom_news_card_clone = dom_news_card.cloneNode(true)
-                    dom_news_card_clone.querySelector('.card-title').textContent = v2[3]
+                  dom_news_card_clone.querySelector('.card-title').innerHTML = highlightStockInText(v2[3], v.stock[0], v.stock[1])
                     dom_news_card_clone.querySelector('#news_time').textContent = v2[1]
                     //渲染內容
                     const reg = new RegExp(`(${v.stock[0]}|${v.stock[1]})`, 'g')
@@ -1026,6 +1064,7 @@
               // })
               //套用篩選條件（全勾選 = AND 邏輯）
               const filterSettings = loadFilterSettings()
+              const todayNewsCount = v.news_filtered.filter(v2 => v2[1] >= data.now).length
               let showRow = true
               if (filterSettings.firecracker && !is_fire_week) showRow = false
               if (filterSettings.k15 && !(k15 && k15[2] === 'true' && k15[3] === 'true')) showRow = false
@@ -1035,6 +1074,7 @@
                 if (volInK <= filterSettings.volumeGtValue) showRow = false
               }
               if (filterSettings.changeGt7 && v.stock[16] < 7) showRow = false
+              if (filterSettings.hasTodayNews && todayNewsCount <= 0) showRow = false
               if (filterSettings.hideLimit && light == 110) showRow = false
               if (filterSettings.priceGt) {
                 const price = Number(v.stock[8].replace(/,/g, ''))
